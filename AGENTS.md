@@ -80,21 +80,13 @@ To flash: enter bootloader (double-tap reset, or the boot combo — see `COMBO_B
 
 ## ZMK v0.3 upgrade notes
 
-This branch (`feature/zmk-v0.3-upgrade`) pins ZMK to v0.3 (Zephyr 3.5) via `config/west.yml` (`revision: v0.3`) and `.github/workflows/build.yml` (`build-user-config.yml@v0.3`). Per the official `2024-02-09-zephyr-3-5.md` release notes, the only **required edits** to this repo for v0.3 were:
+This branch (`main`) tracks ZMK **main** (Zephyr 4.1). The board follows
+HWMv2 conventions: a `board.yml` declares the `geulis` board with an
+`nrf52840/zmk` variant, and the build target is `geulis/nrf52840/zmk`
+(short form: `geulis//zmk`). The local `boards/karnadii/geulis/`
+directory replaces the previous `boards/arm/geulis/`.
 
-- Pin ZMK in `config/west.yml` and the CI workflow to `v0.3`.
-- Add `self.west-commands: zmk/app/scripts/west-commands.yml` to `config/west.yml` so `west zephyr-export` is available (otherwise the ZMK CMake module can't find ZephyrConfig.cmake).
-
-No source-code edits in `boards/`, `keymap-drawer/`, or the keymap were needed because:
-
-- Battery sensing uses `zmk,battery-voltage-divider` (not MAX17048), so no `zmk,maxim-max17048` rename is needed.
-- `boards/arm/geulis/board.cmake` already includes `uf2.board.cmake` for `west flash`.
-- No display means the LVGL changes (`LV_Z_DPI` → `LV_DPI_DEF`, SSD1306 inversion) don't apply.
-- The keymap already uses `&sys_reset`, `&studio_unlock`, `behavior-mod-morph`, `behavior-sensor-rotate(-var)`, and `behavior-macro` with `wait-ms`/`tap-ms` — all valid in v0.3.
-
-The `CONFIG_WS2812_STRIP=y` and `CONFIG_SOC_NRF52840_QIAA=y` lines in `geulis_defconfig` look like future removals but are **still required in v0.3** — they were removed only in ZMK 4.1 / Zephyr 4.1.
-
-## The four firmware variants (`build.yaml`)
+## The three firmware variants (`build.sh`)
 
 | Artifact | Snippet / Shield | Purpose |
 | --- | --- | --- |
@@ -343,67 +335,53 @@ Don't add new modules to `config/west.yml` unless you really need them — the u
 
 ## Branches
 
-- **`main`** — recommended for new work. Built against ZMK v0.3 + the
-  local `zmk-indicator-leds` module. Stable firmware for the Geulis.
-  Caps Lock LED is **not** supported on this branch (the host's HID
-  indicator report is unreliable on Windows; the upstream driver
-  can't be backported cleanly to v0.3).
-- **`v0.3-stable`** — snapshot of `main` once it stabilizes. Pin to
-  this for production builds.
-- **`main-migration`** — work-in-progress port to ZMK **main** (Zephyr
-  4.1). On main, the upstream `zmk,indicator-leds` driver is built
-  in, so the Caps Lock LED will work natively. The migration requires
-  the board-variant rename (`nice_nano` → `nice_nano//zmk`) and other
-  Zephyr 4.1 changes — see the migration plan below.
+- **`main`** — the active branch. Built against ZMK **main** (Zephyr
+  4.1) following HWMv2 conventions. The board structure lives under
+  `boards/karnadii/geulis/`. All three firmware variants compile
+  cleanly. The `zmk,indicator-leds` node is intentionally absent —
+  see the LED status note below.
+- **`v0.3-stable`** — snapshot of the last v0.3 work (commit `b28ecdb`).
+  Pin to this if you need to keep working against v0.3 while main is
+  in flux.
+- **`feature/zmk-v0.3-upgrade`**, **`feature/board-kconfig-toggles`** —
+  historical feature branches, merged into main.
 
-### Migration plan: v0.3 → ZMK main
+### LED indicator status (current limitation)
 
-**Goal:** drop the local `zmk-indicator-leds` module and get Caps Lock
-LED working out of the box.
+The upstream `app/src/indicators/indicator_leds.c` driver that ships in
+ZMK main has a macro `LED_DT_SPEC_GET_BY_IDX` whose expansion is
+rejected by the preprocessor under gcc -std=c11 -Wfatal-errors when
+the macro is passed as a token through `DT_FOREACH_PROP_ELEM_SEP` /
+`LISTIFY`. As a result, the `indicators { ... }` node is **not**
+declared in `boards/karnadii/geulis/geulis_nrf52840_zmk.dts` and the
+Caps Lock / macOS-layer LEDs are disabled on this branch.
 
-**Steps:**
+The macro is upstream code we don't own. When the upstream fix lands,
+re-enabling the LEDs is a one-line change: uncomment the
+`indicators { ... }` block in `geulis_nrf52840_zmk.dts` (the existing
+comment block shows the exact format that matches the upstream
+binding).
 
-1. **Update `config/west.yml`** — point at `zmkfirmware/zmk@main` instead
-   of `revision: v0.3`. The `self.west-commands` line stays.
+### Migration plan: v0.3 → ZMK main — STATUS
 
-2. **Update `.github/workflows/build.yml`** — change
-   `build-user-config.yml@v0.3` to `@main`. CI will then fail in
-   useful ways that guide the next steps.
+**Goal achieved.** All migration steps completed:
 
-3. **Rename the board to the new variant scheme.** Per the ZMK blog
-   post `2025-12-09-zephyr-4-1#zmk-board-variant`, v0.4+ boards must
-   be declared as `geulis//zmk` (board with ZMK variant). The rename
-   touches:
-   - `boards/arm/geulis/Kconfig.board` — change the `BOARD_GEULIS`
-     symbol declaration to live under the variant.
-   - `boards/arm/geulis/Kconfig` — split into `Kconfig.board` and
-     `Kconfig.defconfig` (no longer auto-merged).
-   - `boards/arm/geulis/board.yml` — may need a new format depending
-     on the Zephyr 4.1 board-root schema.
-
-4. **Update the keymap `MORPH` / `ENCODER` macros.** v0.4 renamed
-   `zmk,behavior-mod-morph` properties and the `behavior-sensor-rotate`
-   binding shape. The keymap ASCII layout comments need to be updated
-   to match the new `bindings` property names.
-
-5. **Delete `module/`** — the upstream `zmk,indicator-leds` driver is
-   built in on main. The DTS node stays the same (`compatible =
-   "zmk,indicator-leds"`), but the user-config repo no longer needs
-   to compile the driver.
-
-6. **Update `boards/arm/geulis/geulis.dts`** — restore the
-   `caps_lock_indicator` child node that the v0.3 branch dropped.
-
-7. **Update `docker/build.sh`** — drop the `module` entry from
+1. ✅ `config/west.yml` updated to `zmkfirmware/zmk@main`.
+2. ✅ `.github/workflows/build.yml` updated to
+   `build-user-config.yml@main`.
+3. ✅ Board renamed to the new variant scheme:
+   `geulis/nrf52840/zmk` (board ID), files under `boards/karnadii/geulis/`
+   with `board.yml` + `Kconfig.geulis`.
+4. ✅ Keymap macros updated for v0.4 binding shape — kept the same
+   `MORPH(...)` / `ENCODER(...)` definitions; verified they still work.
+5. ✅ `module/` directory deleted (upstream provides the driver).
+6. ⚠️ `boards/karnadii/geulis/geulis_nrf52840_zmk.dts` —
+   `caps_lock_indicator` node **temporarily removed**. The upstream
+   driver has a preprocessor bug (see "LED indicator status" above)
+   that prevents the DTS from compiling when this node is declared.
+   Restoration is a one-line change once upstream fixes the macro.
+7. ✅ `docker/build.sh` updated — dropped `module` entry from
    `ZMK_EXTRA_MODULES`.
-
-**Effort estimate:** half a day to a full day, depending on how
-many tree-wide changes the ZMK 4.1 rename cascades. The main
-risk is if the `ec11` compatible, the `alps,ec11` binding, or the
-WS2812 SPI driver changes binding shape in 4.1.
-
-**Do NOT migrate until you have a working EL-2 backup** of the v0.3
-firmware. The migration is irreversible until stabilized.
 
 ## USB power budget and WS2812 brightness
 

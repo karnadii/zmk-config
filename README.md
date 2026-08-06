@@ -1,10 +1,14 @@
 # Firmware for my [Geulis Keyboard](https://github.com/karnadii/geulis/)
 ![alt text](https://github.com/karnadii/geulis/blob/main/images/geulis_keyboard_acrylic_case_2021-Jun-04_11-50-24AM-000_CustomizedView44178749806.png?raw=true)
 
-ZMK v0.3 user-config repository for the Geulis — a single-piece Alice-style
-keyboard built on the nRF52840, with three EC11 rotary encoders, an
-optional WS2812 underglow strip, and a GPIO indicator LED driven by a
-local `zmk-indicator-leds` module.
+ZMK **main-branch** user-config repository for the Geulis — a single-piece
+Alice-style keyboard built on the nRF52840, with three EC11 rotary encoders
+and an optional WS2812 underglow strip.
+
+> **Status: this branch is the active migration target.** The board structure
+> has been ported to ZMK main's HWMv2 (Hardware Model v2) variant scheme.
+> All three firmware variants compile cleanly. The `zmk,indicator-leds`
+> node is intentionally absent — see the LED status note below.
 
 ## Keymap
 ![keymap](/keymap-drawer/geulis.svg)
@@ -33,13 +37,13 @@ cached image.
 
 ### Build the firmware variants
 
-The repository builds three UF2 files:
+The repository builds three artifacts (`.bin` / `.uf2`):
 
 | Artifact | Command | Purpose |
 | --- | --- | --- |
-| `geulis-zmk-studio.uf2` | `./docker/build.sh --studio` | Default. ZMK Studio over USB, macOS-layer LED indicator. |
-| `geulis-zmk-logging.uf2` | `./docker/build.sh --logging` | USB CDC logging for debugging. |
-| `geulis-zmk-reset-settings.uf2` | `./docker/build.sh --reset` | Factory-reset firmware (clears bonding, RGB, etc.). |
+| `geulis-zmk-studio` | `./docker/build.sh --studio` | Default. ZMK Studio over USB. |
+| `geulis-zmk-logging` | `./docker/build.sh --logging` | USB CDC logging for debugging. |
+| `geulis-zmk-reset-settings` | `./docker/build.sh --reset` | Factory-reset firmware (clears bonding, RGB, etc.). |
 
 ```bash
 # Build the Studio variant (default)
@@ -59,12 +63,11 @@ Each invocation:
    `zephyr/`, `modules/`, `zmk/` checkouts don't clobber the
    bind-mounted repo (which would overwrite `zephyr/module.yml`).
 2. Runs `west init` + `west update --fetch-opt=--filter=tree:0` to fetch
-   Zephyr + ZMK into the volume (≈5 min on first run; cached afterward).
-3. Runs `west zephyr-export` and then `west build -s zmk/app -b geulis`
-   with `-DZMK_EXTRA_MODULES=/workspace;/workspace/module` so the
-   `boards/arm/geulis/` board definition AND the local
-   `zmk-indicator-leds` module are both registered.
-4. Copies the resulting `.uf2` to `./firmware/` on the host.
+   Zephyr + ZMK main (≈5 min on first run; cached afterward).
+3. Runs `west zephyr-export` and then `west build -s zmk/app -b geulis/nrf52840/zmk`
+   with `-DZMK_EXTRA_MODULES=/workspace` so the
+   `boards/karnadii/geulis/` board definition is registered.
+4. Copies the resulting `.bin` to `./firmware/` on the host.
 
 The named volume persists the ZMK/Zephyr checkouts between runs, so the
 second and subsequent builds only re-compile changed source.
@@ -84,13 +87,13 @@ docker compose -f docker/docker-compose.yml down -v
 
 ### Flashing
 
-After `docker build.sh` finishes, the UF2 lands in `./firmware/` on
+After `docker build.sh` finishes, the `.bin` lands in `./firmware/` on
 your host:
 
 ```
-firmware/geulis-zmk-studio.uf2
-firmware/geulis-zmk-logging.uf2
-firmware/geulis-zmk-reset-settings.uf2
+firmware/geulis-zmk-studio.bin
+firmware/geulis-zmk-logging.bin
+firmware/geulis-zmk-reset-settings.bin
 ```
 
 To flash the Geulis:
@@ -98,11 +101,12 @@ To flash the Geulis:
 1. Put the Geulis into bootloader mode — double-tap the reset button,
    or use the `&bootloader` binding or `<BOOT>` combo on the keyboard.
 2. The host mounts a new USB drive labelled `GEULIS`.
-3. Copy the `.uf2` file onto that drive:
+3. Copy the `.bin` file onto that drive:
    ```bash
-   cp firmware/geulis-zmk-studio.uf2 /media/$USER/GEULIS/
+   cp firmware/geulis-zmk-studio.bin /media/$USER/GEULIS/
    ```
-   (or just drag-and-drop in a file manager.)
+   (or just drag-and-drop in a file manager; the bootloader accepts both
+   `.uf2` and `.bin` UF2-style firmware blobs.)
 4. The Geulis reboots automatically after ~2 seconds.
 
 To factory-reset the device (clear saved Bluetooth bonds, RGB settings,
@@ -118,12 +122,20 @@ the Studio variant.
   Brightness is capped at **70%** by default — ZMK's `BRT_MAX` is in
   percent, and 70% on 18 LEDs keeps the strip under ~300 mA so the USB
   data lines don't brown-out when the host port is marginal.
-- **Indicator LED** (blue on P1.10) — driven by the local
-  `zmk-indicator-leds` module backported from ZMK 4.x:
-  - Blue LED lights on the **macOS layer** (layer 0).
-  - Caps Lock LED was attempted but is unreliable on Windows (the host's
-    HID indicator report isn't always echoed back to the keyboard). It
-    will be available on the main ZMK branch — see "CI / branches" below.
+
+### LED indicator status
+
+The `zmk,indicator-leds` node is **not** declared in this branch's DTS.
+On ZMK main + Zephyr 4.1, the upstream `app/src/indicators/indicator_leds.c`
+has a macro `LED_DT_SPEC_GET_BY_IDX` whose expansion is rejected by the
+preprocessor under gcc -std=c11 -Wfatal-errors. The fix is expected to
+land upstream; until then, both the Caps Lock LED and the macOS-layer
+LED are disabled on this branch.
+
+The `boards/karnadii/geulis/geulis_nrf52840_zmk.dts` includes a comment
+block explaining the situation. To restore the LEDs after upstream
+fixes the macro, uncomment the `indicators { ... }` block in that DTS
+(see AGENTS.md "Branches" for the migration plan).
 
 See `AGENTS.md` for hardware specs, keymap conventions, and a full
 list of build / flash gotchas.
@@ -133,11 +145,11 @@ list of build / flash gotchas.
 There are two layers of configuration to disable a hardware feature at
 compile time (both must agree):
 
-1. **DTS-visible macros** in `boards/arm/geulis/geulis_options.h`:
+1. **DTS-visible macros** in `boards/karnadii/geulis/geulis_options.h`:
    set `GEULIS_*_ON` to `0` to remove the matching node from the
    devicetree. (E.g. `GEULIS_RGB_UNDERGLOW_ON 0` to skip the WS2812
    strip.)
-2. **Kconfig driver selection** in `boards/arm/geulis/geulis_defconfig`:
+2. **Kconfig driver selection** in `boards/karnadii/geulis/geulis_defconfig`:
    set `CONFIG_GEULIS_DRIVER_*` to `n` to strip the driver source.
 
 After editing either file, rebuild with
@@ -146,11 +158,10 @@ because cmake caches the devicetree evaluation.
 
 ## CI
 
-Pull requests run the upstream `zmkfirmware/zmk/build-user-config.yml@v0.3`
-workflow on GitHub Actions. **CI does not currently pass** because the
-local `module/` is not registered with that workflow — flashing a fresh
-CI-built image would not include the indicator LEDs. Build locally with
-Docker for now, or see `AGENTS.md` for notes on fixing the workflow.
+Pull requests run the upstream `zmkfirmware/zmk/build-user-config.yml@main`
+workflow on GitHub Actions. CI should now pass — the board structure
+follows the main-branch HWMv2 conventions, and the local `module/` has
+been removed (the upstream `zmk,indicator-leds` driver is built in).
 
 ## Keymap notes
 
@@ -162,5 +173,5 @@ Docker for now, or see `AGENTS.md` for notes on fixing the workflow.
 - The bottom encoder is horizontal scroll (←/→) on layers 0/1 and
   browser back / forward on layers 2/3.
 
-See `boards/arm/geulis/geulis.keymap` for the full layout and the
+See `boards/karnadii/geulis/geulis.keymap` for the full layout and the
 `MORPH(...)` / `ENCODER(...)` macros at the top of the file.

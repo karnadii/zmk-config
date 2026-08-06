@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: MIT
 #
-# Board-level feature toggles for the Geulis keyboard.
+# Board-level feature toggles and devicetree overlays for the Geulis.
 #
 # Two layers of configuration:
 #   1. This Kconfig file — controls driver selection (ZMK/Zephyr symbols).
-#   2. boards/arm/geulis/geulis_options.h — controls which nodes are
+#   2. boards/karnadii/geulis/geulis_options.h — controls which nodes are
 #      present in the devicetree (the DTS preprocessor uses `#if defined(...)`
 #      on macros from that header).
 #
@@ -13,13 +13,21 @@
 # geulis_options.h is `#include`d by geulis.dts and is the single source
 # users edit to toggle features.
 
+config BOARD_GEULIS
+    select SOC_NRF52840_QIAA
+    select ZMK_BOARD_COMPAT
+    imply RETAINED_MEM
+    imply RETENTION
+    imply RETENTION_BOOT_MODE
+    imply BOOTLOADER_MCUBOOT
+
+if BOARD_GEULIS
+
 config BOARD_ENABLE_DCDC
     bool "Enable DCDC mode"
     select SOC_DCDC_NRF52X
     default y
     depends on BOARD_GEULIS
-
-if BOARD_GEULIS
 
 # Driver selection. Each feature below has a matching `#define` in
 # geulis_options.h. They must be turned on/off IN PAIRS: if you disable

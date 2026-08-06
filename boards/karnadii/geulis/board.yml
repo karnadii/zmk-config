@@ -1,0 +1,7 @@
+board:
+  name: geulis
+  vendor: karnadii
+  socs:
+    - name: nrf52840
+      variants:
+        - name: zmk

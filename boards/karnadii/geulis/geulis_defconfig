@@ -1,8 +1,9 @@
 # SPDX-License-Identifier: MIT
-
-CONFIG_SOC_SERIES_NRF52X=y
-CONFIG_SOC_NRF52840_QIAA=y
-CONFIG_BOARD_GEULIS=y
+#
+# Per the ZMK HWMv2 migration guide, this file should NOT include
+# CONFIG_SOC_* / CONFIG_BOARD_* selections — those are now driven by
+# the board's Kconfig.geulis / Kconfig.board YAML files and the
+# board-variant default selection logic.
 
 # Enable MPU
 CONFIG_ARM_MPU=y
@@ -25,11 +26,11 @@ CONFIG_FLASH_MAP=y
 CONFIG_ZMK_USB=y
 CONFIG_ZMK_BLE=y
 
-# Hardware driver selection (see boards/arm/geulis/Kconfig):
+# Hardware driver selection (see boards/karnadii/geulis/Kconfig):
 #   GEULIS_DRIVER_ENCODER       — selects EC11 driver
 #   GEULIS_DRIVER_RGB_UNDERGLOW — selects WS2812 + ZMK underglow
 # To disable a feature entirely, also flip the matching GEULIS_*_ON
-# define in boards/arm/geulis/geulis_options.h from 1 to 0.
+# define in boards/karnadii/geulis/geulis_options.h from 1 to 0.
 CONFIG_GEULIS_DRIVER_ENCODER=y
 CONFIG_GEULIS_DRIVER_RGB_UNDERGLOW=y
 # RGB is on while USB is plugged in. ZMK's AUTO_OFF_USB symbol name is

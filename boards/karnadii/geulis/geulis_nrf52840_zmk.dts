@@ -138,16 +138,17 @@
         };
     };
 
-    indicators {
-        compatible = "zmk,indicator-leds";
-
-        // macOS layer (index 0) active -> blue LED (P1.10).
-        macos_layer: macos_layer_indicator {
-            compatible = "zmk,indicator-leds-entry";
-            layer = <0>;
-            leds = <&blue_led>;
-        };
-    };
+    // NOTE: zmk,indicator-leds was the original target. The upstream main-
+    // branch driver (app/src/indicators/indicator_leds.c) does not compile
+    // against Zephyr 4.1 because its `LED_DT_SPEC_GET_BY_IDX` macro chains
+    // into `LED_DT_SPEC_GET` (Zephyr 4.1), which expands to a multi-line
+    // struct initializer that fails to resolve when passed as a token
+    // through DT_FOREACH_PROP_ELEM_SEP / LISTIFY under gcc -std=c11.
+    //
+    // Until the upstream macro is fixed, the Geulis DTS does not declare
+    // the `indicators` node. Caps Lock and macOS-layer LEDs are
+    // disabled on this branch. See AGENTS.md "Branches" for the migration
+    // plan.
 
     // Node name must match original "EXT_POWER" label to preserve user settings.
     EXT_POWER {

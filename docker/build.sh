@@ -120,7 +120,7 @@ fi
 west zephyr-export >/dev/null
 
 # --- pick snippet/shield/artifact based on the action ---------------------------
-board="geulis"
+board="geulis/nrf52840/zmk"
 snippet=""
 shield=""
 artifact_prefix="geulis-zmk"
@@ -156,10 +156,8 @@ cmake_args=(
     "-DZMK_CONFIG=${CONFIG_DIR}"
     # The user-config repo (with boards/arm/geulis/) is registered as an
     # extra ZMK module. Mirrors the upstream CI:
-    # https://github.com/zmkfirmware/zmk/blob/v0.3/.github/workflows/build-user-config.yml
-    # The local zmk-indicator-leds sibling module is appended so its driver
-    # registers and its bindings resolve before the board DTS is compiled.
-    "-DZMK_EXTRA_MODULES=${ROOT};${ROOT}/module"
+    # https://github.com/zmkfirmware/zmk/blob/main/.github/workflows/build-user-config.yml
+    "-DZMK_EXTRA_MODULES=${ROOT}"
     ${cmake_extra}
 )
 [[ -n "${shield}"  ]] && cmake_args+=("-DSHIELD=${shield}")

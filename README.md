@@ -3,8 +3,7 @@
 
 ZMK v0.3 user-config repository for the Geulis — a single-piece Alice-style
 keyboard built on the nRF52840, with three EC11 rotary encoders, an
-optional WS2812 underglow strip, an SSD1306 128×32 OLED status screen,
-and a GPIO indicator LED driven by a local `zmk-indicator-leds` module.
+optional WS2812 underglow strip, and an SSD1306 128×32 OLED status screen.
 
 ## Keymap
 ![keymap](/keymap-drawer/geulis.svg)
@@ -61,9 +60,8 @@ Each invocation:
 2. Runs `west init` + `west update --fetch-opt=--filter=tree:0` to fetch
    Zephyr + ZMK into the volume (≈5 min on first run; cached afterward).
 3. Runs `west zephyr-export` and then `west build -s zmk/app -b geulis`
-   with `-DZMK_EXTRA_MODULES=/workspace;/workspace/module` so the
-   `boards/arm/geulis/` board definition AND the local
-   `zmk-indicator-leds` module are both registered.
+   with `-DZMK_EXTRA_MODULES=/workspace` so the `boards/arm/geulis/`
+   board definition is registered.
 4. Copies the resulting `.uf2` to `./firmware/` on the host.
 
 The named volume persists the ZMK/Zephyr checkouts between runs, so the
@@ -122,12 +120,6 @@ the Studio variant.
 - **SSD1306 128×32 OLED status screen** on I2C0 (SDA = P0.15,
   SCL = P0.17, address `0x3C`). Shows layer name, battery percentage,
   and active output by default.
-- **Indicator LED** (blue on P1.10) — driven by the local
-  `zmk-indicator-leds` module backported from ZMK 4.x:
-  - Blue LED lights on the **macOS layer** (layer 0).
-  - Caps Lock LED was attempted but is unreliable on Windows (the host's
-    HID indicator report isn't always echoed back to the keyboard). It
-    will be available on the main ZMK branch — see "CI / branches" below.
 
 See `AGENTS.md` for hardware specs, keymap conventions, and a full
 list of build / flash gotchas.
@@ -241,10 +233,8 @@ Also remove any `&rgb_ug` / `&rgb_underglow` bindings from
 ## CI
 
 Pull requests run the upstream `zmkfirmware/zmk/build-user-config.yml@v0.3`
-workflow on GitHub Actions. **CI does not currently pass** because the
-local `module/` is not registered with that workflow — flashing a fresh
-CI-built image would not include the indicator LEDs. Build locally with
-Docker for now, or see `AGENTS.md` for notes on fixing the workflow.
+workflow on GitHub Actions. CI builds the same artifacts as the local
+Docker workflow above and uploads UF2 files to workflow runs.
 
 ## Keymap notes
 

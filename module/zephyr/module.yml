@@ -1,6 +1,0 @@
-name: zmk-indicator-leds
-build:
-  cmake: .
-  kconfig: Kconfig
-  settings:
-    dts_root: .

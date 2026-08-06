@@ -130,9 +130,15 @@ encoder are always compiled in. The Geulis uses a per-feature
 
 ## CI
 
-Pull requests run `zmkfirmware/zmk/build-user-config.yml@v0.3` on
-GitHub Actions. CI builds the same artifacts as the local Docker
-workflow above and uploads UF2 files to workflow runs.
+Pull requests, pushes to `v0.3-stable` or `main`, weekly schedules,
+and manual `workflow_dispatch` runs all trigger `.github/workflows/build.yml`.
+The build matrix is `build.yaml` (16 entries — all 4 boards ×
+variants). Each entry produces one UF2 file.
+
+A successful push to `v0.3-stable` (or a manual dispatch) publishes
+all the UF2 files to a rolling `latest` GitHub release via
+`softprops/action-gh-release@v2`. The weekly schedule and PR builds
+just exercise the matrix without publishing.
 
 ## Boards
 

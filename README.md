@@ -192,16 +192,6 @@ ZMK Studio **not yet** supported — board has no `zmk,physical-layout`.
 Build: `./docker/build.sh --regular --board marvelous65` (or any
 non-studio variant).
 
-#### Matrix technique
-
-The matrix transform uses a **duplex matrix** — 10 virtual rows × 8
-columns wired from 5 physical rows time-multiplexed across 8 column
-pins. The interleaved `RC(0,n) RC(1,n) ...` pattern in the `map`
-saves MCU pins at the cost of an extra transform step. The actual
-physical matrix is 5 rows × 8 cols = 40 slots; the remaining 40
-slots in the 10×8 virtual matrix are unused (intentional gaps in the
-physical layout).
-
 #### Keymap notes
 
 - 4 layers: `macos` (0), `windows` (1), `functions` (2), `settings` (3)
@@ -219,12 +209,6 @@ ZMK Studio **not yet** supported.
 
 Build: `./docker/build.sh --regular --board marvelous65_ergo` (or
 any non-studio variant).
-
-#### Matrix technique
-
-Same duplex matrix as the Rev2 — see above. The split-B wiring is
-reflected in the matrix transform's `map` (col 1 of row 3 is
-intentionally absent; the B key position spans rows 3 and 4).
 
 #### Keymap notes
 

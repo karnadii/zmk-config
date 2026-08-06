@@ -13,6 +13,12 @@ boards will be added beside Geulis in `boards/arm/<keyboard>/`.
 | **Marvelous65 Rev2** (65% ANSI, encoder) | nRF52840 | `boards/arm/marvelous65/` | regular + logging + reset (Studio pending physical layout) |
 | **Marvelous65 Ergo** (65% ergo, split B) | nRF52840 | `boards/arm/marvelous65_ergo/` | regular + logging + reset (Studio pending physical layout) |
 
+Both Marvelous65 variants share the same hardware (RGB underglow,
+rotary encoder, OLED) and the same nrfmicro-13 pinout; the only
+differences are the matrix transform (split-B on the Ergo), row 3
+GPIO (P1.4 vs P0.20), `EXT_POWER` init-delay (50 ms vs 300 ms), and
+keyboard name.
+
 ## Keymap
 ![keymap](/keymap-drawer/geulis.svg)
 

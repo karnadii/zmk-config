@@ -66,10 +66,10 @@ while [[ $# -gt 0 ]]; do
         -h|--help)
             cat <<'USAGE'
 Usage:
-  build.sh                  Build the default ZMK Studio variant for geulis
-  build.sh --studio         Build with ZMK Studio USB RPC
-  build.sh --logging        Build with USB CDC logging
-  build.sh --reset          Build settings-reset firmware
+  build.sh                  Build the default (logging) firmware for geulis
+  build.sh --studio         Build with ZMK Studio USB RPC -> <board>-zmk.uf2
+  build.sh --logging        Build with USB CDC logging -> <board>-zmk.uf2
+  build.sh --reset          Build settings-reset firmware -> <board>-zmk-reset.uf2
   build.sh --board <name>   Target a specific board (default: geulis)
   build.sh --init           Run only west init + west update
   build.sh --clean          Wipe build artefacts
@@ -137,29 +137,17 @@ case "$action" in
     studio)
         snippet="studio-rpc-usb-uart"
         cmake_extra="-DCONFIG_ZMK_STUDIO=y"
-        artifact="${artifact_prefix}-studio" ;;
+        artifact="${artifact_prefix}" ;;
     logging)
         snippet="zmk-usb-logging"
-        artifact="${artifact_prefix}-logging" ;;
+        artifact="${artifact_prefix}" ;;
     reset)
         shield="settings_reset"
-        artifact="${artifact_prefix}-reset-settings" ;;
+        artifact="${artifact_prefix}-reset" ;;
     *)
         echo "Unknown action: ${action}" >&2
         exit 1 ;;
 esac
-
-# Boards without a zmk,physical-layout cannot build with ZMK Studio
-# (ZMK's `physical_layouts.c` has a static_assert on this). Block
-# studio builds for those boards with a clear error message.
-if [[ "${action}" == "studio" ]]; then
-    case "${target_board}" in
-        marvelous65)
-            echo ">> Marvelous65 doesn't support ZMK Studio yet (no physical layout). Use --logging or --reset." >&2
-            exit 3
-            ;;
-    esac
-fi
 
 target_build="${BUILD_DIR}/${artifact}"
 echo ">> Building ${artifact} (board=${board}${shield:+ shield=${shield}}${snippet:+ snippet=${snippet}})"

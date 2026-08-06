@@ -43,9 +43,9 @@ The repository builds three UF2 files:
 
 | Artifact | Command | Purpose |
 | --- | --- | --- |
-| `geulis-zmk-studio.uf2` | `./docker/build.sh --studio` | Default. ZMK Studio over USB, macOS-layer LED indicator. |
-| `geulis-zmk-logging.uf2` | `./docker/build.sh --logging` | USB CDC logging for debugging. |
-| `geulis-zmk-reset-settings.uf2` | `./docker/build.sh --reset` | Factory-reset firmware (clears bonding, RGB, etc.). |
+| `geulis-zmk.uf2` | `./docker/build.sh --studio` | Default. ZMK Studio over USB. |
+| `geulis-zmk.uf2` | `./docker/build.sh --logging` | USB CDC logging for debugging (same filename as Studio). |
+| `geulis-zmk-reset.uf2` | `./docker/build.sh --reset` | Factory-reset firmware (clears bonding, RGB, etc.). |
 
 ```bash
 # Build the Studio variant (default)
@@ -93,9 +93,8 @@ After `docker build.sh` finishes, the UF2 lands in `./firmware/` on
 your host:
 
 ```
-firmware/geulis-zmk-studio.uf2
-firmware/geulis-zmk-logging.uf2
-firmware/geulis-zmk-reset-settings.uf2
+firmware/geulis-zmk.uf2
+firmware/geulis-zmk-reset.uf2
 ```
 
 To flash the Geulis:
@@ -105,13 +104,13 @@ To flash the Geulis:
 2. The host mounts a new USB drive labelled `GEULIS`.
 3. Copy the `.uf2` file onto that drive:
    ```bash
-   cp firmware/geulis-zmk-studio.uf2 /media/$USER/GEULIS/
+   cp firmware/geulis-zmk.uf2 /media/$USER/GEULIS/
    ```
    (or just drag-and-drop in a file manager.)
 4. The Geulis reboots automatically after ~2 seconds.
 
 To factory-reset the device (clear saved Bluetooth bonds, RGB settings,
-etc.), flash the `geulis-zmk-reset-settings` artifact and then re-flash
+etc.), flash the `geulis-zmk-reset` artifact and then re-flash
 the Studio variant.
 
 ## Hardware features

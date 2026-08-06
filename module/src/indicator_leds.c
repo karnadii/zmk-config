@@ -51,9 +51,43 @@
 
 #include <zmk/event_manager.h>
 #include <zmk/events/hid_indicators_changed.h>
+#include <zmk/events/keycode_state_changed.h>
 #include <zmk/events/layer_state_changed.h>
 #include <zmk/hid_indicators.h>
 #include <zmk/keymap.h>
+
+/* USB HID Keyboard/Keypad usage page 0x07; Caps Lock usage ID 0x39
+ * (see USB HID 1.11 spec table "Keyboard/Keypad"). The host-side
+ * `HID_INDICATOR_CAPS_LOCK` macro doesn't exist in ZMK v0.3 — for the
+ * indicator bit value (HID LED usage ID 0x02), see hid_usage.h.
+ */
+#define HID_USAGE_PAGE_KBD    0x07
+#define HID_USAGE_KBD_CAPS    0x39
+/* HID LED usage ID for Caps Lock (bit position in the LED report).
+ * The HID LED page is 0x08; Caps Lock is the second bit (Num Lock
+ * being the first). Confirmed against dt-bindings/zmk/hid_usage.h.
+ */
+#define HID_USAGE_LED_CAPS_LOCK_BIT 0x02
+
+/* Local Caps Lock tracker. Some hosts (notably Windows installs)
+ * never echo the HID indicator report back to the keyboard, so the
+ * listener for `zmk_hid_indicators_changed` never fires. As a fallback
+ * we watch `zmk_keycode_state_changed` and toggle this flag on each
+ * Caps Lock press (keycode 0x39 on usage page 0x07).
+ *
+ * The local tracker is only consulted when the host-reported HID state
+ * is zero, so a working host echo always wins.
+ */
+static bool local_caps_lock;
+
+static void refresh_indicators(void);
+
+static void toggle_local_caps_lock_if_match(uint8_t usage_page, uint32_t keycode) {
+    if (usage_page == HID_USAGE_PAGE_KBD && (keycode & 0xFF) == HID_USAGE_KBD_CAPS) {
+        local_caps_lock = !local_caps_lock;
+        refresh_indicators();
+    }
+}
 
 LOG_MODULE_REGISTER(zmk_indicator_leds, CONFIG_ZMK_LOG_LEVEL);
 
@@ -109,7 +143,7 @@ static void configure_entry(const struct indicator_entry *e) {
     }
 }
 
-static void update_all(void) {
+static void refresh_indicators(void) {
 #if IS_ENABLED(CONFIG_ZMK_HID_INDICATORS)
     const zmk_hid_indicators_t hid = zmk_hid_indicators_get_current_profile();
 #else
@@ -119,8 +153,22 @@ static void update_all(void) {
 
     for (size_t i = 0; i < entry_count; i++) {
         const struct indicator_entry *e = &entries[i];
-        bool active = (e->hid_bit >= 0) ? ((hid & BIT(e->hid_bit)) != 0)
-                                        : (top == e->layer);
+        bool active;
+        if (e->hid_bit == HID_USAGE_LED_CAPS_LOCK_BIT) {
+            /* Caps Lock: prefer the host-reported HID indicator when
+             * CONFIG_ZMK_HID_INDICATORS is enabled and the event has
+             * fired. Fall back to our locally-tracked state for hosts
+             * that don't echo the indicator (some Windows installs).
+             */
+            active = (hid & BIT(e->hid_bit)) != 0;
+            if (!active && hid == 0 && local_caps_lock) {
+                active = true;
+            }
+        } else if (e->hid_bit >= 0) {
+            active = (hid & BIT(e->hid_bit)) != 0;
+        } else {
+            active = (top == e->layer);
+        }
         set_entry(e, active);
     }
 }
@@ -130,13 +178,17 @@ static int indicator_leds_init(const struct device *dev) {
     for (size_t i = 0; i < entry_count; i++) {
         configure_entry(&entries[i]);
     }
-    update_all();
+    refresh_indicators();
     return 0;
 }
 
 static int event_listener(const zmk_event_t *eh) {
-    ARG_UNUSED(eh);
-    update_all();
+    struct zmk_keycode_state_changed *kc = as_zmk_keycode_state_changed(eh);
+    if (kc != NULL) {
+        toggle_local_caps_lock_if_match(kc->usage_page, kc->keycode);
+        return ZMK_EV_EVENT_BUBBLE;
+    }
+    refresh_indicators();
     return ZMK_EV_EVENT_BUBBLE;
 }
 
@@ -145,6 +197,7 @@ ZMK_LISTENER(indicator_leds_listener, event_listener);
 ZMK_SUBSCRIPTION(indicator_leds_listener, zmk_hid_indicators_changed);
 #endif
 ZMK_SUBSCRIPTION(indicator_leds_listener, zmk_layer_state_changed);
+ZMK_SUBSCRIPTION(indicator_leds_listener, zmk_keycode_state_changed);
 
 DEVICE_DT_INST_DEFINE(0, indicator_leds_init, NULL, NULL, NULL, POST_KERNEL,
                       CONFIG_APPLICATION_INIT_PRIORITY, NULL);

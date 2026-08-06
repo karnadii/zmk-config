@@ -19,8 +19,8 @@ child-binding:
       type: int
       required: false
       description: |
-        HID indicator bit number (0..7). 0 = Num Lock, 1 = Caps Lock,
-        2 = Scroll Lock, 3 = Compose, 4 = Kana. Mutually exclusive
+        HID indicator bit number (0..7). 0 = Num Lock, 2 = Caps Lock,
+        3 = Scroll Lock, 4 = Compose, 5 = Kana. Mutually exclusive
         with `layer`.
     layer:
       type: int

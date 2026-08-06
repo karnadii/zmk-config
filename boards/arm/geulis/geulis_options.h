@@ -38,4 +38,7 @@
 /* 18-LED WS2812 strip on SPI3 (P0.05). */
 #define GEULIS_RGB_UNDERGLOW_ON  1
 
+/* SSD1306 128x32 OLED on I2C0 (SDA = P0.15, SCL = P0.17). */
+#define GEULIS_OLED_ON           1
+
 #endif /* GEULIS_OPTIONS_H_ */

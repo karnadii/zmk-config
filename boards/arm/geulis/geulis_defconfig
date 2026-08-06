@@ -32,6 +32,7 @@ CONFIG_ZMK_BLE=y
 # define in boards/arm/geulis/geulis_options.h from 1 to 0.
 CONFIG_GEULIS_DRIVER_ENCODER=y
 CONFIG_GEULIS_DRIVER_RGB_UNDERGLOW=y
+CONFIG_GEULIS_DRIVER_OLED=y
 # RGB is on while USB is plugged in. ZMK's AUTO_OFF_USB symbol name is
 # misleading — `y` actually turns RGB OFF when USB is connected. We want
 # the opposite, so disable it here.

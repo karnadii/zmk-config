@@ -3,8 +3,8 @@
 
 ZMK v0.3 user-config repository for the Geulis — a single-piece Alice-style
 keyboard built on the nRF52840, with three EC11 rotary encoders, an
-optional WS2812 underglow strip, and a GPIO indicator LED driven by a
-local `zmk-indicator-leds` module.
+optional WS2812 underglow strip, an SSD1306 128×32 OLED status screen,
+and a GPIO indicator LED driven by a local `zmk-indicator-leds` module.
 
 ## Keymap
 ![keymap](/keymap-drawer/geulis.svg)
@@ -113,11 +113,15 @@ the Studio variant.
 
 - **Three EC11 rotary encoders** (top, middle, bottom). All three are
   enabled in firmware by default so a user can solder one in
-  (or swap one out) without re-flashing.
+  (or swap one out) without re-flashing. Individual encoders can be
+  disabled — see [Toggling hardware features](#toggling-hardware-features).
 - **18-LED WS2812 RGB underglow** driven via SPI3 (P0.05).
   Brightness is capped at **70%** by default — ZMK's `BRT_MAX` is in
   percent, and 70% on 18 LEDs keeps the strip under ~300 mA so the USB
   data lines don't brown-out when the host port is marginal.
+- **SSD1306 128×32 OLED status screen** on I2C0 (SDA = P0.15,
+  SCL = P0.17, address `0x3C`). Shows layer name, battery percentage,
+  and active output by default.
 - **Indicator LED** (blue on P1.10) — driven by the local
   `zmk-indicator-leds` module backported from ZMK 4.x:
   - Blue LED lights on the **macOS layer** (layer 0).
@@ -143,6 +147,96 @@ compile time (both must agree):
 After editing either file, rebuild with
 `docker compose -f docker/docker-compose.yml run --rm build ./docker/build.sh --clean`
 because cmake caches the devicetree evaluation.
+
+### Available toggles
+
+| Feature | options.h macro | defconfig symbol | DTS impact |
+| --- | --- | --- | --- |
+| Top encoder (P0.26 / P0.06) | `GEULIS_ENCODER_TOP_ON` | `CONFIG_GEULIS_DRIVER_ENCODER` | toggles `top_encoder` `status` |
+| Middle encoder (P0.08 / P0.27) | `GEULIS_ENCODER_MID_ON` | `CONFIG_GEULIS_DRIVER_ENCODER` | toggles `mid_encoder` `status` |
+| Bottom encoder (P1.08 / P0.11) | `GEULIS_ENCODER_BOT_ON` | `CONFIG_GEULIS_DRIVER_ENCODER` | toggles `bot_encoder` `status` |
+| WS2812 underglow strip | `GEULIS_RGB_UNDERGLOW_ON` | `CONFIG_GEULIS_DRIVER_RGB_UNDERGLOW` | toggles `&spi3` `status` + `led_strip` node |
+| SSD1306 128×32 OLED on I2C0 | `GEULIS_OLED_ON` | `CONFIG_GEULIS_DRIVER_OLED` | toggles `&i2c0` `status` + `ssd1306@3c` node |
+
+The `GEULIS_DRIVER_*` symbol controls whether the **driver source** is
+compiled. The matching `GEULIS_*_ON` macro controls whether the
+**devicetree node** is present. Both must be flipped together — leaving
+the driver compiled with no DT node (or vice-versa) will fail the
+build.
+
+### Examples
+
+**Use only the top encoder (e.g. the PCB only has the top encoder soldered):**
+
+In `boards/arm/geulis/geulis_options.h`:
+
+```c
+#define GEULIS_ENCODER_TOP_ON    1
+#define GEULIS_ENCODER_MID_ON    0
+#define GEULIS_ENCODER_BOT_ON    0
+```
+
+Leave `CONFIG_GEULIS_DRIVER_ENCODER=y` in `geulis_defconfig` — the EC11
+driver is still needed to drive the top encoder.
+
+Then in `boards/arm/geulis/geulis.keymap`, replace the 3-element
+`sensor-bindings` lists so the keymap no longer references the disabled
+encoders. Search for `sensor-bindings = <&media_encoder` and change each
+one to a single-element list:
+
+```dts
+sensor-bindings = <&media_encoder>;
+```
+
+The same applies to the function-layer bindings (`<&rgb_encoder ...`).
+
+**Disable all encoders entirely** (keypad-style build with no rotary
+knobs):
+
+```c
+// geulis_options.h
+#define GEULIS_ENCODER_TOP_ON    0
+#define GEULIS_ENCODER_MID_ON    0
+#define GEULIS_ENCODER_BOT_ON    0
+```
+
+```kconfig
+# geulis_defconfig
+CONFIG_GEULIS_DRIVER_ENCODER=n
+```
+
+The devicetree enforces "at least one encoder enabled" via a `#error`
+in `geulis.dts`, so flipping all three macros to `0` is impossible
+unless you also delete the `#error` line.
+
+**Disable the OLED** (no display module installed):
+
+```c
+// geulis_options.h
+#define GEULIS_OLED_ON           0
+```
+
+```kconfig
+# geulis_defconfig
+# leave CONFIG_GEULIS_DRIVER_OLED=y; the driver is still harmless
+# (DT_HAS_SOLOMON_SSD1306FB_ENABLED goes false and the driver
+# source isn't compiled), or set it to n for explicitness.
+```
+
+**Disable RGB underglow:**
+
+```c
+// geulis_options.h
+#define GEULIS_RGB_UNDERGLOW_ON  0
+```
+
+```kconfig
+# geulis_defconfig
+CONFIG_GEULIS_DRIVER_RGB_UNDERGLOW=n
+```
+
+Also remove any `&rgb_ug` / `&rgb_underglow` bindings from
+`boards/arm/geulis/geulis.keymap` if you use them.
 
 ## CI
 

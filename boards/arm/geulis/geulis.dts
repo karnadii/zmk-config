@@ -50,6 +50,9 @@
 #endif
         zmk,kscan = &kscan0;
         zmk,physical-layout = &layout0;
+#if GEULIS_OLED_ON
+        zephyr,display = &oled;
+#endif
     };
 
     kscan0: kscan0 {
@@ -212,6 +215,24 @@
     pinctrl-0 = <&i2c0_default>;
     pinctrl-1 = <&i2c0_sleep>;
     pinctrl-names = "default", "sleep";
+#if GEULIS_OLED_ON
+    status = "okay";
+
+    oled: ssd1306@3c {
+        compatible = "solomon,ssd1306fb";
+        reg = <0x3c>;
+        width = <128>;
+        height = <32>;
+        segment-offset = <0>;
+        page-offset = <0>;
+        display-offset = <0>;
+        multiplex-ratio = <31>;
+        segment-remap;
+        com-invdir;
+        com-sequential;
+        prechargep = <0x22>;
+    };
+#endif
 };
 
 &spi3 {

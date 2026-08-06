@@ -2,21 +2,27 @@
  * Copyright (c) 2026 Geulis ZMK Module Contributors
  * SPDX-License-Identifier: MIT
  *
- * Driver for `zmk,indicator-leds` — maps either a HID indicator bit
- * (Caps Lock, Num Lock, Scroll Lock, Compose, Kana) or an active layer
- * index to one or more GPIO LEDs defined as standard `gpio-leds` children.
+ * Driver for `zmk,indicator-leds` — backport of the ZMK 4.x driver for
+ * ZMK v0.3 (Zephyr 3.5).
  *
- * This is a backport of the `zmk,indicator-leds` driver that exists in
- * ZMK 4.x but is not present in ZMK v0.3.
+ * Modeled after the upstream main-branch implementation at
+ * app/src/indicators/indicator_leds.c. Subscribes to the four events
+ * that can change LED state, coalesces them into a deferred work item,
+ * and reads the current HID indicator state to drive the LEDs.
+ *
+ * Design note: upstream uses the Zephyr LED API (`struct led_dt_spec`)
+ * which is only available in Zephyr 3.6+. We use direct GPIO calls
+ * (`gpio_pin_set_dt`) since v0.3 ships Zephyr 3.5.
  *
  * Each child of the `zmk,indicator-leds` node declares one indicator.
- * Exactly one of `indicator` or `layer` must be set.
+ * Exactly one of `indicator` or `layer` must be set (layer indicator is
+ * a Geulis-specific extension; upstream only supports HID indicators).
  *
  *   indicators {
  *       compatible = "zmk,indicator-leds";
  *       caps_lock {
  *           compatible = "zmk,indicator-leds-entry";
- *           indicator = <1>;            // HID_INDICATOR_CAPS_LOCK
+ *           indicator = <2>;            // HID_INDICATOR_CAPS_LOCK
  *           leds = <&green_led>;
  *       };
  *       macos_active {
@@ -26,19 +32,10 @@
  *       };
  *   };
  *
- * The `leds` phandles reference existing `gpio-leds` children (the same
- * ones bound by the standard Zephyr GPIO LED driver). The LED's GPio
- * spec is resolved at compile time via `GPIO_DT_SPEC_GET_BY_IDX`, then
- * driven directly with `gpio_pin_set_dt()` — no `led_on`/`led_off` indirection.
- *
- * A single shared event listener subscribes to
- * `zmk_hid_indicators_changed` (when CONFIG_ZMK_HID_INDICATORS=y) and
- * `zmk_layer_state_changed`; on either event it walks the static table
- * and turns each indicator's LEDs on or off.
- *
- * Per-entry LED count is fixed at INDICATOR_LEDS_MAX. If a child has
- * more, the extras are silently dropped (silent at compile time because
- * the driver is intentionally permissive).
+ * Known limitation: on hosts that don't echo the HID indicator report
+ * back to the keyboard (some Windows installs), the Caps Lock LED will
+ * not track state. This is the same limitation upstream ZMK has — the
+ * hardware protocol requires the host to send the indicator update.
  */
 
 #define DT_DRV_COMPAT zmk_indicator_leds
@@ -50,69 +47,14 @@
 #include <zephyr/logging/log.h>
 
 #include <zmk/event_manager.h>
+#include <zmk/activity.h>
+#include <zmk/events/activity_state_changed.h>
+#include <zmk/events/endpoint_changed.h>
 #include <zmk/events/hid_indicators_changed.h>
-#include <zmk/events/keycode_state_changed.h>
 #include <zmk/events/layer_state_changed.h>
+#include <zmk/events/usb_conn_state_changed.h>
 #include <zmk/hid_indicators.h>
 #include <zmk/keymap.h>
-
-/* USB HID Keyboard/Keypad usage page 0x07; Caps Lock usage ID 0x39
- * (see USB HID 1.11 spec table "Keyboard/Keypad"). The host-side
- * `HID_INDICATOR_CAPS_LOCK` macro doesn't exist in ZMK v0.3 — for the
- * indicator bit value (HID LED usage ID 0x02), see hid_usage.h.
- */
-#define HID_USAGE_PAGE_KBD    0x07
-#define HID_USAGE_KBD_CAPS    0x39
-/* HID LED usage ID for Caps Lock (bit position in the LED report).
- * The HID LED page is 0x08; Caps Lock is the second bit (Num Lock
- * being the first). Confirmed against dt-bindings/zmk/hid_usage.h.
- */
-#define HID_USAGE_LED_CAPS_LOCK_BIT 0x02
-
-/* Local Caps Lock tracker. Some hosts (notably Windows installs)
- * never echo the HID indicator report back to the keyboard, so the
- * listener for `zmk_hid_indicators_changed` never fires. As a fallback
- * we watch `zmk_keycode_state_changed` and toggle this flag on each
- * Caps Lock press (keycode 0x39 on usage page 0x07).
- *
- * The local tracker is only consulted when the host-reported HID state
- * is zero, so a working host echo always wins.
- */
-static bool local_caps_lock;
-/* Timestamp of the most recent Caps Lock press we acted on. Used to
- * debounce contact-bounce (matrix scan can fire 2-3 events for a
- * single physical press). Without this the LED appears to flicker
- * because the local state toggles on every duplicate event. */
-static int64_t last_caps_press_ms = INT64_MIN;
-
-static void refresh_indicators(void);
-
-static void toggle_local_caps_lock_if_match(uint8_t usage_page,
-                                            uint32_t keycode,
-                                            bool pressed) {
-    /* zmk_keycode_state_changed fires on both press and release.
-     * Only toggle on press; otherwise every release flips state back
-     * and the LED returns to off as soon as you let go of the key.
-     */
-    if (!pressed) {
-        return;
-    }
-    if (usage_page != HID_USAGE_PAGE_KBD || (keycode & 0xFF) != HID_USAGE_KBD_CAPS) {
-        return;
-    }
-    /* Debounce: ignore duplicate press events within 80 ms. Matrix
-     * scan + USB HID can deliver 2-3 events per physical keypress on
-     * some hosts, which would toggle the local state multiple times
-     * per tap and make the LED appear to flicker. */
-    const int64_t now = k_uptime_get();
-    if (now - last_caps_press_ms < 80) {
-        return;
-    }
-    last_caps_press_ms = now;
-
-    local_caps_lock = !local_caps_lock;
-    refresh_indicators();
-}
 
 LOG_MODULE_REGISTER(zmk_indicator_leds, CONFIG_ZMK_LOG_LEVEL);
 
@@ -146,8 +88,18 @@ static const struct indicator_entry entries[] = {
 
 static const size_t entry_count = ARRAY_SIZE(entries);
 
-static void set_entry(const struct indicator_entry *e, bool on) {
+/* Track the current LED state so we can skip redundant GPIO calls — multiple
+ * events in the same work-item invocation may not all change any LED value.
+ */
+static bool led_state[INDICATOR_LEDS_MAX * 8]; /* rows * leds per row cap */
+
+static void set_entry(const struct indicator_entry *e, bool on, size_t entry_index) {
     for (uint8_t i = 0; i < e->led_count; i++) {
+        const size_t flat = entry_index * INDICATOR_LEDS_MAX + i;
+        if (led_state[flat] == on) {
+            continue;
+        }
+        led_state[flat] = on;
         int rc = gpio_pin_set_dt(&e->leds[i], on ? 1 : 0);
         if (rc < 0) {
             LOG_WRN("gpio_pin_set_dt failed (rc=%d)", rc);
@@ -179,24 +131,41 @@ static void refresh_indicators(void) {
     for (size_t i = 0; i < entry_count; i++) {
         const struct indicator_entry *e = &entries[i];
         bool active;
-        if (e->hid_bit == HID_USAGE_LED_CAPS_LOCK_BIT) {
-            /* Caps Lock: prefer the host-reported HID indicator when
-             * CONFIG_ZMK_HID_INDICATORS is enabled and the event has
-             * fired. Fall back to our locally-tracked state for hosts
-             * that don't echo the indicator (some Windows installs).
-             */
-            active = (hid & BIT(e->hid_bit)) != 0;
-            if (!active && hid == 0 && local_caps_lock) {
-                active = true;
-            }
-        } else if (e->hid_bit >= 0) {
+        if (e->hid_bit >= 0) {
             active = (hid & BIT(e->hid_bit)) != 0;
         } else {
             active = (top == e->layer);
         }
-        set_entry(e, active);
+        set_entry(e, active, i);
     }
 }
+
+static void update_all_indicators(struct k_work *work) {
+    ARG_UNUSED(work);
+    LOG_DBG("Updating indicator LEDs");
+    refresh_indicators();
+}
+
+/* Coalesce events: many events may fire for a single state change
+ * (e.g. endpoint_changed triggers hid_indicators_changed), so we
+ * defer the update to a work item and only update once per batch.
+ */
+static K_WORK_DEFINE(update_all_indicators_work, update_all_indicators);
+
+static int event_listener(const zmk_event_t *eh) {
+    ARG_UNUSED(eh);
+    k_work_submit(&update_all_indicators_work);
+    return ZMK_EV_EVENT_BUBBLE;
+}
+
+ZMK_LISTENER(indicator_leds_listener, event_listener);
+#if IS_ENABLED(CONFIG_ZMK_HID_INDICATORS)
+ZMK_SUBSCRIPTION(indicator_leds_listener, zmk_hid_indicators_changed);
+#endif
+ZMK_SUBSCRIPTION(indicator_leds_listener, zmk_activity_state_changed);
+ZMK_SUBSCRIPTION(indicator_leds_listener, zmk_usb_conn_state_changed);
+ZMK_SUBSCRIPTION(indicator_leds_listener, zmk_endpoint_changed);
+ZMK_SUBSCRIPTION(indicator_leds_listener, zmk_layer_state_changed);
 
 static int indicator_leds_init(const struct device *dev) {
     ARG_UNUSED(dev);
@@ -206,23 +175,6 @@ static int indicator_leds_init(const struct device *dev) {
     refresh_indicators();
     return 0;
 }
-
-static int event_listener(const zmk_event_t *eh) {
-    struct zmk_keycode_state_changed *kc = as_zmk_keycode_state_changed(eh);
-    if (kc != NULL) {
-        toggle_local_caps_lock_if_match(kc->usage_page, kc->keycode, kc->state);
-        return ZMK_EV_EVENT_BUBBLE;
-    }
-    refresh_indicators();
-    return ZMK_EV_EVENT_BUBBLE;
-}
-
-ZMK_LISTENER(indicator_leds_listener, event_listener);
-#if IS_ENABLED(CONFIG_ZMK_HID_INDICATORS)
-ZMK_SUBSCRIPTION(indicator_leds_listener, zmk_hid_indicators_changed);
-#endif
-ZMK_SUBSCRIPTION(indicator_leds_listener, zmk_layer_state_changed);
-ZMK_SUBSCRIPTION(indicator_leds_listener, zmk_keycode_state_changed);
 
 DEVICE_DT_INST_DEFINE(0, indicator_leds_init, NULL, NULL, NULL, POST_KERNEL,
                       CONFIG_APPLICATION_INIT_PRIORITY, NULL);

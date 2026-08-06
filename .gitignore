@@ -1,0 +1,21 @@
+# west workspace (created on first local build via `west init -l config`)
+/.west/
+
+# Modules fetched by `west update` — many hundreds of MB.
+/modules/
+/zephyr/
+/bootloader/
+/zmk/
+
+# Local build output and downloaded ZMK firmware artefacts.
+/build/
+/firmware/
+
+# Python build artefacts
+__pycache__/
+*.pyc
+
+# Editor / OS junk
+.vscode/.browse.VC.db*
+.idea/
+.DS_Store

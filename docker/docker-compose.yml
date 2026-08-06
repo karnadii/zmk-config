@@ -1,0 +1,29 @@
+services:
+  build:
+    # Build with: `docker compose -f docker/docker-compose.yml build`
+    # Run with:   `docker compose -f docker/docker-compose.yml run --rm build ./docker/build.sh`
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: geulis-zmk-build:latest
+    container_name: geulis-zmk-build
+    working_dir: /workspace
+    volumes:
+      # Bind-mount the repo at /workspace so artefacts (./firmware/) land on the host.
+      # Note: do NOT mount any of the user's subdirectories that conflict with
+      # west's default project paths (zephyr/, modules/, bootloader/, zmk/).
+      - ..:/workspace
+      # Persistent named volume for the west workspace. west init/update fetches
+      # Zephyr + ZMK into this volume (~5 min on first run, cached afterward).
+      # Keeping it separate from /workspace means west's `zephyr/` checkout
+      # doesn't clobber our repo's `zephyr/module.yml`.
+      - zmk_workspace_cache:/zmk-workspace
+    # Match the host user so files created in the bind mount are owned by you.
+    user: "${UID:-1000}:${GID:-1000}"
+    environment:
+      - ZMK_CONFIG=/zmk-workspace/config
+    tty: true
+    stdin_open: true
+
+volumes:
+  zmk_workspace_cache:

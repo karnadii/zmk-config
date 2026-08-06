@@ -7,7 +7,11 @@ manifest:
   projects:
     - name: zmk
       remote: zmkfirmware
-      revision: main
+      revision: v0.3
       import: app/west.yml
   self:
     path: config
+    # Expose the `west zephyr-export` extension command provided by ZMK's
+    # bundled scripts. The `zmk/app/scripts/west-commands.yml` file is
+    # fetched by `west update`; until then west itself doesn't need the command.
+    west-commands: zmk/app/scripts/west-commands.yml

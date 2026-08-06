@@ -341,6 +341,70 @@ When editing the keymap:
 
 Don't add new modules to `config/west.yml` unless you really need them — the upstream ZMK repo already pulls in everything ZMK-Studio / RGB / battery / ext-power / etc. need.
 
+## Branches
+
+- **`main`** — recommended for new work. Built against ZMK v0.3 + the
+  local `zmk-indicator-leds` module. Stable firmware for the Geulis.
+  Caps Lock LED is **not** supported on this branch (the host's HID
+  indicator report is unreliable on Windows; the upstream driver
+  can't be backported cleanly to v0.3).
+- **`v0.3-stable`** — snapshot of `main` once it stabilizes. Pin to
+  this for production builds.
+- **`main-migration`** — work-in-progress port to ZMK **main** (Zephyr
+  4.1). On main, the upstream `zmk,indicator-leds` driver is built
+  in, so the Caps Lock LED will work natively. The migration requires
+  the board-variant rename (`nice_nano` → `nice_nano//zmk`) and other
+  Zephyr 4.1 changes — see the migration plan below.
+
+### Migration plan: v0.3 → ZMK main
+
+**Goal:** drop the local `zmk-indicator-leds` module and get Caps Lock
+LED working out of the box.
+
+**Steps:**
+
+1. **Update `config/west.yml`** — point at `zmkfirmware/zmk@main` instead
+   of `revision: v0.3`. The `self.west-commands` line stays.
+
+2. **Update `.github/workflows/build.yml`** — change
+   `build-user-config.yml@v0.3` to `@main`. CI will then fail in
+   useful ways that guide the next steps.
+
+3. **Rename the board to the new variant scheme.** Per the ZMK blog
+   post `2025-12-09-zephyr-4-1#zmk-board-variant`, v0.4+ boards must
+   be declared as `geulis//zmk` (board with ZMK variant). The rename
+   touches:
+   - `boards/arm/geulis/Kconfig.board` — change the `BOARD_GEULIS`
+     symbol declaration to live under the variant.
+   - `boards/arm/geulis/Kconfig` — split into `Kconfig.board` and
+     `Kconfig.defconfig` (no longer auto-merged).
+   - `boards/arm/geulis/board.yml` — may need a new format depending
+     on the Zephyr 4.1 board-root schema.
+
+4. **Update the keymap `MORPH` / `ENCODER` macros.** v0.4 renamed
+   `zmk,behavior-mod-morph` properties and the `behavior-sensor-rotate`
+   binding shape. The keymap ASCII layout comments need to be updated
+   to match the new `bindings` property names.
+
+5. **Delete `module/`** — the upstream `zmk,indicator-leds` driver is
+   built in on main. The DTS node stays the same (`compatible =
+   "zmk,indicator-leds"`), but the user-config repo no longer needs
+   to compile the driver.
+
+6. **Update `boards/arm/geulis/geulis.dts`** — restore the
+   `caps_lock_indicator` child node that the v0.3 branch dropped.
+
+7. **Update `docker/build.sh`** — drop the `module` entry from
+   `ZMK_EXTRA_MODULES`.
+
+**Effort estimate:** half a day to a full day, depending on how
+many tree-wide changes the ZMK 4.1 rename cascades. The main
+risk is if the `ec11` compatible, the `alps,ec11` binding, or the
+WS2812 SPI driver changes binding shape in 4.1.
+
+**Do NOT migrate until you have a working EL-2 backup** of the v0.3
+firmware. The migration is irreversible until stabilized.
+
 ## USB power budget and WS2812 brightness
 
 The WS2812 strip draws ~60 mA per LED at full white (20 mA per R/G/B

@@ -19,6 +19,11 @@ differences are the matrix transform (split-B on the Ergo), row 3
 GPIO (P1.4 vs P0.20), `EXT_POWER` init-delay (50 ms vs 300 ms), and
 keyboard name.
 
+Both Marvelous65 variants use a **duplex matrix** — 10 virtual
+rows × 8 columns wired from 5 physical rows time-multiplexed across
+8 column pins. The interleaved `RC(0,n) RC(1,n) ...` pattern in the
+`map` saves MCU pins at the cost of an extra transform step.
+
 ## Keymap
 ![keymap](/keymap-drawer/geulis.svg)
 

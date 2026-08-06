@@ -29,6 +29,11 @@
         zephyr,display = &oled;
     };
 
+    // Duplex matrix: 10 virtual rows × 8 cols (80 key slots) wired from
+    // 5 physical rows time-multiplexed across 8 column pins. The interleaved
+    // RC(0,n) RC(1,n) ... pattern saves MCU pins at the cost of an extra
+    // transform step. The MCU's column count is fixed by the nrfmicro-13
+    // pinout (8 cols); we double up on rows to keep the column budget low.
     default_transform: keymap_transform_0 {
         compatible = "zmk,matrix-transform";
         columns = <8>;

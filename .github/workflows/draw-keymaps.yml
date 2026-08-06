@@ -4,10 +4,10 @@ on:
   workflow_dispatch:  # can be triggered manually
   push:               # automatically run on changes to following paths
     paths:
-      - "boards/arm/geulis/*.keymap"
-      - "boards/arm/geulis/*.dtsi"
+      - "boards/arm/**/*.keymap"
+      - "boards/arm/**/*.dtsi"
       - .github/workflows/draw-keymaps.yml
-        
+
 
 jobs:
   draw:
@@ -15,10 +15,9 @@ jobs:
     permissions:
       contents: write  # allow workflow to commit to the repo
     with:
-      keymap_patterns: "boards/arm/geulis/*.keymap"  # config file, ignored if not exists
-      output_folder: "keymap-drawer"            # path to save produced SVG and keymap YAML files
+      keymap_patterns: "boards/arm/**/*.keymap"
+      output_folder: "keymap-drawer"
       fail_on_error: true
       amend_commit: true
-      json_path: boards/arm/geulis/
+      json_path: boards/arm/
       config_path: keymap-drawer/config.yaml
-

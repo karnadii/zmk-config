@@ -1,9 +1,15 @@
-# Firmware for my [Geulis Keyboard](https://github.com/karnadii/geulis/)
+# ZMK user-config for my keyboards
 ![alt text](https://github.com/karnadii/geulis/blob/main/images/geulis_keyboard_acrylic_case_2021-Jun-04_11-50-24AM-000_CustomizedView44178749806.png?raw=true)
 
-ZMK v0.3 user-config repository for the Geulis — a single-piece Alice-style
-keyboard built on the nRF52840, with three EC11 rotary encoders, an
-optional WS2812 underglow strip, and an SSD1306 128×32 OLED status screen.
+ZMK v0.3 user-config repository for my keyboard builds. Currently
+ships with the **Geulis** — a single-piece Alice-style keyboard built
+on the nRF52840, with three EC11 rotary encoders, an optional WS2812
+underglow strip, and an SSD1306 128×32 OLED status screen. Additional
+boards will be added beside Geulis in `boards/arm/<keyboard>/`.
+
+| Keyboard | MCU | Path | Status |
+| --- | --- | --- | --- |
+| **Geulis** (Alice, 7×10) | nRF52840 | `boards/arm/geulis/` | stable |
 
 ## Keymap
 ![keymap](/keymap-drawer/geulis.svg)

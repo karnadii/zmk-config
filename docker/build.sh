@@ -23,7 +23,8 @@
 #      `zmk/app/scripts/west-commands.yml` extension — our config/west.yml
 #      points `self.west-commands` at it).
 #   4. `west build -s zmk/app -b geulis … -- -DZMK_CONFIG=<ws>/config
-#      -DZMK_EXTRA_MODULES=<repo>` so the build finds our `boards/arm/geulis/`.
+#      -DZMK_EXTRA_MODULES=<repo>` so the build finds our
+#      `boards/arm/geulis/`.
 #   5. Copy the resulting UF2/BIN to ./firmware/ on the host (bind-mounted).
 #
 # The west workspace is kept in a named docker volume (zmk_workspace_cache)

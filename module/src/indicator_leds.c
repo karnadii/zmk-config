@@ -79,6 +79,11 @@
  * is zero, so a working host echo always wins.
  */
 static bool local_caps_lock;
+/* Timestamp of the most recent Caps Lock press we acted on. Used to
+ * debounce contact-bounce (matrix scan can fire 2-3 events for a
+ * single physical press). Without this the LED appears to flicker
+ * because the local state toggles on every duplicate event. */
+static int64_t last_caps_press_ms = INT64_MIN;
 
 static void refresh_indicators(void);
 
@@ -92,10 +97,21 @@ static void toggle_local_caps_lock_if_match(uint8_t usage_page,
     if (!pressed) {
         return;
     }
-    if (usage_page == HID_USAGE_PAGE_KBD && (keycode & 0xFF) == HID_USAGE_KBD_CAPS) {
-        local_caps_lock = !local_caps_lock;
-        refresh_indicators();
+    if (usage_page != HID_USAGE_PAGE_KBD || (keycode & 0xFF) != HID_USAGE_KBD_CAPS) {
+        return;
     }
+    /* Debounce: ignore duplicate press events within 80 ms. Matrix
+     * scan + USB HID can deliver 2-3 events per physical keypress on
+     * some hosts, which would toggle the local state multiple times
+     * per tap and make the LED appear to flicker. */
+    const int64_t now = k_uptime_get();
+    if (now - last_caps_press_ms < 80) {
+        return;
+    }
+    last_caps_press_ms = now;
+
+    local_caps_lock = !local_caps_lock;
+    refresh_indicators();
 }
 
 LOG_MODULE_REGISTER(zmk_indicator_leds, CONFIG_ZMK_LOG_LEVEL);

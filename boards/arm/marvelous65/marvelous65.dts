@@ -1,0 +1,219 @@
+/*
+ * Copyright (c) 2024 Ujang Karnadi
+ *
+ * SPDX-License-Identifier: MIT
+ */
+
+
+/dts-v1/;
+#include <nordic/nrf52840_qiaa.dtsi>
+
+#include <dt-bindings/zmk/matrix_transform.h>
+#include <dt-bindings/led/led.h>
+
+#include "marvelous65-pinctrl.dtsi"
+#include "marvelous65-layout.dtsi"
+
+/ {
+    model = "Marvelous65";
+    compatible = "karnadi,marvelous65";
+    revision = "rev2";
+
+    chosen {
+        zephyr,code-partition = &code_partition;
+        zephyr,sram = &sram0;
+        zephyr,flash = &flash0;
+        zmk,battery = &vbatt;
+        zmk,kscan = &kscan0;
+        zmk,underglow = &led_strip;
+        zephyr,display = &oled;
+        zmk,physical-layout = &layout0;
+    };
+
+    default_transform: keymap_transform_0 {
+        compatible = "zmk,matrix-transform";
+        columns = <8>;
+        rows = <10>;
+
+        // 65% layout: row 0 = ESC..DEL+ENC (15 keys mapped),
+        // row 1 = TAB..BSLH+ENC (15), row 2 = CAPS..ENTER (14),
+        // row 3 = SHIFT..SHIFT+UP (14), row 4 = CTL..RIGHT (12).
+        map = <
+RC(1,0) RC(0,1) RC(1,1) RC(0,2) RC(1,2) RC(0,3) RC(1,3) RC(0,4) RC(1,4) RC(0,5) RC(1,5) RC(0,6) RC(1,6) RC(0,7) RC(1,7)
+RC(3,0) RC(2,1) RC(3,1) RC(2,2) RC(3,2) RC(2,3) RC(3,3) RC(2,4) RC(3,4) RC(2,5) RC(3,5) RC(2,6) RC(3,6) RC(2,7) RC(3,7)
+RC(5,0) RC(4,1) RC(5,1) RC(4,2) RC(5,2) RC(4,3) RC(5,3) RC(4,4) RC(5,4) RC(4,5) RC(5,5) RC(4,6)                 RC(5,7)
+RC(6,0) RC(7,1) RC(6,1) RC(7,2) RC(6,2) RC(7,3) RC(6,3) RC(7,4) RC(6,4) RC(7,5) RC(6,5) RC(7,6)         RC(6,7) RC(7,7)
+RC(8,0) RC(9,1) RC(8,1) RC(9,2)         RC(8,3)         RC(9,4)         RC(8,5) RC(9,5) RC(8,6) RC(9,6) RC(8,7) RC(9,7)
+        >;
+    };
+
+    kscan0: kscan_0 {
+        compatible = "zmk,kscan-gpio-matrix";
+        label = "KSCAN";
+        diode-direction = "col2row";
+        wakeup-source;
+
+        col-gpios
+            = <&gpio0 12 GPIO_ACTIVE_HIGH>
+            , <&gpio0 8 GPIO_ACTIVE_HIGH>
+            , <&gpio0 26 GPIO_ACTIVE_HIGH>
+            , <&gpio0 6 GPIO_ACTIVE_HIGH>
+            , <&gpio0 30 GPIO_ACTIVE_HIGH>
+            , <&gpio0 2 GPIO_ACTIVE_HIGH>
+            , <&gpio1 13 GPIO_ACTIVE_HIGH>
+            , <&gpio0 28 GPIO_ACTIVE_HIGH>
+            ;
+
+        row-gpios
+            = <&gpio0 24 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
+            , <&gpio0 13 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
+            , <&gpio0 5 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
+            , <&gpio1 4 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
+            , <&gpio0 22 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
+            , <&gpio0 7 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
+            , <&gpio0 31 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
+            , <&gpio0 29 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
+            , <&gpio0 3 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
+            , <&gpio1 11 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
+            ;
+    };
+
+    left_encoder: encoder_left {
+        compatible = "alps,ec11";
+        label = "LEFT_ENCODER";
+        a-gpios = <&gpio0 9 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>;
+        b-gpios = <&gpio0 10 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>;
+        steps = <80>;
+        status = "okay";
+    };
+
+    sensors {
+        compatible = "zmk,keymap-sensors";
+        sensors = <&left_encoder>;
+        triggers-per-rotation = <20>;
+    };
+
+    vbatt: vbatt {
+        compatible = "zmk,battery-voltage-divider";
+        io-channels = <&adc 2>;
+        output-ohms = <2000000>;
+        full-ohms = <(2000000 + 820000)>;
+    };
+
+    leds {
+        compatible = "gpio-leds";
+
+        blue_led: led_0 {
+            gpios = <&gpio1 10 GPIO_ACTIVE_HIGH>;
+            label = "Blue LED";
+        };
+    };
+
+    // Node name must match original "EXT_POWER" label to preserve user settings.
+    EXT_POWER {
+        compatible = "zmk,ext-power-generic";
+        control-gpios = <&gpio1 9 GPIO_ACTIVE_LOW>;
+        init-delay-ms = <50>;
+    };
+};
+
+&adc {
+    status = "okay";
+};
+
+&gpiote {
+    status = "okay";
+};
+
+&gpio0 {
+    status = "okay";
+};
+
+&gpio1 {
+    status = "okay";
+};
+
+&i2c0 {
+    compatible = "nordic,nrf-twi";
+    pinctrl-0 = <&i2c0_default>;
+    pinctrl-1 = <&i2c0_sleep>;
+    pinctrl-names = "default", "sleep";
+    status = "okay";
+
+    oled: ssd1306@3c {
+        compatible = "solomon,ssd1306fb";
+        reg = <0x3c>;
+        label = "DISPLAY";
+        width = <128>;
+        height = <32>;
+        segment-offset = <0>;
+        page-offset = <0>;
+        display-offset = <0>;
+        multiplex-ratio = <31>;
+        segment-remap;
+        com-invdir;
+        com-sequential;
+        prechargep = <0x22>;
+    };
+};
+
+&spi1 {
+    compatible = "nordic,nrf-spim";
+    pinctrl-0 = <&spi1_default>;
+    pinctrl-1 = <&spi1_sleep>;
+    pinctrl-names = "default", "sleep";
+    status = "okay";
+
+    led_strip: ws2812@0 {
+        compatible = "worldsemi,ws2812-spi";
+        label = "WS2812";
+
+        /* SPI */
+        reg = <0>; /* ignored, but necessary for SPI bindings */
+        spi-max-frequency = <4000000>;
+
+        /* WS2812 */
+        chain-length = <14>; /* number of LEDs */
+        spi-one-frame = <0x70>;
+        spi-zero-frame = <0x40>;
+        color-mapping = <LED_COLOR_ID_GREEN
+                        LED_COLOR_ID_RED
+                        LED_COLOR_ID_BLUE>;
+    };
+};
+
+zephyr_udc0: &usbd {
+    status = "okay";
+};
+
+&flash0 {
+    /*
+     * For more information, see:
+     * http://docs.zephyrproject.org/latest/devices/dts/flash_partitions.html
+     */
+    partitions {
+        compatible = "fixed-partitions";
+        #address-cells = <1>;
+        #size-cells = <1>;
+
+        sd_partition: partition@0 {
+            label = "mbr";
+            reg = <0x00000000 0x00001000>;
+        };
+
+        code_partition: partition@1000 {
+            label = "code_partition";
+            reg = <0x00001000 0x000d3000>;
+        };
+
+        storage_partition: partition@d4000 {
+            label = "storage";
+            reg = <0x000d4000 0x00020000>;
+        };
+
+        boot_partition: partition@f4000 {
+            label = "adafruit_boot";
+            reg = <0x000f4000 0x0000c000>;
+        };
+    };
+};

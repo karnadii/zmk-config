@@ -1,0 +1,15 @@
+file_format: "1"
+id: marvelous65
+name: Marvelous65
+type: board
+arch: arm
+features:
+  - keys
+  - underglow
+  - display
+  - studio
+
+outputs:
+  - usb
+  - ble
+url: https://github.com/karnadii/marvelous65

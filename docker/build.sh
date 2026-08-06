@@ -22,9 +22,10 @@
 #   3. `west zephyr-export` registers Zephyr's CMake config (needs the
 #      `zmk/app/scripts/west-commands.yml` extension — our config/west.yml
 #      points `self.west-commands` at it).
-#   4. `west build -s zmk/app -b geulis … -- -DZMK_CONFIG=<ws>/config
+#   4. `west build -s zmk/app -b <keyboard> … -- -DZMK_CONFIG=<ws>/config
 #      -DZMK_EXTRA_MODULES=<repo>` so the build finds our
-#      `boards/arm/geulis/`.
+#      `boards/arm/<keyboard>/`. Pass `--board <name>` to target a specific
+#      keyboard (defaults to geulis).
 #   5. Copy the resulting UF2/BIN to ./firmware/ on the host (bind-mounted).
 #
 # The west workspace is kept in a named docker volume (zmk_workspace_cache)
@@ -48,6 +49,7 @@ action=studio
 want_shell=false
 want_init=false
 want_clean=false
+target_board="geulis"
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -57,13 +59,18 @@ while [[ $# -gt 0 ]]; do
         --clean)     want_clean=true ;;
         --init)      want_init=true ;;
         --shell)     want_shell=true ;;
+        --board)
+            shift
+            target_board="$1"
+            ;;
         -h|--help)
             cat <<'USAGE'
 Usage:
-  build.sh                  Build the default ZMK Studio variant
+  build.sh                  Build the default ZMK Studio variant for geulis
   build.sh --studio         Build with ZMK Studio USB RPC
   build.sh --logging        Build with USB CDC logging
   build.sh --reset          Build settings-reset firmware
+  build.sh --board <name>   Target a specific board (default: geulis)
   build.sh --init           Run only west init + west update
   build.sh --clean          Wipe build artefacts
   build.sh --shell          Drop into a shell (env already configured)
@@ -120,10 +127,10 @@ fi
 west zephyr-export >/dev/null
 
 # --- pick snippet/shield/artifact based on the action ---------------------------
-board="geulis"
+board="${target_board}"
 snippet=""
 shield=""
-artifact_prefix="geulis-zmk"
+artifact_prefix="${target_board}-zmk"
 cmake_extra=""
 
 case "$action" in

@@ -1,4 +1,4 @@
-# west workspace (created on first local build via `west init -l config`)
+# West workspace (created on first local build via `west init -l config`)
 /.west/
 
 # Modules fetched by `west update` — many hundreds of MB.
@@ -14,8 +14,48 @@
 # Python build artefacts
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+.pytest_cache/
 
-# Editor / OS junk
+# Editor / IDE junk
+# VS Code
 .vscode/.browse.VC.db*
+.vscode/settings.json
+# PyCharm / JetBrains
 .idea/
+*.iml
+*.iws
+*.ipr
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+# Crush (AI CLI session state — see https://github.com/charmbracelet/crush)
+.crush/
+
+# OS junk
 .DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Editor backup files
+*.bak
+*.orig
+*.rej
+
+# Logs and runtime
+*.log
+*.tmp
+
+# Environment / secret files
+.env
+.env.local
+*.pem
+*.key
+
+# West + ZMK build artefacts
+.cache/
+build/
+dist/

@@ -9,6 +9,7 @@
 #include <nordic/nrf52840_qiaa.dtsi>
 
 #include <dt-bindings/led/led.h>
+#include <dt-bindings/zmk/hid_indicators.h>
 
 #include "geulis_options.h"
 #include "geulis-pinctrl.dtsi"
@@ -138,17 +139,15 @@
         };
     };
 
-    // NOTE: zmk,indicator-leds was the original target. The upstream main-
-    // branch driver (app/src/indicators/indicator_leds.c) does not compile
-    // against Zephyr 4.1 because its `LED_DT_SPEC_GET_BY_IDX` macro chains
-    // into `LED_DT_SPEC_GET` (Zephyr 4.1), which expands to a multi-line
-    // struct initializer that fails to resolve when passed as a token
-    // through DT_FOREACH_PROP_ELEM_SEP / LISTIFY under gcc -std=c11.
-    //
-    // Until the upstream macro is fixed, the Geulis DTS does not declare
-    // the `indicators` node. Caps Lock and macOS-layer LEDs are
-    // disabled on this branch. See AGENTS.md "Branches" for the migration
-    // plan.
+    // NOTE: zmk,indicator-leds in upstream main-branch has an unfixed bug
+    // (LED_DT_SPEC_GET_BY_IDX macro expands a multi-line struct initializer
+    // block that fails to resolve when passed as a token through
+    // DT_FOREACH_PROP_ELEM_SEP / LISTIFY under gcc -std=c11). Until the
+    // upstream macro is fixed, the Geulis DTS does not declare the
+    // `indicators` node. Caps Lock and Num Lock LED indicators are
+    // disabled on this branch. The blue + green GPIO LED nodes are
+    // still declared in `leds { ... }` above and could be driven by
+    // a custom module once the upstream macro is fixed.
 
     // Node name must match original "EXT_POWER" label to preserve user settings.
     EXT_POWER {

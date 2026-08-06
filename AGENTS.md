@@ -349,15 +349,34 @@ Don't add new modules to `config/west.yml` unless you really need them — the u
 ### LED indicator status (current limitation)
 
 The upstream `app/src/indicators/indicator_leds.c` driver that ships in
-ZMK main has a macro `LED_DT_SPEC_GET_BY_IDX` whose expansion is
-rejected by the preprocessor under gcc -std=c11 -Wfatal-errors when
-the macro is passed as a token through `DT_FOREACH_PROP_ELEM_SEP` /
-`LISTIFY`. As a result, the `indicators { ... }` node is **not**
-declared in `boards/karnadii/geulis/geulis_nrf52840_zmk.dts` and the
-Caps Lock / macOS-layer LEDs are disabled on this branch.
+ZMK main has two unfixed bugs (as of ZMK main HEAD, March 2026):
 
-The macro is upstream code we don't own. When the upstream fix lands,
-re-enabling the LEDs is a one-line change: uncomment the
+1. **C compile failure**: The macro `LED_DT_SPEC_GET_BY_IDX` chains into
+   Zephyr 4.1's `LED_DT_SPEC_GET`, which expands to a multi-line struct
+   initializer block. That block, when passed as a token through
+   `DT_FOREACH_PROP_ELEM_SEP` / `LISTIFY`, fails to resolve under
+   gcc -std=c11 -Wfatal-errors.
+
+2. **Devicetree binding mismatch**: Even after working around #1, the
+   generated devicetree header does not include `P_leds_FOREACH_PROP_ELEM_SEP`
+   or `P_indicator` macros — only `P_compatible` is generated. This
+   indicates the upstream `child-binding` (`type: phandles` for `leds`,
+   `type: int` for `indicator`) doesn't fully match Zephyr 4.1's
+   devicetree validator expectations, even though it matches the published
+   docs.
+
+Neither bug has a known upstream fix as of writing. The upstream driver
+is brand new (added March 2026) and is not used by any upstream
+board yet, so the breakage was not caught during CI.
+
+As a result, the `indicators { ... }` node is **not** declared in
+`boards/karnadii/geulis/geulis_nrf52840_zmk.dts` and the Caps Lock /
+Num Lock / macOS-layer LEDs are disabled on this branch. The blue and
+green GPIO LED nodes (`blue_led`, `green_led`) are still declared in
+the `leds { ... }` block and could be driven by a custom module once
+the upstream macro is fixed.
+
+To restore LEDs after upstream merges a fix, uncomment the
 `indicators { ... }` block in `geulis_nrf52840_zmk.dts` (the existing
 comment block shows the exact format that matches the upstream
 binding).

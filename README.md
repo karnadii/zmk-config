@@ -11,6 +11,7 @@ boards will be added beside Geulis in `boards/arm/<keyboard>/`.
 | --- | --- | --- | --- |
 | **Geulis** (Alice, 7×10) | nRF52840 | `boards/arm/geulis/` | regular + studio + logging + reset |
 | **Marvelous65 Rev2** (65% ANSI, encoder) | nRF52840 | `boards/arm/marvelous65/` | regular + logging + reset (Studio pending physical layout) |
+| **Marvelous65 Ergo** (65% ergo, split B) | nRF52840 | `boards/arm/marvelous65_ergo/` | regular + logging + reset (Studio pending physical layout) |
 
 ## Keymap
 ![keymap](/keymap-drawer/geulis.svg)

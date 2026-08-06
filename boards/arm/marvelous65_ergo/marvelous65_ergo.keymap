@@ -1,0 +1,101 @@
+/*
+ * Copyright (c) 2024 Ujang Karnadi
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Marvelous65 Ergo keymap. Ported from the reference at
+ * https://github.com/karnadii/marvelous65 (Marvelous65-ergo/Firmware/marvelous65_ergo/marvelous65_ergo.keymap)
+ * with these adjustments:
+ *   - 4 layers (macos / windows / functions / settings). The reference's
+ *     mouse layer was dropped per user preference.
+ *   - Plain &kp BKSP instead of the reference's Shift+BSPC/DEL morph.
+ *
+ * 65% ergo layout (matrix positions match the ASCII diagram comments):
+ *
+ *  Row 0: ESC  1  2  3  4  5  6  7  8  9  0  -  =  BKSP DEL ENC
+ *  Row 1: TAB  Q  W  E  R  T  Y  U  I  O  P  [  ]  \   ENC
+ *  Row 2: MO4  A  S  D  F  G  H  J  K  L  ;  '  ENTER
+ *  Row 3: LSFT  [split B left]  Z  X  C  V  B  N  M  ,  .  /  RSFT UP
+ *  Row 4: LCTL LALT LGUI SPC  [split B right]  RGUI MO2 MO3 LEFT DOWN RIGHT
+ */
+
+#include <behaviors.dtsi>
+#include <dt-bindings/zmk/keys.h>
+#include <dt-bindings/zmk/bt.h>
+#include <dt-bindings/zmk/outputs.h>
+#include <dt-bindings/zmk/rgb.h>
+
+/ {
+    enc_vol: enc_vol {
+        compatible = "zmk,behavior-sensor-rotate";
+        label = "enc_vol";
+        #sensor-binding-cells = <0>;
+        bindings = <&kp C_VOL_UP>, <&kp C_VOL_DN>;
+    };
+
+    enc_track: enc_track {
+        compatible = "zmk,behavior-sensor-rotate";
+        label = "enc_track";
+        #sensor-binding-cells = <0>;
+        bindings = <&kp C_NEXT>, <&kp C_PREV>;
+    };
+
+    enc_scrub: enc_scrub {
+        compatible = "zmk,behavior-sensor-rotate";
+        label = "enc_scrub";
+        #sensor-binding-cells = <0>;
+        bindings = <&kp C_FF>, <&kp C_RW>;
+    };
+
+    keymap0: keymap {
+        compatible = "zmk,keymap";
+
+        default_layer {
+            label = "MACOS";
+            bindings = <
+&kp ESC &kp NUM_1 &kp NUM_2 &kp NUM_3 &kp NUM_4 &kp NUM_5 &kp NUM_6 &kp NUM_7 &kp NUM_8 &kp NUM_9 &kp NUM_0 &kp MINUS &kp EQL &kp BKSP &kp DEL
+&kp TAB &kp Q    &kp W    &kp E    &kp R    &kp T    &kp Y    &kp U    &kp I    &kp O    &kp P    &kp LBKT &kp RBKT &kp BSLH &kp C_PP
+&mo 4   &kp A    &kp S    &kp D    &kp F    &kp G    &kp H    &kp J    &kp K    &kp L    &kp SCLN &kp QUOT                &kp RET
+&kp LSFT          &kp Z   &kp X    &kp C    &kp V    &kp B    &kp B    &kp N    &kp M    &kp CMMA &kp DOT  &kp FSLH  &kp RSFT &kp UP
+&kp LCTL &kp LALT &kp LGUI &kp SPC              &kp SPC          &kp RGUI &mo 2    &mo 3    &kp LEFT &kp DOWN &kp RIGHT
+            >;
+            sensor-bindings = <&enc_vol>;
+        };
+
+        macos_layer {
+            label = "WINDOWS";
+            bindings = <
+&kp ESC &kp NUM_1 &kp NUM_2 &kp NUM_3 &kp NUM_4 &kp NUM_5 &kp NUM_6 &kp NUM_7 &kp NUM_8 &kp NUM_9 &kp NUM_0 &kp MINUS &kp EQL &kp BKSP &kp DEL
+&kp TAB &kp Q    &kp W    &kp E    &kp R    &kp T    &kp Y    &kp U    &kp I    &kp O    &kp P    &kp LBKT &kp RBKT &kp BSLH &kp C_PP
+&mo 4   &kp A    &kp S    &kp D    &kp F    &kp G    &kp H    &kp J    &kp K    &kp L    &kp SCLN &kp QUOT                &kp RET
+&kp LSFT          &kp Z   &kp X    &kp C    &kp V    &kp B    &kp B    &kp N    &kp M    &kp CMMA &kp DOT  &kp FSLH  &kp RSFT &kp UP
+&kp LCTL &kp LGUI &kp LALT &kp SPC              &kp SPC          &kp RALT &mo 2    &mo 3    &kp LEFT &kp DOWN &kp RIGHT
+            >;
+            sensor-bindings = <&enc_vol>;
+        };
+
+        functions {
+            label = "FUNCTIONS";
+            bindings = <
+&kp GRAVE &kp F1   &kp F2   &kp F3   &kp F4   &kp F5   &kp F6   &kp F7   &kp F8   &kp F9   &kp F10 &kp F11 &kp F12 &kp DEL &kp C_PP
+&bt BT_CLR &bt BT_SEL 0 &bt BT_SEL 1 &bt BT_SEL 2 &bt BT_SEL 3 &trans &trans &trans &trans &trans &trans &trans &trans &trans &kp C_PP
+&out OUT_TOG &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans                &tog 1
+&kp LSFT &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans                &kp RSFT &kp PG_UP
+&trans &trans &trans &trans              &trans          &trans &trans &trans &kp HOME &kp PG_DN &kp END
+            >;
+            sensor-bindings = <&enc_track>;
+        };
+
+        settings {
+            label = "SETTINGS";
+            bindings = <
+&rgb_ug RGB_TOG &kp C_BRI_DN &kp C_BRI_UP &rgb_ug RGB_HUD &rgb_ug RGB_HUI &rgb_ug RGB_BRD &rgb_ug RGB_BRI &kp C_PREV &kp C_PP &kp C_NEXT &kp K_MUTE &kp C_VOL_DN &kp C_VOL_UP &rgb_ug RGB_EFF &kp C_PP
+&bt BT_CLR &bt BT_SEL 0 &bt BT_SEL 1 &bt BT_SEL 2 &bt BT_SEL 3 &trans &trans &trans &trans &trans &trans &trans &trans &trans &kp C_PP
+&out OUT_TOG &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans                &trans &tog 1
+&kp LSFT &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans                &kp RSFT &kp PG_UP
+&trans &trans &trans &trans              &trans          &trans &trans &trans &kp HOME &kp PG_DN &kp END
+            >;
+            sensor-bindings = <&enc_scrub>;
+        };
+    };
+};

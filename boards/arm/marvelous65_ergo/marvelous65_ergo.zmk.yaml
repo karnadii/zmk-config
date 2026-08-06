@@ -1,0 +1,14 @@
+file_format: "1"
+id: marvelous65_ergo
+name: Marvelous65 Ergo
+type: board
+arch: arm
+features:
+  - keys
+  - underglow
+  - display
+
+outputs:
+  - usb
+  - ble
+url: https://github.com/karnadii/marvelous65

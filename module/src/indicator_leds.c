@@ -82,7 +82,16 @@ static bool local_caps_lock;
 
 static void refresh_indicators(void);
 
-static void toggle_local_caps_lock_if_match(uint8_t usage_page, uint32_t keycode) {
+static void toggle_local_caps_lock_if_match(uint8_t usage_page,
+                                            uint32_t keycode,
+                                            bool pressed) {
+    /* zmk_keycode_state_changed fires on both press and release.
+     * Only toggle on press; otherwise every release flips state back
+     * and the LED returns to off as soon as you let go of the key.
+     */
+    if (!pressed) {
+        return;
+    }
     if (usage_page == HID_USAGE_PAGE_KBD && (keycode & 0xFF) == HID_USAGE_KBD_CAPS) {
         local_caps_lock = !local_caps_lock;
         refresh_indicators();
@@ -185,7 +194,7 @@ static int indicator_leds_init(const struct device *dev) {
 static int event_listener(const zmk_event_t *eh) {
     struct zmk_keycode_state_changed *kc = as_zmk_keycode_state_changed(eh);
     if (kc != NULL) {
-        toggle_local_caps_lock_if_match(kc->usage_page, kc->keycode);
+        toggle_local_caps_lock_if_match(kc->usage_page, kc->keycode, kc->state);
         return ZMK_EV_EVENT_BUBBLE;
     }
     refresh_indicators();

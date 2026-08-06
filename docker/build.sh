@@ -45,7 +45,7 @@ CONFIG_DIR="${WORKSPACE_ROOT}/config"
 
 mkdir -p "${FIRMWARE_DIR}"
 
-action=studio
+action=regular
 want_shell=false
 want_init=false
 want_clean=false
@@ -53,6 +53,7 @@ target_board="geulis"
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
+        --regular)   action=regular ;;
         --studio)    action=studio ;;
         --logging)   action=logging ;;
         --reset)     action=reset ;;
@@ -66,14 +67,19 @@ while [[ $# -gt 0 ]]; do
         -h|--help)
             cat <<'USAGE'
 Usage:
-  build.sh                  Build the default (logging) firmware for geulis
-  build.sh --studio         Build with ZMK Studio USB RPC -> <board>-zmk.uf2
+  build.sh                  Build the default (regular) firmware for geulis
+  build.sh --regular        Build plain USB HID + BLE firmware -> <board>-zmk.uf2
+  build.sh --studio         Build with ZMK Studio USB RPC -> <board>-zmk-studio.uf2
   build.sh --logging        Build with USB CDC logging -> <board>-zmk-logging.uf2
   build.sh --reset          Build settings-reset firmware -> <board>-zmk-reset.uf2
   build.sh --board <name>   Target a specific board (default: geulis)
   build.sh --init           Run only west init + west update
   build.sh --clean          Wipe build artefacts
   build.sh --shell          Drop into a shell (env already configured)
+
+Note: --studio needs the board to declare a zmk,physical-layout. Marvelous65
+will fail to compile --studio until the layout is added (it fails with a
+clear C static_assert, not a wrapper-side block).
 USAGE
             exit 0 ;;
         *)
@@ -134,10 +140,12 @@ artifact_prefix="${target_board}-zmk"
 cmake_extra=""
 
 case "$action" in
+    regular)
+        artifact="${artifact_prefix}" ;;
     studio)
         snippet="studio-rpc-usb-uart"
         cmake_extra="-DCONFIG_ZMK_STUDIO=y"
-        artifact="${artifact_prefix}" ;;
+        artifact="${artifact_prefix}-studio" ;;
     logging)
         snippet="zmk-usb-logging"
         artifact="${artifact_prefix}-logging" ;;

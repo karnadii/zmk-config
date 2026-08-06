@@ -9,8 +9,8 @@ boards will be added beside Geulis in `boards/arm/<keyboard>/`.
 
 | Keyboard | MCU | Path | Status |
 | --- | --- | --- | --- |
-| **Geulis** (Alice, 7×10) | nRF52840 | `boards/arm/geulis/` | stable |
-| **Marvelous65 Rev2** (65% ANSI, encoder) | nRF52840 | `boards/arm/marvelous65/` | stable (no ZMK Studio yet) |
+| **Geulis** (Alice, 7×10) | nRF52840 | `boards/arm/geulis/` | regular + studio + logging + reset |
+| **Marvelous65 Rev2** (65% ANSI, encoder) | nRF52840 | `boards/arm/marvelous65/` | regular + logging + reset (Studio pending physical layout) |
 
 ## Keymap
 ![keymap](/keymap-drawer/geulis.svg)
@@ -39,24 +39,29 @@ cached image.
 
 ### Build the firmware variants
 
-The repository builds three UF2 files:
+Each board produces four UF2 files (one per `--action`):
 
-| Artifact | Command | Purpose |
-| --- | --- | --- |
-| `geulis-zmk.uf2` | `./docker/build.sh --studio` | Default. ZMK Studio over USB. |
-| `geulis-zmk-logging.uf2` | `./docker/build.sh --logging` | USB CDC logging for debugging. |
-| `geulis-zmk-reset.uf2` | `./docker/build.sh --reset` | Factory-reset firmware (clears bonding, RGB, etc.). |
+| Action | Flag | Artifact | Purpose |
+| --- | --- | --- | --- |
+| `regular` | `--regular` | `<board>-zmk.uf2` | Plain USB HID + BLE. Daily-use firmware, no Studio, no logging. |
+| `studio` | `--studio` | `<board>-zmk-studio.uf2` | ZMK Studio over USB (live remap). Requires `zmk,physical-layout`. |
+| `logging` | `--logging` | `<board>-zmk-logging.uf2` | USB CDC logging for debugging. |
+| `reset` | `--reset` | `<board>-zmk-reset.uf2` | Factory-reset firmware (clears bonding, RGB, etc.). |
 
 ```bash
-# Build the Studio variant (default)
+# Build all four variants for the default board (geulis)
+docker compose -f docker/docker-compose.yml run --rm build ./docker/build.sh --regular
 docker compose -f docker/docker-compose.yml run --rm build ./docker/build.sh --studio
-
-# Build the logging variant
 docker compose -f docker/docker-compose.yml run --rm build ./docker/build.sh --logging
-
-# Build the reset-settings variant
 docker compose -f docker/docker-compose.yml run --rm build ./docker/build.sh --reset
+
+# Target a specific board with --board <name>
+docker compose -f docker/docker-compose.yml run --rm build ./docker/build.sh --studio --board marvelous65
 ```
+
+If `--studio` fails with a `static assertion failed` error mentioning
+`zmk,physical-layout`, the board doesn't yet declare a physical layout
+in its DTS — that's a per-board feature that must be added manually.
 
 Each invocation:
 
@@ -94,6 +99,7 @@ your host:
 
 ```
 firmware/geulis-zmk.uf2
+firmware/geulis-zmk-studio.uf2
 firmware/geulis-zmk-logging.uf2
 firmware/geulis-zmk-reset.uf2
 ```
@@ -112,7 +118,7 @@ To flash the Geulis:
 
 To factory-reset the device (clear saved Bluetooth bonds, RGB settings,
 etc.), flash the `geulis-zmk-reset` artifact and then re-flash
-the Studio variant.
+the regular variant.
 
 ## Hardware features
 

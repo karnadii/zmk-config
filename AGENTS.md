@@ -112,25 +112,26 @@ All three target the single `geulis` board.
 - **RGB underglow:** WS2812 strip of 18 LEDs driven via SPI3 (SPIM MOSI on P0.05). Toggle via `GEULIS_RGB_UNDERGLOW_ON` in `geulis_options.h`. Chain length, color mapping, and SPI frame patterns are in `geulis.dts` under `&spi3`. Configured via `CONFIG_ZMK_RGB_UNDERGLOW_*` in `geulis_defconfig` (auto-off on USB, hue start 160, effect 3, brightness 10–50).
 - **Battery sensing:** `zmk,battery-voltage-divider` on ADC channel AIN2, divider 2 MΩ / 820 kΩ.
 - **External power control (`EXT_POWER`):** `zmk,ext-power-generic` toggles via GPIO P1.09 active-low, 50 ms init delay. The node **must** keep the literal label `EXT_POWER` to preserve user settings across reflash.
-- **LED indicators (custom `zmk-indicator-leds` module):** `boards/arm/geulis/geulis.dts` declares an `indicators` node. Green LED (P1.11) tracks Caps Lock (HID bit 1); blue LED (P1.10) tracks the macOS layer (index 0). LEDs default off when neither condition is active. Implementation is a backport of the v0.4 `zmk,indicator-leds` driver — see `module/`.
+- **LED indicators (custom `zmk-indicator-leds` module):** `boards/arm/geulis/geulis.dts` declares an `indicators` node. Blue LED (P1.10) tracks the macOS layer (index 0). LEDs default off when no indicator is active. Implementation is a backport of the v0.4 `zmk,indicator-leds` driver — see `module/`.
 - **Sleep / PM:** `CONFIG_ZMK_PM_SOFT_OFF`, `CONFIG_ZMK_SLEEP`, `CONFIG_ZMK_EXT_POWER`, and a 10-minute idle timeout (`CONFIG_ZMK_IDLE_SLEEP_TIMEOUT = 600000`).
 - **BLE tuning:** 2M PHY disabled, +8 dBm TX power commented out, no passkey entry — see the `# Connection issue` comment block in `geulis_defconfig`.
 
 ## Local module: `zmk-indicator-leds`
 
-ZMK v0.3's HID indicator API (`CONFIG_ZMK_HID_INDICATORS`) only emits the
-report side — it does NOT include the `zmk,indicator-leds` GPIO driver
-that ships with ZMK 4.x. The local module under `module/` backports that
-driver so the Geulis can drive its two indicator LEDs (green + blue) from
-HID indicator bits and layer state.
+ZMK v0.3 does NOT include the `zmk,indicator-leds` GPIO driver that
+ships with ZMK 4.x. The local module under `module/` backports that
+driver so the Geulis can drive an indicator LED from layer state.
 
 **How it works:**
 
-- Declares a `ZMK_LISTENER` that subscribes to `zmk_layer_state_changed`
-  and (when `CONFIG_ZMK_HID_INDICATORS=y`) `zmk_hid_indicators_changed`.
-- On either event it walks a static table built at compile time from the
-  `zmk,indicator-leds` node's children and toggles each indicator's GPIO
-  directly via `gpio_pin_set_dt()` (no `led_on`/`led_off` indirection).
+- Subscribes to `zmk_layer_state_changed`,
+  `zmk_activity_state_changed`, `zmk_usb_conn_state_changed`,
+  `zmk_endpoint_changed`, and (when `CONFIG_ZMK_HID_INDICATORS=y`)
+  `zmk_hid_indicators_changed`.
+- Coalesces events into a single work item, then walks a static
+  table built at compile time from the `zmk,indicator-leds` node's
+  children and toggles each indicator's GPIO directly via
+  `gpio_pin_set_dt()` (no `led_on`/`led_off` indirection).
 - The GPIO spec for each `leds` phandle is resolved via
   `GPIO_DT_SPEC_GET_BY_IDX` against the LED's `gpios` property.
 
@@ -191,12 +192,13 @@ is a phandle-array referencing existing `gpio-leds` children.
   implemented. LEDs simply follow the indicator / layer state.
 - The upstream DPI / brightness / pulse controls are not relevant here
   (the Geulis uses plain GPIO LEDs, not PWM or smart LEDs).
-- **Caps Lock LED requires `CONFIG_ZMK_HID_INDICATORS=y`** to be enabled
-  on the build. Without it, the host's Caps Lock report never reaches
-  ZMK and `zmk_hid_indicators_changed` is never raised. The studio
-  build in `docker/build.sh` already enables this. For other variants,
-  add `-DCONFIG_ZMK_HID_INDICATORS=y` to `cmake_extra` in the relevant
-  branch if you want Caps Lock tracking.
+- **Caps Lock LED is not supported on ZMK v0.3.** The host's HID
+  indicator report is unreliable on Windows, and the upstream
+  `zmk,indicator-leds` driver needs it to track Caps Lock state. The
+  main ZMK branch adds reliability enhancements upstream that the
+  v0.3 backport can't replicate. The Geulis on v0.3 gets layer
+  indicator only (blue LED on macOS layer). To add Caps Lock LED,
+  switch to main-branch ZMK — see the migration plan below.
 
 **Why a module and not a board-local overlay:**
 

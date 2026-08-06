@@ -141,15 +141,6 @@
     indicators {
         compatible = "zmk,indicator-leds";
 
-        // Caps Lock -> green LED (P1.11). HID indicator bit 2.
-        // (Bit 0 = Num Lock, bit 2 = Caps Lock per USB HID 1.11 spec —
-        // see dt-bindings/zmk/hid_usage.h HID_USAGE_LED_*)
-        caps_lock: caps_lock_indicator {
-            compatible = "zmk,indicator-leds-entry";
-            indicator = <2>;
-            leds = <&green_led>;
-        };
-
         // macOS layer (index 0) active -> blue LED (P1.10).
         macos_layer: macos_layer_indicator {
             compatible = "zmk,indicator-leds-entry";

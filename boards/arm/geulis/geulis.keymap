@@ -98,13 +98,11 @@
         MORPH(home_rst, &kp HOME, &sys_reset)
         MORPH(end_boot, &kp END, &bootloader)
         MORPH(pp_mute, &kp C_MUTE, &kp C_PP)
-        // Plain Caps Lock for macOS / Windows layers. We deliberately
-        // do NOT use the `caps_word_caps` morph above because the morph's
-        // default branch fires &caps_word (no OS Caps Lock report), so
-        // the host never sets the HID indicator bit and our green LED
-        // can't track it. Plain &kp CAPS makes the OS toggle, the host
-        // sends a HID indicator report back, and the green LED lights.
-        // The caps_word behavior is still defined above for use elsewhere.
+        // Caps Lock: morph — caps_word on plain tap, &kp CAPS when Shift/Cmd
+        // is held. This is the original Geulis binding; user benefits from
+        // caps-word ergonomics. (No LED indicator on v0.3 — the green LED is
+        // reserved for Caps Lock on the main-branch only.)
+        MORPH(caps_word_caps, &caps_word, &kp CAPS)
     };
 
     combos {
@@ -286,7 +284,7 @@
             bindings = <
 &pp_mute         &gresc             &kp N1  &kp N2  &kp N3    &kp N4    &kp N5  &kp N6      &kp N7       &kp N8    &kp N9  &kp N0     &kp MINUS  &kp EQUAL  &bspc_del  &kp DEL
 &kp PAGE_UP      &kp TAB            &kp Q   &kp W   &kp E     &kp R     &kp T               &kp Y        &kp U     &kp I   &kp O      &kp P      &kp LBKT   &kp RBKT   &kp BACKSLASH
-&kp PAGE_DOWN    &kp CAPS           &kp A   &kp S   &kp D     &kp F     &kp G                            &kp H     &kp J   &kp K      &kp L      &kp SEMI   &kp SQT    &kp RET
+&kp PAGE_DOWN    &caps_word_caps    &kp A   &kp S   &kp D     &kp F     &kp G                            &kp H     &kp J   &kp K      &kp L      &kp SEMI   &kp SQT    &kp RET
                  &kp LSHFT          &kp Z   &kp X   &kp C     &kp V     &kp B               &kp B        &kp N     &kp M   &kp COMMA  &kp DOT    &kp FSLH   &kp RSHFT  &kp DEL
                  &kp LCTRL                          &kp LALT  &kp LGUI  &mo 3               &lt 2 SPACE  &kp RGUI                                                      &kp RCTRL
             >;
@@ -314,7 +312,7 @@
             bindings = <
 &pp_mute         &gresc            &kp N1  &kp N2  &kp N3    &kp N4    &kp N5  &kp N6      &kp N7       &kp N8    &kp N9  &kp N0     &kp MINUS  &kp EQUAL  &bspc_del  &kp DEL
 &kp PAGE_UP      &kp TAB           &kp Q   &kp W   &kp E     &kp R     &kp T               &kp Y        &kp U     &kp I   &kp O      &kp P      &kp LBKT   &kp RBKT   &kp BACKSLASH
-&kp PAGE_DOWN    &kp CAPS           &kp A   &kp S   &kp D     &kp F     &kp G                            &kp H     &kp J   &kp K      &kp L      &kp SEMI   &kp SQT    &kp RET
+&kp PAGE_DOWN    &caps_word_caps   &kp A   &kp S   &kp D     &kp F     &kp G                            &kp H     &kp J   &kp K      &kp L      &kp SEMI   &kp SQT    &kp RET
                  &kp LSHFT         &kp Z   &kp X   &kp C     &kp V     &kp B               &kp B        &kp N     &kp M   &kp COMMA  &kp DOT    &kp FSLH   &kp RSHFT  &kp DEL
                  &kp LCTRL                         &kp LGUI  &kp LALT  &mo 3               &lt 2 SPACE  &kp RALT                                                      &kp RCTRL
             >;

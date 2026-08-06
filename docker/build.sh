@@ -129,7 +129,7 @@ cmake_extra=""
 case "$action" in
     studio)
         snippet="studio-rpc-usb-uart"
-        cmake_extra="-DCONFIG_ZMK_STUDIO=y -DCONFIG_ZMK_HID_INDICATORS=y"
+        cmake_extra="-DCONFIG_ZMK_STUDIO=y"
         artifact="${artifact_prefix}-studio" ;;
     logging)
         snippet="zmk-usb-logging"

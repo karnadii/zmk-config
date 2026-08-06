@@ -3,7 +3,7 @@
 
 ZMK v0.3 user-config repository for the Geulis — a single-piece Alice-style
 keyboard built on the nRF52840, with three EC11 rotary encoders, an
-optional WS2812 underglow strip, and two GPIO indicator LEDs driven by a
+optional WS2812 underglow strip, and a GPIO indicator LED driven by a
 local `zmk-indicator-leds` module.
 
 ## Keymap
@@ -37,7 +37,7 @@ The repository builds three UF2 files:
 
 | Artifact | Command | Purpose |
 | --- | --- | --- |
-| `geulis-zmk-studio.uf2` | `./docker/build.sh --studio` | Default. ZMK Studio over USB, Caps Lock + macOS-layer LED indicators. |
+| `geulis-zmk-studio.uf2` | `./docker/build.sh --studio` | Default. ZMK Studio over USB, macOS-layer LED indicator. |
 | `geulis-zmk-logging.uf2` | `./docker/build.sh --logging` | USB CDC logging for debugging. |
 | `geulis-zmk-reset-settings.uf2` | `./docker/build.sh --reset` | Factory-reset firmware (clears bonding, RGB, etc.). |
 
@@ -118,11 +118,12 @@ the Studio variant.
   Brightness is capped at **70%** by default — ZMK's `BRT_MAX` is in
   percent, and 70% on 18 LEDs keeps the strip under ~300 mA so the USB
   data lines don't brown-out when the host port is marginal.
-- **Two indicator LEDs** (green on P1.11, blue on P1.10) — driven by
-  the local `zmk-indicator-leds` module backported from ZMK 4.x:
-  - Green LED lights on **Caps Lock** (requires `ZMK_HID_INDICATORS=y`,
-    already enabled in the Studio build).
+- **Indicator LED** (blue on P1.10) — driven by the local
+  `zmk-indicator-leds` module backported from ZMK 4.x:
   - Blue LED lights on the **macOS layer** (layer 0).
+  - Caps Lock LED was attempted but is unreliable on Windows (the host's
+    HID indicator report isn't always echoed back to the keyboard). It
+    will be available on the main ZMK branch — see "CI / branches" below.
 
 See `AGENTS.md` for hardware specs, keymap conventions, and a full
 list of build / flash gotchas.

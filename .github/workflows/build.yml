@@ -2,11 +2,21 @@ name: Build ZMK firmware
 
 on:
   push:
+    branches:
+      - v0.3-stable
+      - main
     paths:
       - build.yaml
       - 'config/**'
       - 'boards/**'
+      - 'boards/shields/**'
       - .github/workflows/build.yml
+      - docker/**
+
+  pull_request:
+    branches:
+      - v0.3-stable
+      - main
 
   workflow_dispatch:
   schedule:
@@ -17,15 +27,54 @@ permissions:
 
 jobs:
   build:
+    name: ${{ matrix.artifact-name || matrix.board }}
     uses: zmkfirmware/zmk/.github/workflows/build-user-config.yml@v0.3
+    with:
+      build_matrix_path: build.yaml
 
   release:
+    name: Publish UF2 firmware
+    # Publish on either a push to v0.3-stable (the default branch) or
+    # a manual `workflow_dispatch` run. PR builds and the weekly
+    # schedule never trigger a release — that just exercises the
+    # build matrix to catch regressions.
+    if: >-
+      (github.event_name == 'push' && github.ref == 'refs/heads/v0.3-stable')
+      || github.event_name == 'workflow_dispatch'
     needs: build
-    uses: filterpaper/scripts/.github/workflows/publish-artifact.yml@main
-    with:
-      release_name: ZMK Firmware
-      release_tag: latest
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: List artifacts
+        run: |
+          echo "## UF2 files to release:"
+          find artifacts -name '*.uf2' -type f | sort
+
+      - name: Create / update "latest" GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ZMK Firmware / latest
+          tag_name: latest
+          generate_release_notes: true
+          files: |
+            artifacts/**/*.uf2
+          fail_on_unmatched_files: false
 
   purge:
     if: github.event_name == 'schedule'
-    uses: filterpaper/scripts/.github/workflows/purge-workflow.yml@main
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete old workflow runs
+        uses: joshkyh/pull-request-action@c8a3ade91cd5d63ee7a8de93ec4b16d6e26a64c2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          # keep the most recent 14 workflow runs
+          max-keep-amount: 14
+          # delete runs that finished more than 3 days ago
+          retention-days: 3
+          head-branch: ${{ github.ref }}

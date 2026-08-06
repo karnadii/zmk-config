@@ -1,5 +1,24 @@
 ---
+# ZMK build matrix.
+#
+# The CI workflow (`.github/workflows/build.yml`) reads this file and
+# dispatches one parallel job per entry to
+# `zmkfirmware/zmk/.github/workflows/build-user-config.yml@v0.3`.
+# Each entry produces one UF2 artifact that lands in `firmware/`.
+#
+# `cmake-args` lets us pass extra `-D...` flags straight to the
+# CMake build (used below to enable `ZMK_SPLIT` for the split
+# keyboard, which is otherwise gated on the shield's Kconfig).
+#
+# Variant naming: see README.md "Building the firmware" section.
+# Each board's <board>-zmk.uf2 is the regular (default) build.
+# <board>-zmk-studio.uf2 needs `zmk,physical-layout`; only the
+# Geulis has one for now.
+
 include:
+  # ---------- Geulis (Alice, 7x10) ----------
+  - board: geulis
+    artifact-name: geulis-zmk
   - board: geulis
     snippet: studio-rpc-usb-uart
     cmake-args: -DCONFIG_ZMK_STUDIO=y
@@ -9,4 +28,52 @@ include:
     artifact-name: geulis-zmk-logging
   - board: geulis
     shield: settings_reset
-    artifact-name: geulis-zmk-reset-settings
+    artifact-name: geulis-zmk-reset
+
+  # ---------- Marvelous65 Rev2 (65% ANSI) ----------
+  - board: marvelous65
+    artifact-name: marvelous65-zmk
+  - board: marvelous65
+    snippet: zmk-usb-logging
+    artifact-name: marvelous65-zmk-logging
+  - board: marvelous65
+    shield: settings_reset
+    artifact-name: marvelous65-zmk-reset
+
+  # ---------- Marvelous65 Ergo (65% ergo, split B) ----------
+  - board: marvelous65_ergo
+    artifact-name: marvelous65_ergo-zmk
+  - board: marvelous65_ergo
+    snippet: zmk-usb-logging
+    artifact-name: marvelous65_ergo-zmk-logging
+  - board: marvelous65_ergo
+    shield: settings_reset
+    artifact-name: marvelous65_ergo-zmk-reset
+
+  # ---------- Marvelous65 Split — left half ----------
+  # ZMK split needs the shield's Kconfig to pull in ZMK_SPLIT_ROLE_*.
+  # The shield's Kconfig.shield handles that automatically when
+  # -DSHIELD=marvelous65_split_{left,right} is passed (so we don't
+  # need extra cmake-args here).
+  - board: nrfmicro_13
+    shield: marvelous65_split_left
+    artifact-name: nrfmicro_13-marvelous65_split_left-zmk
+  - board: nrfmicro_13
+    shield: marvelous65_split_left
+    snippet: zmk-usb-logging
+    artifact-name: nrfmicro_13-marvelous65_split_left-zmk-logging
+  - board: nrfmicro_13
+    shield: settings_reset;marvelous65_split_left
+    artifact-name: nrfmicro_13-marvelous65_split_left-zmk-reset
+
+  # ---------- Marvelous65 Split — right half ----------
+  - board: nrfmicro_13
+    shield: marvelous65_split_right
+    artifact-name: nrfmicro_13-marvelous65_split_right-zmk
+  - board: nrfmicro_13
+    shield: marvelous65_split_right
+    snippet: zmk-usb-logging
+    artifact-name: nrfmicro_13-marvelous65_split_right-zmk-logging
+  - board: nrfmicro_13
+    shield: settings_reset;marvelous65_split_right
+    artifact-name: nrfmicro_13-marvelous65_split_right-zmk-reset

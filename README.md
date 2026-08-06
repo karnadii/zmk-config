@@ -146,17 +146,85 @@ list of build / flash gotchas.
 
 ## Toggling hardware features
 
-There are two layers of configuration to disable a hardware feature at
-compile time (both must agree):
+Each optional feature has two layers of configuration that must agree
+to disable it at compile time. The DTS layer strips the device tree
+node; the Kconfig layer strips the driver source. Setting only one
+layer results in a build error (e.g. `A zmk,underglow chosen node must
+be declared`).
 
-1. **DTS-visible macros** in `boards/karnadii/geulis/geulis_options.h`:
-   set `GEULIS_*_ON` to `0` to remove the matching node from the
-   devicetree. (E.g. `GEULIS_RGB_UNDERGLOW_ON 0` to skip the WS2812
-   strip.)
-2. **Kconfig driver selection** in `boards/karnadii/geulis/geulis_defconfig`:
-   set `CONFIG_GEULIS_DRIVER_*` to `n` to strip the driver source.
+### 1. OLED display (SSD1306 128x32 on I2C0)
 
-After editing either file, rebuild with
+DTS — `boards/karnadii/geulis/geulis_options.h`:
+```c
+// Comment out (or set to 0) the OLED macro to remove the display node.
+/* #define GEULIS_OLED_ON  1 */
+```
+
+Kconfig — `boards/karnadii/geulis/Kconfig.geulis`:
+```
+# CONFIG_GEULIS_DRIVER_OLED is not set
+```
+(Or comment out the `select SSD1306` / `select ZMK_DISPLAY` lines in the
+Kconfig.)
+
+The DTS `&i2c0 { ... ssd1306@3c { ... } }` block and the
+`chosen/zephyr,display = &oled` line stay declared; only the LVGL display
+driver code and the ZMK status screen code are dropped. Saves about
+120 KB of flash.
+
+### 2. Rotary encoders (top, middle, bottom — EC11)
+
+DTS — `boards/karnadii/geulis/geulis_options.h`:
+```c
+// Each defaults to 1; set to 0 to remove that encoder's DTS node.
+#define GEULIS_ENCODER_TOP_ON  1   // top encoder (always required — anchors sensors array)
+#define GEULIS_ENCODER_MID_ON   0   // set to 1 if the middle encoder is soldered
+#define GEULIS_ENCODER_BOT_ON   0   // set to 1 if the bottom encoder is soldered
+```
+
+Kconfig — `boards/karnadii/geulis/geulis_defconfig`:
+```
+CONFIG_EC11=y
+CONFIG_EC11_TRIGGER_GLOBAL_THREAD=y
+```
+(Leave both enabled; the EC11 driver is shared across all three encoders.
+To disable encoders entirely, also set `CONFIG_GEULIS_DRIVER_ENCODER=n` in
+`boards/karnadii/geulis/Kconfig.geulis`.)
+
+At least one of `GEULIS_ENCODER_TOP_ON` / `_MID_ON` / `_BOT_ON` must be `1`
+(the `sensors` node anchors on whichever is enabled first, defaulting to
+top). A `#error` enforces this at compile time.
+
+### 3. RGB underglow (WS2812 18-LED strip on SPI3)
+
+DTS — `boards/karnadii/geulis/geulis_options.h`:
+```c
+#define GEULIS_RGB_UNDERGLOW_ON  0   // set to 1 to keep the strip driver compiled
+```
+
+Kconfig — `boards/karnadii/geulis/Kconfig.geulis`:
+```
+# CONFIG_GEULIS_DRIVER_RGB_UNDERGLOW is not set
+```
+(Or comment out the `select WS2812_STRIP` / `select ZMK_RGB_UNDERGLOW`
+lines in the Kconfig.)
+
+This disables the WS2812 strip driver and ZMK's RGB underglow layer,
+saving roughly 5–10 KB of flash. The `&spi3 { ... led_strip { ... } }`
+block stays declared; only the driver code is dropped. If you remove
+`GEULIS_RGB_UNDERGLOW_ON = 0` but leave the Kconfig enabled, you'll get
+a build error from ZMK's `rgb_underglow.c`.
+
+### 4. Other Kconfig knobs (no DTS changes needed)
+
+| Setting | File | Effect |
+| --- | --- | --- |
+| `CONFIG_GEULIS_RGB_UNDERGLOW_AUTO_OFF_USB=n` | `geulis_defconfig` | Turn off RGB on USB (ZMK's symbol name is misleading — `y` actually turns OFF on USB). |
+| `CONFIG_ZMK_RGB_UNDERGLOW_BRT_MAX=70` | `geulis_defconfig` | Cap brightness at 70% (~300 mA on USB, safe for marginal hosts). Range 0–100 percent. |
+| `CONFIG_ZMK_DISPLAY_BLANK_ON_IDLE=n` | `geulis_defconfig` | Keep OLED on while keyboard is idle on battery (otherwise blanks after timeout). |
+| `CONFIG_GEULIS_RGB_UNDERGLOW_HUE_START=160` | `geulis_defconfig` | Default boot hue for the underglow. |
+
+After editing any of the above, rebuild with
 `docker compose -f docker/docker-compose.yml run --rm build ./docker/build.sh --clean`
 because cmake caches the devicetree evaluation.
 

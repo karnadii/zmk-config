@@ -21,15 +21,19 @@
 /* --- Hardware presence ----------------------------------------------------- */
 /* Set to 0 to remove the matching hardware from the devicetree. */
 
-/* Top encoder (P0.26 / P0.06). The default rotation-axis for media
+/* Top encoder (P0.26 / P0.06). Default rotation axis for media
  * volume. Always enabled — the `sensors` node anchors on this. */
 #define GEULIS_ENCODER_TOP_ON    1
 
-/* Middle encoder (P0.08 / P0.27). PCB pads may not be populated. */
-#define GEULIS_ENCODER_MID_ON    0
+/* Middle encoder (P0.08 / P0.27). The PCB pads are exposed even if the
+ * encoder isn't populated — leave this ON so the user can solder an EC11
+ * in later without re-flashing. */
+#define GEULIS_ENCODER_MID_ON    1
 
-/* Bottom encoder (P1.08 / P0.11). PCB pads may not be populated. */
-#define GEULIS_ENCODER_BOT_ON    0
+/* Bottom encoder (P1.08 / P0.11). The PCB pads are exposed even if the
+ * encoder isn't populated — leave this ON so the user can solder an EC11
+ * in later without re-flashing. */
+#define GEULIS_ENCODER_BOT_ON    1
 
 /* 18-LED WS2812 strip on SPI3 (P0.05). */
 #define GEULIS_RGB_UNDERGLOW_ON  1

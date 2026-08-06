@@ -166,37 +166,32 @@
     sensors {
         compatible = "zmk,keymap-sensors";
 /*
- * Build the `sensors` phandle list from the enabled encoders. The
- * anchor is the first enabled encoder; the remaining two become
- * optional tail entries. At least one encoder must be enabled.
- *
- * TAIL_* macros are ALWAYS defined (possibly to ""), so the
- * preprocessor never leaves literal `GEULIS_TAIL_*` text in the
- * output. The dtlib parser validates the resulting phandle list.
+ * Build the `sensors` phandle list from the enabled encoders. Each
+ * ENC_* macro expands to either `&foo_encoder` (when enabled) or
+ * nothing — the wrapping `<>` are part of the assignment itself.
  */
 #if GEULIS_ENCODER_TOP_ON
-#define GEULIS_ANCHOR <&top_encoder>
-#elif GEULIS_ENCODER_MID_ON
-#define GEULIS_ANCHOR <&mid_encoder>
-#elif GEULIS_ENCODER_BOT_ON
-#define GEULIS_ANCHOR <&bot_encoder>
+#define ENC_TOP &top_encoder
 #else
+#define ENC_TOP
+#endif
+#if GEULIS_ENCODER_MID_ON
+#define ENC_MID &mid_encoder
+#else
+#define ENC_MID
+#endif
+#if GEULIS_ENCODER_BOT_ON
+#define ENC_BOT &bot_encoder
+#else
+#define ENC_BOT
+#endif
+#if !(GEULIS_ENCODER_TOP_ON || GEULIS_ENCODER_MID_ON || GEULIS_ENCODER_BOT_ON)
 #error "At least one of GEULIS_ENCODER_TOP/MID/BOT_ON must be 1"
 #endif
-#if GEULIS_ENCODER_TOP_ON && GEULIS_ENCODER_MID_ON
-#define GEULIS_TAIL_MID , &mid_encoder
-#else
-#define GEULIS_TAIL_MID
-#endif
-#if (GEULIS_ENCODER_TOP_ON || GEULIS_ENCODER_MID_ON) && GEULIS_ENCODER_BOT_ON
-#define GEULIS_TAIL_BOT , &bot_encoder
-#else
-#define GEULIS_TAIL_BOT
-#endif
-        sensors = GEULIS_ANCHOR GEULIS_TAIL_MID GEULIS_TAIL_BOT;
-#undef GEULIS_ANCHOR
-#undef GEULIS_TAIL_MID
-#undef GEULIS_TAIL_BOT
+        sensors = < ENC_TOP ENC_MID ENC_BOT >;
+#undef ENC_TOP
+#undef ENC_MID
+#undef ENC_BOT
         triggers-per-rotation = <20>;
     };
 

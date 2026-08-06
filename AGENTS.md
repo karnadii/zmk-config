@@ -326,13 +326,42 @@ When editing the keymap:
 
 Don't add new modules to `config/west.yml` unless you really need them — the upstream ZMK repo already pulls in everything ZMK-Studio / RGB / battery / ext-power / etc. need.
 
+## USB power budget and WS2812 brightness
+
+The WS2812 strip draws ~60 mA per LED at full white (20 mA per R/G/B
+channel). With 18 LEDs, the theoretical peak is ~1.1 A — far above the
+USB 2.0 budget of 500 mA. As brightness rises, the strip's instantaneous
+current draw during refresh causes VBUS to sag, which can brown out the
+USB data lines (host sees the device as disconnected until brightness
+drops back down).
+
+The brightness values in `geulis_defconfig` (`ZMK_RGB_UNDERGLOW_BRT_MIN=10`,
+`BRT_MAX=80`, in **percent**) keep the strip under ~340 mA average on
+USB, leaving headroom for BLE (~10 mA) and the nRF52840 itself.
+
+| `BRT_MAX` | Per-LED duty | Total avg current (18 LEDs) | USB-safe? |
+|-----------|--------------|------------------------------|-----------|
+| 50  | ~20% | ~216 mA | yes |
+| 70  | ~27% | ~300 mA | yes |
+| **80** (default) | **~31%** | **~340 mA** | **yes — recommended cap** |
+| 90  | ~35% | ~380 mA | borderline |
+| 100 | ~39% | ~420 mA | risky on some hosts |
+
+If the user reports USB dropouts on a particular host, lower `BRT_MAX`.
+The Kconfig symbol is **percent (0–100)**, not 0–255 — multiplying by
+2.55 gives the 8-bit PWM equivalent.
+
+`CONFIG_GEULIS_RGB_UNDERGLOW_AUTO_OFF_USB` is named misleadingly: it
+turns off the strip when USB is **disconnected** (i.e., on battery).
+Leaving it on saves battery at the cost of LED glow when plugged in.
+
 ## Quick checklist for common changes
 
 - **Add a new layer:** add a `display-name = "..."` block to `keymap { ... }` in `geulis.keymap`, keep its matrix-row counts (5 rows, total ~62 positions) consistent with the ASCII diagram comment.
 - **Add a new behavior:** use the `MORPH(...)` / `ENCODER(...)` macros at the top of `geulis.keymap`; reference it as `&your_name` in a binding.
 - **Add a new combo:** append to `combos { ... }` — note that `<key-positions = <...>>` are matrix positions, not key labels.
 - **Add a new indicator:** append a child to the `indicators` node in `boards/arm/geulis/geulis.dts` with `compatible = "zmk,indicator-leds-entry"` and either `indicator = <N>` or `layer = <N>`. Reuse existing `gpio-leds` children for the `leds` array.
-- **Enable an unused encoder:** flip `GEULIS_ENCODER_MID_ON` or `GEULIS_ENCODER_BOT_ON` to `1` in `boards/arm/geulis/geulis_options.h`. Then bind a behavior to `&mid_encoder` / `&bot_encoder` in `geulis.keymap`.
+- **Disable an unused encoder:** flip `GEULIS_ENCODER_MID_ON` or `GEULIS_ENCODER_BOT_ON` to `0` in `boards/arm/geulis/geulis_options.h` (and set `CONFIG_GEULIS_DRIVER_ENCODER` to `n` if disabling all three). Default is `1` for all three so users can solder an encoder in without re-flashing.
 - **Disable RGB underglow:** flip `GEULIS_RGB_UNDERGLOW_ON` to `0` in `geulis_options.h` AND `CONFIG_GEULIS_DRIVER_RGB_UNDERGLOW` to `n` in `geulis_defconfig`. Also remove `&rgb_ug` bindings from `geulis.keymap`.
 - **Change RGB defaults:** `geulis_defconfig` (`CONFIG_ZMK_RGB_UNDERGLOW_*`).
 - **Change sleep timeout:** `geulis.conf` (`CONFIG_ZMK_IDLE_SLEEP_TIMEOUT`).

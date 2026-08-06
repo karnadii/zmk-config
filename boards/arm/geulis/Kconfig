@@ -52,30 +52,4 @@ config GEULIS_RGB_UNDERGLOW_AUTO_OFF_USB
     default y
     depends on GEULIS_DRIVER_RGB_UNDERGLOW
 
-# Runtime tuning (not features per se). These terns set the startup
-# parameters of the RGB underglow. Edit values in geulis_defconfig
-# (or override here via CONFIG_GEULIS_RGB_UNDERGLOW_*).
-config GEULIS_RGB_UNDERGLOW_HUE_START
-    int "RGB underglow startup hue (0–359)"
-    default 160
-    depends on GEULIS_DRIVER_RGB_UNDERGLOW
-
-config GEULIS_RGB_UNDERGLOW_EFF_START
-    int "RGB underglow startup effect index"
-    default 3
-    range 0 7
-    depends on GEULIS_DRIVER_RGB_UNDERGLOW
-
-config GEULIS_RGB_UNDERGLOW_BRT_MIN
-    int "RGB underglow minimum brightness (0–255)"
-    default 10
-    range 0 255
-    depends on GEULIS_DRIVER_RGB_UNDERGLOW
-
-config GEULIS_RGB_UNDERGLOW_BRT_MAX
-    int "RGB underglow maximum brightness (0–255)"
-    default 50
-    range 0 255
-    depends on GEULIS_DRIVER_RGB_UNDERGLOW
-
 endif # BOARD_GEULIS

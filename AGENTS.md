@@ -262,9 +262,19 @@ single source the DTS preprocessor sees. The Kconfig layer is needed
 because the driver source itself is Kconfig-controlled (it lives in
 upstream ZMK/Zephyr modules, not in this repo).
 
-## Physical layouts and transforms — important pattern
+## Physical layout (Alice) and layout variants
 
-The Geulis supports **four backspace/right-shift variants** (split/one × split/one). All four are defined and the user picks by setting `zmk,physical-layout` to one of `&layout0`–`&layout3`:
+The Geulis is a **single-piece Alice-style keyboard**: two slanted halves
+(±12° key rotation) merged into one PCB with a thumb cluster on row 4.
+There is no split-peripheral — everything runs off a single nRF52840.
+Note that the term **"split"** elsewhere in this repo (e.g. in
+`geulis.dts`, `geulis-layout.dtsi`, `geulis.json`) refers only to the
+optional split-backspace / split-right-shift **key variants** below,
+never to a split keyboard.
+
+The Geulis supports **four backspace/right-shift variants** (split × one
+for each of backspace and right-shift). All four are defined and the
+user picks by setting `zmk,physical-layout` to one of `&layout0`–`&layout3`:
 
 | Label | Backspace | Right shift |
 | --- | --- | --- |
@@ -275,7 +285,10 @@ The Geulis supports **four backspace/right-shift variants** (split/one × split/
 
 Each layout has a matching `transform0`–`transform3` in `geulis-transform.dtsi` (same `map`, only the last entry of the bottom row differs by 1 column), and `geulis-layout.dtsi`'s `position_map` ties them together. **If you change the matrix wiring, you must edit all four transforms consistently**, and the active one is whichever `&layoutN` is selected in `geulis.dts`'s `chosen { zmk,physical-layout = ... }`.
 
-The matrix is 7×10 = 70 slots but only ~62 keys are mapped (split design with thumb cluster gaps). Several `RC(r,c)` slots in transforms are unused — that's intentional.
+The matrix is 7×10 = 70 slots but only ~62 keys are mapped (Alice
+layout with a split thumb cluster and intentional gaps in the inner
+columns). Several `RC(r,c)` slots in transforms are unused — that's
+intentional.
 
 ## Keymap structure (`boards/arm/geulis/geulis.keymap`)
 

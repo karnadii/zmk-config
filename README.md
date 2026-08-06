@@ -1,10 +1,10 @@
 # Firmware for my [Geulis Keyboard](https://github.com/karnadii/geulis/)
 ![alt text](https://github.com/karnadii/geulis/blob/main/images/geulis_keyboard_acrylic_case_2021-Jun-04_11-50-24AM-000_CustomizedView44178749806.png?raw=true)
 
-ZMK v0.3 user-config repository for the Geulis — an nRF52840-based split
-keyboard with three EC11 rotary encoders, an optional WS2812 underglow
-strip, and two GPIO indicator LEDs driven by a local `zmk-indicator-leds`
-module.
+ZMK v0.3 user-config repository for the Geulis — a single-piece Alice-style
+keyboard built on the nRF52840, with three EC11 rotary encoders, an
+optional WS2812 underglow strip, and two GPIO indicator LEDs driven by a
+local `zmk-indicator-leds` module.
 
 ## Keymap
 ![keymap](/keymap-drawer/geulis.svg)

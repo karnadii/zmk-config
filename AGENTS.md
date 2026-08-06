@@ -191,6 +191,12 @@ is a phandle-array referencing existing `gpio-leds` children.
   implemented. LEDs simply follow the indicator / layer state.
 - The upstream DPI / brightness / pulse controls are not relevant here
   (the Geulis uses plain GPIO LEDs, not PWM or smart LEDs).
+- **Caps Lock LED requires `CONFIG_ZMK_HID_INDICATORS=y`** to be enabled
+  on the build. Without it, the host's Caps Lock report never reaches
+  ZMK and `zmk_hid_indicators_changed` is never raised. The studio
+  build in `docker/build.sh` already enables this. For other variants,
+  add `-DCONFIG_ZMK_HID_INDICATORS=y` to `cmake_extra` in the relevant
+  branch if you want Caps Lock tracking.
 
 **Why a module and not a board-local overlay:**
 

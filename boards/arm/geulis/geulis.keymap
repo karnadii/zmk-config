@@ -51,11 +51,29 @@
         MORPH(vol_prev, &kp C_VOL_DN, &kp C_PREV)
         MORPH(bri_i_hue_i, &rgb_ug RGB_BRI, &rgb_ug RGB_HUI)
         MORPH(bri_d_hue_d, &rgb_ug RGB_BRD, &rgb_ug RGB_HUD)
-        
+
         // Encoders
         ENCODER(media_encoder, &vol_prev, &vol_next)
         ENCODER_VAR(rgb_encoder, &bri_d_hue_d, &bri_i_hue_i)
         ENCODER(bt_encoder, &bt BT_PRV, &bt BT_NXT)
+        // Mid encoder: vertical scroll (DOWN/UP arrow) by default, undo/redo on upper layers.
+        // Each action is a MORPH (own phandle) so the ENCODER binding can use a
+        // bare phandle reference instead of &kp <HID-arithmetic> (which the DTS
+        // parser rejects when nested inside a sensor-rotate's bindings).
+        MORPH(mid_enc_prev, &kp DOWN, &kp DOWN)
+        MORPH(mid_enc_next, &kp UP, &kp UP)
+        MORPH(mid_fn_enc_prev, &kp LC(Z), &kp LC(Y))
+        MORPH(mid_fn_enc_next, &kp LC(Y), &kp LC(Z))
+        ENCODER(mid_enc, &mid_enc_prev, &mid_enc_next)
+        ENCODER(mid_fn_enc, &mid_fn_enc_prev, &mid_fn_enc_next)
+        // Bot encoder: horizontal scroll (LEFT/RIGHT arrow) by default,
+        // browser back/forward on upper layers.
+        MORPH(bot_enc_prev, &kp LEFT, &kp LEFT)
+        MORPH(bot_enc_next, &kp RIGHT, &kp RIGHT)
+        MORPH(bot_fn_enc_prev, &kp C_AC_BACK, &kp C_AC_BACK)
+        MORPH(bot_fn_enc_next, &kp C_AC_FORWARD, &kp C_AC_FORWARD)
+        ENCODER(bot_enc, &bot_enc_prev, &bot_enc_next)
+        ENCODER(bot_fn_enc, &bot_fn_enc_prev, &bot_fn_enc_next)
 
         // Media controls
         MORPH(bspc_del, &kp BACKSPACE, &kp DEL)
@@ -267,7 +285,7 @@
                  &kp LCTRL                          &kp LALT  &kp LGUI  &mo 3               &lt 2 SPACE  &kp RGUI                                                      &kp RCTRL
             >;
 
-            sensor-bindings = <&media_encoder>;
+            sensor-bindings = <&media_encoder>, <&mid_enc>, <&bot_enc>;
         };
 
 /*
@@ -295,7 +313,7 @@
                  &kp LCTRL                         &kp LGUI  &kp LALT  &mo 3               &lt 2 SPACE  &kp RALT                                                      &kp RCTRL
             >;
 
-            sensor-bindings = <&media_encoder>;
+            sensor-bindings = <&media_encoder>, <&mid_enc>, <&bot_enc>;
         };
 /*
  * Functions:
@@ -322,7 +340,7 @@
              &kp LCTRL                                 &trans        &trans        &none                  &none  &trans                                                                    &kp RCTRL
             >;
 
-            sensor-bindings = <&rgb_encoder 0 0>;
+            sensor-bindings = <&rgb_encoder 0 0>, <&mid_fn_enc>, <&bot_fn_enc>;
         };
 /*
  * Settings:
@@ -349,7 +367,7 @@
                &none                                           &none         &none         &none                                 &none            &none                                                                                              &none
             >;
 
-             sensor-bindings = <&rgb_encoder 0 0>;
+             sensor-bindings = <&rgb_encoder 0 0>, <&mid_fn_enc>, <&bot_fn_enc>;
         };
 
 /*

@@ -149,6 +149,18 @@ case "$action" in
         exit 1 ;;
 esac
 
+# Boards without a zmk,physical-layout cannot build with ZMK Studio
+# (ZMK's `physical_layouts.c` has a static_assert on this). Block
+# studio builds for those boards with a clear error message.
+if [[ "${action}" == "studio" ]]; then
+    case "${target_board}" in
+        marvelous65)
+            echo ">> Marvelous65 doesn't support ZMK Studio yet (no physical layout). Use --logging or --reset." >&2
+            exit 3
+            ;;
+    esac
+fi
+
 target_build="${BUILD_DIR}/${artifact}"
 echo ">> Building ${artifact} (board=${board}${shield:+ shield=${shield}}${snippet:+ snippet=${snippet}})"
 echo "   CMake args: ${cmake_extra}"

@@ -10,7 +10,7 @@ boards will be added beside Geulis in `boards/arm/<keyboard>/`.
 | Keyboard | MCU | Path | Status |
 | --- | --- | --- | --- |
 | **Geulis** (Alice, 7×10) | nRF52840 | `boards/arm/geulis/` | stable |
-| **Marvelous65 Rev2** (65% ANSI, encoder) | nRF52840 | `boards/arm/marvelous65/` | stable |
+| **Marvelous65 Rev2** (65% ANSI, encoder) | nRF52840 | `boards/arm/marvelous65/` | stable (no ZMK Studio yet) |
 
 ## Keymap
 ![keymap](/keymap-drawer/geulis.svg)

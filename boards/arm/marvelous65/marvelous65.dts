@@ -12,7 +12,6 @@
 #include <dt-bindings/led/led.h>
 
 #include "marvelous65-pinctrl.dtsi"
-#include "marvelous65-layout.dtsi"
 
 / {
     model = "Marvelous65";
@@ -25,9 +24,9 @@
         zephyr,flash = &flash0;
         zmk,battery = &vbatt;
         zmk,kscan = &kscan0;
+        zmk,matrix_transform = &default_transform;
         zmk,underglow = &led_strip;
         zephyr,display = &oled;
-        zmk,physical-layout = &layout0;
     };
 
     default_transform: keymap_transform_0 {

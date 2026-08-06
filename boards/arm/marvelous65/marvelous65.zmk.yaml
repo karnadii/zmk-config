@@ -7,7 +7,6 @@ features:
   - keys
   - underglow
   - display
-  - studio
 
 outputs:
   - usb

@@ -16,6 +16,13 @@ This is a **ZMK user-config repo**, not standalone firmware. It defines the keyb
 ├── build.yaml                # CI build matrix (defines the firmware artifacts built)
 ├── config/west.yml           # West manifest pointing at zmkfirmware/zmk @ main
 ├── zephyr/module.yml         # Registers this repo as a Zephyr module (board_root: .)
+├── module/                   # Local `zmk-indicator-leds` ZMK module (see below)
+│   ├── CMakeLists.txt
+│   ├── Kconfig
+│   ├── zephyr/module.yml     # `name: zmk-indicator-leds` (must be unique vs ZMK's own `module`)
+│   ├── dts/bindings/zmk,indicator-leds.yaml
+│   ├── include/              # (reserved for public headers)
+│   └── src/indicator_leds.c  # backport of `zmk,indicator-leds` for ZMK v0.3
 ├── boards/arm/geulis/        # Board definition (the keyboard lives here)
 │   ├── Kconfig, Kconfig.board, Kconfig.defconfig
 │   ├── board.cmake           # nrfjprog / UF2 / openocd runners
@@ -67,7 +74,7 @@ docker compose -f docker/docker-compose.yml run --rm build ./docker/build.sh --s
 docker compose -f docker/docker-compose.yml run --rm build ./docker/build.sh --shell
 ```
 
-The script does a `west init -l <ws>/config` + `west update` into a **named docker volume** (`zmk_workspace_cache`, mounted at `/zmk-workspace`) on first run. The user-config repo's `config/west.yml` is copied there so west's `zephyr/`, `modules/`, `bootloader/`, `zmk/` checkouts land in the volume instead of clobbering the bind-mounted repo (which would overwrite the tracked `zephyr/module.yml`). `west zephyr-export` registers the Zephyr CMake config — this requires `self.west-commands: zmk/app/scripts/west-commands.yml` in `config/west.yml`. Then `west build -s zmk/app -b geulis -S <snippet> -- -DZMK_CONFIG=<ws>/config -DZMK_EXTRA_MODULES=<repo> …` builds the firmware. UF2 lands in `./firmware/` (gitignored).
+The script does a `west init -l <ws>/config` + `west update` into a **named docker volume** (`zmk_workspace_cache`, mounted at `/zmk-workspace`) on first run. The user-config repo's `config/west.yml` is copied there so west's `zephyr/`, `modules/`, `bootloader/`, `zmk/` checkouts land in the volume instead of clobbering the bind-mounted repo (which would overwrite the tracked `zephyr/module.yml`). `west zephyr-export` registers the Zephyr CMake config — this requires `self.west-commands: zmk/app/scripts/west-commands.yml` in `config/west.yml`. Then `west build -s zmk/app -b geulis -S <snippet> -- -DZMK_CONFIG=<ws>/config -DZMK_EXTRA_MODULES=<repo>;<repo>/module` builds the firmware. The second `ZMK_EXTRA_MODULES` entry activates the local `zmk-indicator-leds` module (see below). UF2 lands in `./firmware/` (gitignored).
 
 To flash: enter bootloader (double-tap reset, or the boot combo — see `COMBO_BOOTLOADER` in `geulis.keymap`), then copy the `.uf2` to the mounted `GEULIS` drive.
 
@@ -105,8 +112,98 @@ All three target the single `geulis` board.
 - **RGB underglow:** WS2812 strip of 18 LEDs driven via SPI3 (SPIM MOSI on P0.05). Chain length, color mapping, and SPI frame patterns are in `geulis.dts` under `&spi3`. Configured via `CONFIG_ZMK_RGB_UNDERGLOW_*` in `geulis_defconfig` (auto-off on USB, hue start 160, effect 3, brightness 10–50).
 - **Battery sensing:** `zmk,battery-voltage-divider` on ADC channel AIN2, divider 2 MΩ / 820 kΩ.
 - **External power control (`EXT_POWER`):** `zmk,ext-power-generic` toggles via GPIO P1.09 active-low, 50 ms init delay. The node **must** keep the literal label `EXT_POWER` to preserve user settings across reflash.
+- **LED indicators (custom `zmk-indicator-leds` module):** `boards/arm/geulis/geulis.dts` declares an `indicators` node. Green LED (P1.11) tracks Caps Lock (HID bit 1); blue LED (P1.10) tracks the macOS layer (index 0). LEDs default off when neither condition is active. Implementation is a backport of the v0.4 `zmk,indicator-leds` driver — see `module/`.
 - **Sleep / PM:** `CONFIG_ZMK_PM_SOFT_OFF`, `CONFIG_ZMK_SLEEP`, `CONFIG_ZMK_EXT_POWER`, and a 10-minute idle timeout (`CONFIG_ZMK_IDLE_SLEEP_TIMEOUT = 600000`).
 - **BLE tuning:** 2M PHY disabled, +8 dBm TX power commented out, no passkey entry — see the `# Connection issue` comment block in `geulis_defconfig`.
+
+## Local module: `zmk-indicator-leds`
+
+ZMK v0.3's HID indicator API (`CONFIG_ZMK_HID_INDICATORS`) only emits the
+report side — it does NOT include the `zmk,indicator-leds` GPIO driver
+that ships with ZMK 4.x. The local module under `module/` backports that
+driver so the Geulis can drive its two indicator LEDs (green + blue) from
+HID indicator bits and layer state.
+
+**How it works:**
+
+- Declares a `ZMK_LISTENER` that subscribes to `zmk_layer_state_changed`
+  and (when `CONFIG_ZMK_HID_INDICATORS=y`) `zmk_hid_indicators_changed`.
+- On either event it walks a static table built at compile time from the
+  `zmk,indicator-leds` node's children and toggles each indicator's GPIO
+  directly via `gpio_pin_set_dt()` (no `led_on`/`led_off` indirection).
+- The GPIO spec for each `leds` phandle is resolved via
+  `GPIO_DT_SPEC_GET_BY_IDX` against the LED's `gpios` property.
+
+**DT usage:**
+
+```dts
+indicators {
+    compatible = "zmk,indicator-leds";
+
+    caps_lock_indicator {
+        compatible = "zmk,indicator-leds-entry";
+        indicator = <1>;            /* HID_INDICATOR_CAPS_LOCK */
+        leds = <&green_led>;
+    };
+
+    macos_layer_indicator {
+        compatible = "zmk,indicator-leds-entry";
+        layer = <0>;
+        leds = <&blue_led>;
+    };
+};
+```
+
+Each child must have either `indicator = <N>` (HID indicator bit number)
+or `layer = <N>` (zero-based keymap layer index), but not both. `leds`
+is a phandle-array referencing existing `gpio-leds` children.
+
+**Build wiring:**
+
+- `module/zephyr/module.yml` is named `zmk-indicator-leds` (NOT `module` —
+  ZMK's own `app/module` collides on the default name and would silently
+  shadow us).
+- `docker/build.sh` passes the local module via
+  `-DZMK_EXTRA_MODULES=${ROOT};${ROOT}/module`. The `dts_root: .` setting
+  exposes `module/dts/bindings/` so the binding resolves before the board
+  DTS is compiled.
+- The module's `CMakeLists.txt` uses `find_path` to locate ZMK's
+  `app/include` (where `<zmk/event_manager.h>` etc. live) and adds it
+  to the global `zephyr_interface` include path. Keep the path in sync
+  if ZMK ever relocates its include directory.
+
+**Known limitation — CI build is broken:**
+
+- The GitHub Actions workflow (`.github/workflows/build.yml`) uses the
+  upstream `zmkfirmware/zmk/build-user-config.yml@v0.3`, which does NOT
+  pass `-DZMK_EXTRA_MODULES=...` for the local `module/`. As a result,
+  `boards/arm/geulis/geulis.dts`'s `indicators { compatible =
+  "zmk,indicator-leds"; … }` node will fail devicetree validation on
+  CI, and the build will fail.
+- Local Docker builds work because `docker/build.sh` injects the module
+  path. CI is intentionally left broken until either (a) the indicators
+  node is moved to an overlay file that only local builds include, or
+  (b) the workflow is patched to forward the module path.
+
+**Limitations vs upstream ZMK 4.x driver:**
+
+- The upstream `on-while-idle` / `binding-behavior` properties are not
+  implemented. LEDs simply follow the indicator / layer state.
+- The upstream DPI / brightness / pulse controls are not relevant here
+  (the Geulis uses plain GPIO LEDs, not PWM or smart LEDs).
+
+**Why a module and not a board-local overlay:**
+
+- The ZMK v0.3 devicetree has no `&ind_leds` style helper for arbitrary
+  GPIO pins, and the upstream `zmk,indicator-leds` driver doesn't exist
+  in this ZMK version. A local module is the only way to drive
+  arbitrary GPIOs from indicator events without forking ZMK.
+- The module is **only** registered when building locally — see
+  `docker/build.sh`. CI (`.github/workflows/build.yml`) does not pass
+  the local module, so a CI build will still compile (the `indicators`
+  node will fail `device_is_ready()` checks and the Kconfig will be
+  disabled — but since the binding comes from the same module, the
+  compile-time `indicators` node would still match).
 
 ## Physical layouts and transforms — important pattern
 
@@ -177,6 +274,7 @@ Don't add new modules to `config/west.yml` unless you really need them — the u
 - **Add a new layer:** add a `display-name = "..."` block to `keymap { ... }` in `geulis.keymap`, keep its matrix-row counts (5 rows, total ~62 positions) consistent with the ASCII diagram comment.
 - **Add a new behavior:** use the `MORPH(...)` / `ENCODER(...)` macros at the top of `geulis.keymap`; reference it as `&your_name` in a binding.
 - **Add a new combo:** append to `combos { ... }` — note that `<key-positions = <...>>` are matrix positions, not key labels.
+- **Add a new indicator:** append a child to the `indicators` node in `boards/arm/geulis/geulis.dts` with `compatible = "zmk,indicator-leds-entry"` and either `indicator = <N>` or `layer = <N>`. Reuse existing `gpio-leds` children for the `leds` array.
 - **Change RGB defaults:** `geulis_defconfig` (`CONFIG_ZMK_RGB_UNDERGLOW_*`).
 - **Change sleep timeout:** `geulis.conf` (`CONFIG_ZMK_IDLE_SLEEP_TIMEOUT`).
 - **Update the rendered keymap image:** push to main; CI commits `keymap-drawer/geulis.svg` into your commit.

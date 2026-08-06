@@ -23,7 +23,8 @@
 #      `zmk/app/scripts/west-commands.yml` extension — our config/west.yml
 #      points `self.west-commands` at it).
 #   4. `west build -s zmk/app -b geulis … -- -DZMK_CONFIG=<ws>/config
-#      -DZMK_EXTRA_MODULES=<repo>` so the build finds our `boards/arm/geulis/`.
+#      -DZMK_EXTRA_MODULES=<repo>;<repo>/module` so the build finds our
+#      `boards/arm/geulis/` AND the local `zmk-indicator-leds` module.
 #   5. Copy the resulting UF2/BIN to ./firmware/ on the host (bind-mounted).
 #
 # The west workspace is kept in a named docker volume (zmk_workspace_cache)
@@ -156,7 +157,9 @@ cmake_args=(
     # The user-config repo (with boards/arm/geulis/) is registered as an
     # extra ZMK module. Mirrors the upstream CI:
     # https://github.com/zmkfirmware/zmk/blob/v0.3/.github/workflows/build-user-config.yml
-    "-DZMK_EXTRA_MODULES=${ROOT}"
+    # The local zmk-indicator-leds sibling module is appended so its driver
+    # registers and its bindings resolve before the board DTS is compiled.
+    "-DZMK_EXTRA_MODULES=${ROOT};${ROOT}/module"
     ${cmake_extra}
 )
 [[ -n "${shield}"  ]] && cmake_args+=("-DSHIELD=${shield}")

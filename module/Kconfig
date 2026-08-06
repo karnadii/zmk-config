@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: MIT
+
+config ZMK_INDICATOR_LEDS
+    bool "zmk,indicator-leds driver"
+    default y
+    depends on DT_HAS_ZMK_INDICATOR_LEDS_ENABLED
+    help
+      Build the backport of the zmk,indicator-leds GPIO driver for ZMK v0.3.
+      Activated automatically when a node with compatible
+      "zmk,indicator-leds" is present in the devicetree.

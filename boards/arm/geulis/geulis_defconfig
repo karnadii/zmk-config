@@ -35,7 +35,7 @@ CONFIG_GEULIS_DRIVER_RGB_UNDERGLOW=y
 CONFIG_GEULIS_RGB_UNDERGLOW_AUTO_OFF_USB=y
 
 # RGB underglow tuning. ZMK's BRT_* values are in PERCENT (0–100).
-# BRT_MAX=80 keeps 18-LED WS2812 current draw under ~340 mA on USB,
+# BRT_MAX=70 keeps 18-LED WS2812 current draw under ~300 mA on USB,
 # leaving enough headroom for BLE (~10 mA) inside the USB 500 mA budget.
 # Going above ~85 starts to cause USB VBUS sag on some hosts (the LED
 # refresh current spikes brown out the USB data lines).
@@ -43,7 +43,7 @@ CONFIG_ZMK_RGB_UNDERGLOW_HUE_START=160
 CONFIG_ZMK_RGB_UNDERGLOW_EFF_START=3
 CONFIG_ZMK_RGB_UNDERGLOW_BRT_START=40
 CONFIG_ZMK_RGB_UNDERGLOW_BRT_MIN=10
-CONFIG_ZMK_RGB_UNDERGLOW_BRT_MAX=80
+CONFIG_ZMK_RGB_UNDERGLOW_BRT_MAX=70
 
 # EC11 driver must use the global-workqueue trigger (can't be selected
 # from a choice symbol via Kconfig `select`).

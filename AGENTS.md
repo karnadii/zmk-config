@@ -336,14 +336,14 @@ USB data lines (host sees the device as disconnected until brightness
 drops back down).
 
 The brightness values in `geulis_defconfig` (`ZMK_RGB_UNDERGLOW_BRT_MIN=10`,
-`BRT_MAX=80`, in **percent**) keep the strip under ~340 mA average on
+`BRT_MAX=70`, in **percent**) keep the strip under ~300 mA average on
 USB, leaving headroom for BLE (~10 mA) and the nRF52840 itself.
 
 | `BRT_MAX` | Per-LED duty | Total avg current (18 LEDs) | USB-safe? |
 |-----------|--------------|------------------------------|-----------|
 | 50  | ~20% | ~216 mA | yes |
-| 70  | ~27% | ~300 mA | yes |
-| **80** (default) | **~31%** | **~340 mA** | **yes — recommended cap** |
+| **70** (default) | **~27%** | **~300 mA** | **yes — recommended cap** |
+| 80  | ~31% | ~340 mA | yes |
 | 90  | ~35% | ~380 mA | borderline |
 | 100 | ~39% | ~420 mA | risky on some hosts |
 

@@ -50,6 +50,7 @@ want_shell=false
 want_init=false
 want_clean=false
 target_board="geulis"
+target_shield=""
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -64,22 +65,31 @@ while [[ $# -gt 0 ]]; do
             shift
             target_board="$1"
             ;;
+        --shield)
+            shift
+            target_shield="$1"
+            ;;
         -h|--help)
             cat <<'USAGE'
 Usage:
-  build.sh                  Build the default (regular) firmware for geulis
-  build.sh --regular        Build plain USB HID + BLE firmware -> <board>-zmk.uf2
-  build.sh --studio         Build with ZMK Studio USB RPC -> <board>-zmk-studio.uf2
-  build.sh --logging        Build with USB CDC logging -> <board>-zmk-logging.uf2
-  build.sh --reset          Build settings-reset firmware -> <board>-zmk-reset.uf2
-  build.sh --board <name>   Target a specific board (default: geulis)
-  build.sh --init           Run only west init + west update
-  build.sh --clean          Wipe build artefacts
-  build.sh --shell          Drop into a shell (env already configured)
+  build.sh                       Build the default (regular) firmware for geulis
+  build.sh --regular             Build plain USB HID + BLE firmware -> <board>-zmk.uf2
+  build.sh --studio              Build with ZMK Studio USB RPC -> <board>-zmk-studio.uf2
+  build.sh --logging             Build with USB CDC logging -> <board>-zmk-logging.uf2
+  build.sh --reset               Build settings-reset firmware -> <board>-zmk-reset.uf2
+  build.sh --board <name>        Target a specific Kconfig board (default: geulis)
+  build.sh --shield <name>       Target a specific shield (e.g. marvelous65_split_left)
+  build.sh --init                Run only west init + west update
+  build.sh --clean               Wipe build artefacts
+  build.sh --shell               Drop into a shell (env already configured)
 
 Note: --studio needs the board to declare a zmk,physical-layout. Marvelous65
 will fail to compile --studio until the layout is added (it fails with a
 clear C static_assert, not a wrapper-side block).
+
+Split keyboards: use --board <name> --shield <half>. Default board is geulis;
+split shields default to --board nrfmicro_13 since they're designed against
+the Pro Micro pinout.
 USAGE
             exit 0 ;;
         *)
@@ -133,10 +143,22 @@ fi
 west zephyr-export >/dev/null
 
 # --- pick snippet/shield/artifact based on the action ---------------------------
+# When --shield is set, default the Kconfig board to nrfmicro_13
+# (the Pro Micro pin-compatible board the split shields target).
+if [[ -n "${target_shield}" && "${target_board}" == "geulis" ]]; then
+    target_board="nrfmicro_13"
+fi
+
 board="${target_board}"
 snippet=""
-shield=""
-artifact_prefix="${target_board}-zmk"
+shield="${target_shield}"
+# When a shield is set, embed its name in the artifact so left/right
+# halves don't clobber each other (e.g. marvelous65_split_left-zmk.uf2).
+if [[ -n "${shield}" ]]; then
+    artifact_prefix="${target_board}-${shield}-zmk"
+else
+    artifact_prefix="${target_board}-zmk"
+fi
 cmake_extra=""
 
 case "$action" in
@@ -150,7 +172,15 @@ case "$action" in
         snippet="zmk-usb-logging"
         artifact="${artifact_prefix}-logging" ;;
     reset)
-        shield="settings_reset"
+        # The settings_reset shield resets the whole board's settings,
+        # which includes the user's shield's settings. So we layer it
+        # on top via -DSHIELD="settings_reset;marvelous65_split_left"-
+        # style syntax (ZMK accepts a ';' separated shield list).
+        if [[ -n "${shield}" ]]; then
+            shield="settings_reset;${shield}"
+        else
+            shield="settings_reset"
+        fi
         artifact="${artifact_prefix}-reset" ;;
     *)
         echo "Unknown action: ${action}" >&2

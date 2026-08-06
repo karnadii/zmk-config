@@ -1,0 +1,71 @@
+/*
+ * Copyright (c) 2024 Ujang Karnadi
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Marvelous65 Split — right half overlay.
+ *
+ * Same wiring style as the left half (Pro Micro pin aliases), with
+ * col-offset = <8> on default_transform so the right half's keys
+ * land in the right half of the 16-col logical matrix.
+ */
+
+#include "marvelous65_split.dtsi"
+
+&default_transform {
+    col-offset = <8>;
+};
+
+/ {
+    kscan0: kscan {
+        compatible = "zmk,kscan-gpio-matrix";
+        label = "KSCAN";
+        diode-direction = "col2row";
+
+        col-gpios
+            = <&gpio0  1 GPIO_ACTIVE_HIGH>
+            , <&gpio0  0 GPIO_ACTIVE_HIGH>
+            , <&gpio0 15 GPIO_ACTIVE_HIGH>
+            , <&gpio0  7 GPIO_ACTIVE_HIGH>
+            , <&gpio0 14 GPIO_ACTIVE_HIGH>
+            , <&gpio0  8 GPIO_ACTIVE_HIGH>
+            , <&gpio0 16 GPIO_ACTIVE_HIGH>
+            , <&gpio0  9 GPIO_ACTIVE_HIGH>
+            ;
+
+        row-gpios
+            = <&gpio0  1 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
+            , <&gpio0  3 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
+            , <&gpio0  2 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
+            , <&gpio0  6 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
+            , <&gpio0 10 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
+            ;
+    };
+};
+
+&right_encoder {
+    status = "okay";
+};
+
+&spi1 {
+    compatible = "nordic,nrf-spim";
+    pinctrl-0 = <&spi1_default>;
+    pinctrl-1 = <&spi1_sleep>;
+    pinctrl-names = "default", "sleep";
+    status = "okay";
+
+    led_strip: ws2812@0 {
+        compatible = "worldsemi,ws2812-spi";
+        label = "WS2812";
+
+        reg = <0>;
+        spi-max-frequency = <4000000>;
+
+        chain-length = <14>;
+        spi-one-frame = <0x70>;
+        spi-zero-frame = <0x40>;
+        color-mapping = <LED_COLOR_ID_GREEN
+                        LED_COLOR_ID_RED
+                        LED_COLOR_ID_BLUE>;
+    };
+};

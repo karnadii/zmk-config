@@ -1,0 +1,38 @@
+# SPDX-License-Identifier: MIT
+
+if SHIELD_MARVELOUS65_SPLIT_LEFT || SHIELD_MARVELOUS65_SPLIT_RIGHT
+
+# EC11 driver — both halves have an encoder, but only one is enabled
+# at a time via the per-half overlay (left.overlay / right.overlay).
+# The workqueue choice is set in marvelous65_split.conf rather than
+# here because choice symbols can't be 'default'd.
+config EC11
+    default y
+
+# OLED status screen on I2C0 (0x3C) on both halves.
+config I2C
+    default y
+config SSD1306
+    default y
+config SSD1306_REVERSE_MODE
+    bool
+    default y
+
+# RGB underglow on each half.
+config WS2812_STRIP
+    default y
+config ZMK_RGB_UNDERGLOW
+    default y
+
+# Display + LVGL tuning.
+config LVGL_HOR_RES_MAX
+    int
+    default 128
+config LVGL_VER_RES_MAX
+    int
+    default 32
+config LVGL_VDB_SIZE
+    int
+    default 64
+
+endif # SHIELD_MARVELOUS65_SPLIT_LEFT || SHIELD_MARVELOUS65_SPLIT_RIGHT

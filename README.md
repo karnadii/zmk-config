@@ -12,6 +12,7 @@ boards will be added beside Geulis in `boards/arm/<keyboard>/`.
 | **Geulis** (Alice, 7×10) | nRF52840 | `boards/arm/geulis/` | regular + studio + logging + reset |
 | **Marvelous65 Rev2** (65% ANSI, encoder) | nRF52840 | `boards/arm/marvelous65/` | regular + logging + reset (Studio pending physical layout) |
 | **Marvelous65 Ergo** (65% ergo, split B) | nRF52840 | `boards/arm/marvelous65_ergo/` | regular + logging + reset (Studio pending physical layout) |
+| **Marvelous65 Split** (split, both halves) | nRF52852 (any Pro Micro pin-compatible) | `boards/shields/marvelous65_split/` | regular + logging + reset (left + right halves, nrfmicro_13 default) |
 
 Both Marvelous65 variants share the same hardware (RGB underglow,
 rotary encoder, OLED) and the same nrfmicro-13 pinout; the only
@@ -23,6 +24,13 @@ Both Marvelous65 variants use a **duplex matrix** — 10 virtual
 rows × 8 columns wired from 5 physical rows time-multiplexed across
 8 column pins. The interleaved `RC(0,n) RC(1,n) ...` pattern in the
 `map` saves MCU pins at the cost of an extra transform step.
+
+The Marvelous65 Split is a true ZMK split keyboard — two halves
+that pair over BLE. Each half runs the same firmware image; the
+Kconfig.shield picks the role (central / peripheral) based on
+`-DSHIELD=marvelous65_split_{left,right}`. The shield is designed
+against the nrfmicro_13 Pro Micro pinout but works on any other
+Pro Micro pin-compatible board (pass `--board <name>` to override).
 
 ## Keymap
 ![keymap](/keymap-drawer/geulis.svg)
@@ -69,6 +77,10 @@ docker compose -f docker/docker-compose.yml run --rm build ./docker/build.sh --r
 
 # Target a specific board with --board <name>
 docker compose -f docker/docker-compose.yml run --rm build ./docker/build.sh --studio --board marvelous65
+
+# Split keyboard: --board nrfmicro_13 (default) + --shield <left|right>
+docker compose -f docker/docker-compose.yml run --rm build ./docker/build.sh --regular --shield marvelous65_split_left
+docker compose -f docker/docker-compose.yml run --rm build ./docker/build.sh --regular --shield marvelous65_split_right
 ```
 
 If `--studio` fails with a `static assertion failed` error mentioning

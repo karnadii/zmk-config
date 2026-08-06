@@ -1,0 +1,22 @@
+# SPDX-License-Identifier: MIT
+
+config SHIELD_MARVELOUS65_SPLIT_LEFT
+    def_bool $(shields_list_contains,marvelous65_split_left)
+
+config SHIELD_MARVELOUS65_SPLIT_RIGHT
+    def_bool $(shields_list_contains,marvelous65_split_right)
+
+if SHIELD_MARVELOUS65_SPLIT_LEFT || SHIELD_MARVELOUS65_SPLIT_RIGHT
+
+config ZMK_KEYBOARD_NAME
+    default "Marvel65Split"
+
+# ZMK split keyboard support. Each half runs the same firmware image
+# (the .dtsi is shared); which half is determined by -DSHIELD=..._left
+# or ..._right at build time.
+config ZMK_SPLIT
+    default y
+select ZMK_SPLIT_ROLE_CENTRAL if SHIELD_MARVELOUS65_SPLIT_LEFT
+select ZMK_SPLIT_ROLE_PERIPHERAL if SHIELD_MARVELOUS65_SPLIT_RIGHT
+
+endif # SHIELD_MARVELOUS65_SPLIT_LEFT || SHIELD_MARVELOUS65_SPLIT_RIGHT

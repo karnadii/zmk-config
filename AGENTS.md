@@ -100,8 +100,13 @@ All three target the single `geulis` board.
 
 - **MCU:** nRF52840 (QIAA, `SOC_NRF52840_QIAA`).
 - **Matrix:** 7 rows × 10 cols, GPIO-matrix scan with `diode-direction = "col2row"`, active-high rows with internal pull-down, active-high cols.
-- **Three EC11 rotary encoders** wired to GPIOs but only `top_encoder` (`encoder_top`) is `status = "okay"`. Toggle which encoders are enabled via `boards/arm/geulis/geulis_options.h` (`GEULIS_ENCODER_TOP_ON` / `_MID_ON` / `_BOT_ON`). See "Feature toggles" below.
-- **RGB underglow:** WS2812 strip of 18 LEDs driven via SPI3 (SPIM MOSI on P0.05). Toggle via `GEULIS_RGB_UNDERGLOW_ON` in `geulis_options.h`. Chain length, color mapping, and SPI frame patterns are in `geulis.dts` under `&spi3`. Configured via `CONFIG_ZMK_RGB_UNDERGLOW_*` in `geulis_defconfig` (auto-off on USB, hue start 160, effect 3, brightness 10–50).
+- **Three EC11 rotary encoders** wired to GPIOs but only `top_encoder` (`encoder_top`) is `status = "okay"`. Toggle which encoders are enabled via `boards/karnadii/geulis/geulis_options.h` (`GEULIS_ENCODER_TOP_ON` / `_MID_ON` / `_BOT_ON`). See "Feature toggles" below.
+- **RGB underglow:** WS2812 strip of 18 LEDs driven via SPI3 (SPIM MOSI on P0.05). Toggle via `GEULIS_RGB_UNDERGLOW_ON` in `geulis_options.h`. Chain length, color mapping, and SPI frame patterns are in `geulis_nrf52840_zmk.dts` under `&spi3`. Configured via `CONFIG_ZMK_RGB_UNDERGLOW_*` in `geulis_defconfig` (auto-off on USB, hue start 160, effect 3, brightness 10–70%).
+- **SSD1306 128x32 OLED** on I2C0 (P0.15 SDA, P0.17 SCL) at address
+  0x3C. Driven by Zephyr's SSD1306 driver + ZMK's built-in status
+  screen showing layer, battery, output, and WPM widgets. Selected
+  via `CONFIG_GEULIS_DRIVER_OLED=y` in `boards/karnadii/geulis/Kconfig.geulis`.
+  The DTS node is in `geulis_nrf52840_zmk.dts` under `&i2c0`.
 - **Battery sensing:** `zmk,battery-voltage-divider` on ADC channel AIN2, divider 2 MΩ / 820 kΩ.
 - **External power control (`EXT_POWER`):** `zmk,ext-power-generic` toggles via GPIO P1.09 active-low, 50 ms init delay. The node **must** keep the literal label `EXT_POWER` to preserve user settings across reflash.
 - **LED indicators (custom `zmk-indicator-leds` module):** `boards/arm/geulis/geulis.dts` declares an `indicators` node. Blue LED (P1.10) tracks the macOS layer (index 0). LEDs default off when no indicator is active. Implementation is a backport of the v0.4 `zmk,indicator-leds` driver — see `module/`.

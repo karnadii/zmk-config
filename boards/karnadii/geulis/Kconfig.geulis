@@ -60,4 +60,18 @@ config GEULIS_RGB_UNDERGLOW_AUTO_OFF_USB
     default y
     depends on GEULIS_DRIVER_RGB_UNDERGLOW
 
+# SSD1306 128x32 OLED on I2C0 (P0.15 SDA, P0.17 SCL) at address 0x3C.
+# The OLED node is declared in geulis_nrf52840_zmk.dts. Selecting
+# ZMK_DISPLAY here pulls in the built-in status screen with layer,
+# battery, output, and WPM widgets. Disable this to remove the OLED
+# driver (the DTS node will still be declared but the status screen
+# code won't be compiled).
+config GEULIS_DRIVER_OLED
+    bool "OLED display status screen"
+    select SSD1306
+    select ZMK_DISPLAY
+    imply ZMK_DISPLAY_BLANK_ON_IDLE
+    default y
+    depends on BOARD_GEULIS
+
 endif # BOARD_GEULIS

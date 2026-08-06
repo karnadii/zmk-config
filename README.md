@@ -122,6 +122,10 @@ the Studio variant.
   Brightness is capped at **70%** by default — ZMK's `BRT_MAX` is in
   percent, and 70% on 18 LEDs keeps the strip under ~300 mA so the USB
   data lines don't brown-out when the host port is marginal.
+- **SSD1306 128x32 OLED** on I2C0 (P0.15 SDA, P0.17 SCL) at address
+  0x3C. ZMK's built-in status screen shows the active layer, battery
+  percentage, output (USB/BLE), and WPM. Selected by default via
+  `CONFIG_GEULIS_DRIVER_OLED=y` in `boards/karnadii/geulis/Kconfig.geulis`.
 
 ### LED indicator status
 

@@ -1,7 +1,81 @@
 # SPDX-License-Identifier: MIT
+#
+# Board-level feature toggles for the Geulis keyboard.
+#
+# Two layers of configuration:
+#   1. This Kconfig file — controls driver selection (ZMK/Zephyr symbols).
+#   2. boards/arm/geulis/geulis_options.h — controls which nodes are
+#      present in the devicetree (the DTS preprocessor uses `#if defined(...)`
+#      on macros from that header).
+#
+# The reason for two layers: Zephyr's DTS preprocessor does NOT see
+# autoconf.h, so Kconfig values are not directly available in DTS.
+# geulis_options.h is `#include`d by geulis.dts and is the single source
+# users edit to toggle features.
 
 config BOARD_ENABLE_DCDC
     bool "Enable DCDC mode"
     select SOC_DCDC_NRF52X
     default y
     depends on BOARD_GEULIS
+
+if BOARD_GEULIS
+
+# Driver selection. Each feature below has a matching `#define` in
+# geulis_options.h. They must be turned on/off IN PAIRS: if you disable
+# the Kconfig `select` here, also set the matching GEULIS_*_ON to 0 in
+# geulis_options.h.
+
+config GEULIS_DRIVER_ENCODER
+    bool "EC11 encoder driver (top/mid/bot all enabled)"
+    select EC11
+    default y
+    help
+      Enables the EC11 (rotary encoder) driver. Disable to strip all
+      encoder support. To selectively enable individual encoders, leave
+      this on and toggle GEULIS_ENCODER_MID_ON / GEULIS_ENCODER_BOT_ON
+      in geulis_options.h.
+
+config GEULIS_DRIVER_RGB_UNDERGLOW
+    bool "WS2812 RGB underglow driver"
+    select WS2812_STRIP
+    select ZMK_RGB_UNDERGLOW
+    default y
+    help
+      Enables the WS2812 strip driver and ZMK's RGB underglow layer.
+      To remove the strip from the devicetree entirely, also set
+      GEULIS_RGB_UNDERGLOW_ON to 0 in geulis_options.h.
+
+config GEULIS_RGB_UNDERGLOW_AUTO_OFF_USB
+    bool "Turn off RGB underglow when USB is plugged in"
+    select ZMK_RGB_UNDERGLOW_AUTO_OFF_USB
+    default y
+    depends on GEULIS_DRIVER_RGB_UNDERGLOW
+
+# Runtime tuning (not features per se). These terns set the startup
+# parameters of the RGB underglow. Edit values in geulis_defconfig
+# (or override here via CONFIG_GEULIS_RGB_UNDERGLOW_*).
+config GEULIS_RGB_UNDERGLOW_HUE_START
+    int "RGB underglow startup hue (0–359)"
+    default 160
+    depends on GEULIS_DRIVER_RGB_UNDERGLOW
+
+config GEULIS_RGB_UNDERGLOW_EFF_START
+    int "RGB underglow startup effect index"
+    default 3
+    range 0 7
+    depends on GEULIS_DRIVER_RGB_UNDERGLOW
+
+config GEULIS_RGB_UNDERGLOW_BRT_MIN
+    int "RGB underglow minimum brightness (0–255)"
+    default 10
+    range 0 255
+    depends on GEULIS_DRIVER_RGB_UNDERGLOW
+
+config GEULIS_RGB_UNDERGLOW_BRT_MAX
+    int "RGB underglow maximum brightness (0–255)"
+    default 50
+    range 0 255
+    depends on GEULIS_DRIVER_RGB_UNDERGLOW
+
+endif # BOARD_GEULIS

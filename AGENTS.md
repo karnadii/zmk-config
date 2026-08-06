@@ -108,8 +108,8 @@ All three target the single `geulis` board.
 
 - **MCU:** nRF52840 (QIAA, `SOC_NRF52840_QIAA`).
 - **Matrix:** 7 rows × 10 cols, GPIO-matrix scan with `diode-direction = "col2row"`, active-high rows with internal pull-down, active-high cols.
-- **Three EC11 rotary encoders** wired to GPIOs but only `top_encoder` (`encoder_top`) is `status = "okay"`. The middle/bottom encoders (`mid_encoder`, `bot_encoder`) are defined with `status = "disabled"` but kept in `sensors` so the existing `keymap-sensors` node can rotate/rotate-var them with one currently-bound sensor. If you wire another encoder, flip its `status` to `"okay"`.
-- **RGB underglow:** WS2812 strip of 18 LEDs driven via SPI3 (SPIM MOSI on P0.05). Chain length, color mapping, and SPI frame patterns are in `geulis.dts` under `&spi3`. Configured via `CONFIG_ZMK_RGB_UNDERGLOW_*` in `geulis_defconfig` (auto-off on USB, hue start 160, effect 3, brightness 10–50).
+- **Three EC11 rotary encoders** wired to GPIOs but only `top_encoder` (`encoder_top`) is `status = "okay"`. Toggle which encoders are enabled via `boards/arm/geulis/geulis_options.h` (`GEULIS_ENCODER_TOP_ON` / `_MID_ON` / `_BOT_ON`). See "Feature toggles" below.
+- **RGB underglow:** WS2812 strip of 18 LEDs driven via SPI3 (SPIM MOSI on P0.05). Toggle via `GEULIS_RGB_UNDERGLOW_ON` in `geulis_options.h`. Chain length, color mapping, and SPI frame patterns are in `geulis.dts` under `&spi3`. Configured via `CONFIG_ZMK_RGB_UNDERGLOW_*` in `geulis_defconfig` (auto-off on USB, hue start 160, effect 3, brightness 10–50).
 - **Battery sensing:** `zmk,battery-voltage-divider` on ADC channel AIN2, divider 2 MΩ / 820 kΩ.
 - **External power control (`EXT_POWER`):** `zmk,ext-power-generic` toggles via GPIO P1.09 active-low, 50 ms init delay. The node **must** keep the literal label `EXT_POWER` to preserve user settings across reflash.
 - **LED indicators (custom `zmk-indicator-leds` module):** `boards/arm/geulis/geulis.dts` declares an `indicators` node. Green LED (P1.11) tracks Caps Lock (HID bit 1); blue LED (P1.10) tracks the macOS layer (index 0). LEDs default off when neither condition is active. Implementation is a backport of the v0.4 `zmk,indicator-leds` driver — see `module/`.
@@ -211,6 +211,57 @@ is a phandle-array referencing existing `gpio-leds` children.
   disabled — but since the binding comes from the same module, the
   compile-time `indicators` node would still match).
 
+## Feature toggles — `geulis_options.h` + `geulis_defconfig`
+
+The Geulis supports optional hardware (extra encoders, RGB underglow) that
+can be enabled/disabled at compile time. Two layers must agree:
+
+### Layer 1: `boards/arm/geulis/geulis_options.h` (DTS-visible)
+
+This is the user-facing toggle. Set `#define GEULIS_*_ON` to `0` to
+remove the matching node from the devicetree. The header is `#include`d
+by `geulis.dts` and is processed by the DTS preprocessor (plain C
+preprocessor). Available toggles:
+
+- `GEULIS_ENCODER_TOP_ON` — set to `0` to disable the top encoder.
+- `GEULIS_ENCODER_MID_ON` — set to `1` to enable the middle encoder.
+- `GEULIS_ENCODER_BOT_ON` — set to `1` to enable the bottom encoder.
+- `GEULIS_RGB_UNDERGLOW_ON` — set to `0` to disable the WS2812 strip.
+
+At least one encoder must be enabled (a `#error` enforces this).
+
+### Layer 2: `boards/arm/geulis/geulis_defconfig` (Kconfig)
+
+This selects the matching upstream driver symbols so the driver source
+isn't compiled when unused. The `GEULIS_DRIVER_*` Kconfig entries are
+defined in `boards/arm/geulis/Kconfig` and pull in their `select`s:
+
+- `CONFIG_GEULIS_DRIVER_ENCODER=y` selects `EC11`.
+- `CONFIG_GEULIS_DRIVER_RGB_UNDERGLOW=y` selects `WS2812_STRIP` + `ZMK_RGB_UNDERGLOW`.
+
+To disable a feature entirely, do **both**:
+
+1. Set `GEULIS_*_ON` to `0` in `geulis_options.h`.
+2. Set `CONFIG_GEULIS_DRIVER_*` to `n` in `geulis_defconfig` (or remove.
+
+If you only flip the DTS, the driver source is still compiled and you
+get a `#error "A zmk,underglow chosen node must be declared"` from
+ZMK's `rgb_underglow.c`. If you only flip Kconfig, the driver is
+disabled but the devicetree still references it — also a build error.
+
+The Kconfig layer also exposes tuning knobs that don't affect DTS:
+
+- `CONFIG_GEULIS_RGB_UNDERGLOW_AUTO_OFF_USB` — turn off RGB on USB.
+- `CONFIG_GEULIS_RGB_UNDERGLOW_HUE_START` / `_EFF_START` / `_BRT_MIN` / `_BRT_MAX`.
+
+### Why two layers?
+
+Zephyr's DTS preprocessor does NOT see `autoconf.h`, so Kconfig values
+are not directly usable in DTS. The `geulis_options.h` header is the
+single source the DTS preprocessor sees. The Kconfig layer is needed
+because the driver source itself is Kconfig-controlled (it lives in
+upstream ZMK/Zephyr modules, not in this repo).
+
 ## Physical layouts and transforms — important pattern
 
 The Geulis supports **four backspace/right-shift variants** (split/one × split/one). All four are defined and the user picks by setting `zmk,physical-layout` to one of `&layout0`–`&layout3`:
@@ -281,6 +332,8 @@ Don't add new modules to `config/west.yml` unless you really need them — the u
 - **Add a new behavior:** use the `MORPH(...)` / `ENCODER(...)` macros at the top of `geulis.keymap`; reference it as `&your_name` in a binding.
 - **Add a new combo:** append to `combos { ... }` — note that `<key-positions = <...>>` are matrix positions, not key labels.
 - **Add a new indicator:** append a child to the `indicators` node in `boards/arm/geulis/geulis.dts` with `compatible = "zmk,indicator-leds-entry"` and either `indicator = <N>` or `layer = <N>`. Reuse existing `gpio-leds` children for the `leds` array.
+- **Enable an unused encoder:** flip `GEULIS_ENCODER_MID_ON` or `GEULIS_ENCODER_BOT_ON` to `1` in `boards/arm/geulis/geulis_options.h`. Then bind a behavior to `&mid_encoder` / `&bot_encoder` in `geulis.keymap`.
+- **Disable RGB underglow:** flip `GEULIS_RGB_UNDERGLOW_ON` to `0` in `geulis_options.h` AND `CONFIG_GEULIS_DRIVER_RGB_UNDERGLOW` to `n` in `geulis_defconfig`. Also remove `&rgb_ug` bindings from `geulis.keymap`.
 - **Change RGB defaults:** `geulis_defconfig` (`CONFIG_ZMK_RGB_UNDERGLOW_*`).
 - **Change sleep timeout:** `geulis.conf` (`CONFIG_ZMK_IDLE_SLEEP_TIMEOUT`).
 - **Update the rendered keymap image:** push to main; CI commits `keymap-drawer/geulis.svg` into your commit.

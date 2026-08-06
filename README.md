@@ -44,7 +44,7 @@ The repository builds three UF2 files:
 | Artifact | Command | Purpose |
 | --- | --- | --- |
 | `geulis-zmk.uf2` | `./docker/build.sh --studio` | Default. ZMK Studio over USB. |
-| `geulis-zmk.uf2` | `./docker/build.sh --logging` | USB CDC logging for debugging (same filename as Studio). |
+| `geulis-zmk-logging.uf2` | `./docker/build.sh --logging` | USB CDC logging for debugging. |
 | `geulis-zmk-reset.uf2` | `./docker/build.sh --reset` | Factory-reset firmware (clears bonding, RGB, etc.). |
 
 ```bash
@@ -94,6 +94,7 @@ your host:
 
 ```
 firmware/geulis-zmk.uf2
+firmware/geulis-zmk-logging.uf2
 firmware/geulis-zmk-reset.uf2
 ```
 

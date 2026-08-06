@@ -68,7 +68,7 @@ while [[ $# -gt 0 ]]; do
 Usage:
   build.sh                  Build the default (logging) firmware for geulis
   build.sh --studio         Build with ZMK Studio USB RPC -> <board>-zmk.uf2
-  build.sh --logging        Build with USB CDC logging -> <board>-zmk.uf2
+  build.sh --logging        Build with USB CDC logging -> <board>-zmk-logging.uf2
   build.sh --reset          Build settings-reset firmware -> <board>-zmk-reset.uf2
   build.sh --board <name>   Target a specific board (default: geulis)
   build.sh --init           Run only west init + west update
@@ -140,7 +140,7 @@ case "$action" in
         artifact="${artifact_prefix}" ;;
     logging)
         snippet="zmk-usb-logging"
-        artifact="${artifact_prefix}" ;;
+        artifact="${artifact_prefix}-logging" ;;
     reset)
         shield="settings_reset"
         artifact="${artifact_prefix}-reset" ;;

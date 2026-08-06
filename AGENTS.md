@@ -105,12 +105,12 @@ All three target the single `geulis` board.
 - **RGB underglow:** WS2812 strip of 18 LEDs driven via SPI3 (SPIM MOSI on P0.05). Toggle via `GEULIS_RGB_UNDERGLOW_ON` in `geulis_options.h`. Chain length, color mapping, and SPI frame patterns are in `geulis.dts` under `&spi3`. Configured via `CONFIG_ZMK_RGB_UNDERGLOW_*` in `geulis_defconfig` (auto-off on USB, hue start 160, effect 3, brightness 10–50).
 - **Battery sensing:** `zmk,battery-voltage-divider` on ADC channel AIN2, divider 2 MΩ / 820 kΩ.
 - **External power control (`EXT_POWER`):** `zmk,ext-power-generic` toggles via GPIO P1.09 active-low, 50 ms init delay. The node **must** keep the literal label `EXT_POWER` to preserve user settings across reflash.
-- **LED indicators:** removed in this revision. The Geulis previously
-  drove a blue GPIO LED (P1.10) from layer state via a local
-  `zmk-indicator-leds` ZMK module that backported the upstream
-  v0.4 driver. That module is no longer registered with `west`;
-  if you want a layer- or Caps-Lock-driven indicator, switch to the
-  main ZMK branch where the upstream driver is built in.
+- **GPIO LEDs (P1.10 blue, P1.11 green):** declared in the devicetree
+  `leds { ... }` block but not driven by any feature on this branch —
+  reserved for future use. The previous `zmk-indicator-leds` module that
+  toggled these from layer state has been removed; if you want a
+  layer- or Caps-Lock-driven indicator, switch to the main ZMK branch
+  where the upstream driver is built in.
 - **Sleep / PM:** `CONFIG_ZMK_PM_SOFT_OFF`, `CONFIG_ZMK_SLEEP`, `CONFIG_ZMK_EXT_POWER`, and a 10-minute idle timeout (`CONFIG_ZMK_IDLE_SLEEP_TIMEOUT = 600000`).
 - **BLE tuning:** 2M PHY disabled, +8 dBm TX power commented out, no passkey entry — see the `# Connection issue` comment block in `geulis_defconfig`.
 

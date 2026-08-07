@@ -2,7 +2,7 @@ layout: {zmk_keyboard: geulis}
 layers:
   Default:
   - {t: MUTE, s: PP}
-  - {t: ESC, s: '`'}
+  - {t: '$$mdi:keyboard-esc$$', s: '`'}
   - '1'
   - '2'
   - '3'
@@ -15,10 +15,10 @@ layers:
   - '0'
   - '-'
   - '='
-  - {t: BACKSPACE, s: DEL}
-  - DEL
+  - {t: '$$mdi:keyboard-backspace$$', s: '$$mdi:backspace-reverse-outline$$'}
+  - $$mdi:backspace-reverse-outline$$
   - PAGE UP
-  - TAB
+  - $$mdi:keyboard-tab$$
   - Q
   - W
   - E
@@ -33,7 +33,7 @@ layers:
   - ']'
   - \
   - PAGE DOWN
-  - {t: '&caps_word', s: CAPS}
+  - {t: '&caps_word', s: '$$mdi:keyboard-caps$$'}
   - A
   - S
   - D
@@ -45,8 +45,8 @@ layers:
   - L
   - ;
   - ''''
-  - RET
-  - LSHFT
+  - $$mdi:keyboard-return$$
+  - $$mdi:apple-keyboard-shift$$
   - Z
   - X
   - C
@@ -58,21 +58,21 @@ layers:
   - ','
   - .
   - /
-  - RSHFT
-  - DEL
-  - LCTRL
-  - LALT
-  - LGUI
+  - $$mdi:apple-keyboard-shift$$
+  - $$mdi:backspace-reverse-outline$$
+  - $$mdi:apple-keyboard-control$$
+  - $$mdi:apple-keyboard-option$$
+  - $$mdi:apple-keyboard-command$$
   - Settings
-  - {t: SPACE, h: Functions}
-  - RGUI
-  - RCTRL
+  - {t: '$$mdi:keyboard-space$$', h: Functions, type: ghost}
+  - $$mdi:apple-keyboard-command$$
+  - $$mdi:apple-keyboard-control$$
   Functions:
   - {t: MUTE, s: PP}
-  - {t: ESC, s: '`'}
+  - {t: '$$mdi:keyboard-esc$$', s: '`'}
   - {t: F1, s: BRI DN}
   - {t: F2, s: BRI UP}
-  - {t: F3, s: Gui+ TAB}
+  - {t: F3, s: 'Gui+ $$mdi:keyboard-tab$$'}
   - {t: F4, s: Gui+ E}
   - {t: F5, s: RGB BRD}
   - {t: F6, s: RGB BRI}
@@ -131,7 +131,7 @@ layers:
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - ''
-  - {type: held}
+  - ''
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   Settings:
@@ -139,7 +139,7 @@ layers:
   - {t: '~', s: EP TOG}
   - BRI DEC
   - BRI UP
-  - Gui+ TAB
+  - Gui+ $$mdi:keyboard-tab$$
   - Gui+ E
   - RGB BRD
   - RGB BRI

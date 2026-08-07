@@ -50,6 +50,11 @@ parse_config:
     "&mkp LCLK":       "LCK"
     "&mkp MCLK":       "MID"
     "&mkp RCLK":       "ROK"
+    # Space (inner-thumb layer-tap): tap renders an MDI keyboard-space glyph,
+    # hold renders the functions layer (idx 1). Both halves carry `type: ghost`
+    # so the key visually reads as "optional" / modifier-locked position
+    # rather than a plain letter.
+    "&lt 1 SPACE":     {tap: "$$mdi:keyboard-space$$", hold: Functions, type: ghost}
   sticky_label: sticky
   toggle_label: toggle
   tap_toggle_label: tap-toggle
@@ -206,6 +211,50 @@ parse_config:
     NON_US_HASH: '#'
     NUHS: '#'
     TILDE2: '~'
+    # Common ASCII-name → MDI icon mappings. The parser falls back to a
+    # string-lookup on keycodes parsed from `&kp X` bindings, so `RET`,
+    # `TAB`, `ESC`, `DEL`, `BACKSPACE`, `CAPS`, `LSHFT`, `RSHFT` are all
+    # reachable exactly by their ZMK name. Glyphs come from the local cache
+    # at ~/.cache/keymap-drawer/glyphs/mdi:<name>.svg (auto-fetched upstream
+    # from Templarian/MaterialDesign-SVG).
+    RET:       "$$mdi:keyboard-return$$"
+    SPACE:     "$$mdi:keyboard-space$$"
+    TAB:       "$$mdi:keyboard-tab$$"
+    ESC:       "$$mdi:keyboard-esc$$"
+    DEL:       "$$mdi:backspace-reverse-outline$$"
+    # `keyboard-backspace` shows a leftward arrow inside a keycap —
+    # visually reads as a single backspace (delete-left) glyph, matching
+    # Windows / Mac convention. Variant exists if you prefer outline only.
+    BACKSPACE: "$$mdi:keyboard-backspace$$"
+    # Apple-keyboard-shift is the standard "hollow up arrow over a chunky
+    # trapezoid" — same icon used on iOS / iPadOS / macOS keyboards, makes
+    # the SHIFT key instantly recognizable. Both LSHFT and RSHFT map.
+    LSHFT:     "$$mdi:apple-keyboard-shift$$"
+    RSHFT:     "$$mdi:apple-keyboard-shift$$"
+    LSHIFT:    "$$mdi:apple-keyboard-shift$$"
+    RSHIFT:    "$$mdi:apple-keyboard-shift$$"
+    CAPS:      "$$mdi:keyboard-caps$$"
+    # Modifiers — Apple-keyboard icons for keyboard diagrams. Match the
+    # same visual language as iOS / iPadOS / macOS keyboards so the
+    # modifier cluster reads as a coherent "Apple modifier set":
+    #   GUI (Cmd on Mac, Win on Windows, Super on Linux) ↦ apple-keyboard-command  (⌘)
+    #   CTL    ↦ apple-keyboard-control  (⌃)
+    #   ALT    ↦ apple-keyboard-option   (⌥)
+    #   SHIFT  ↦ apple-keyboard-shift    (⇧, defined above)
+    #   LS / RS / LC / RC / LG variants are accepted alongside the full
+    #   names for completeness.
+    LCTL:  "$$mdi:apple-keyboard-control$$"
+    LCTRL: "$$mdi:apple-keyboard-control$$"
+    RCTL:  "$$mdi:apple-keyboard-control$$"
+    RCTRL: "$$mdi:apple-keyboard-control$$"
+    LALT:  "$$mdi:apple-keyboard-option$$"
+    RALT:  "$$mdi:apple-keyboard-option$$"
+    LGUI:  "$$mdi:apple-keyboard-command$$"
+    RGUI:  "$$mdi:apple-keyboard-command$$"
+    # ZMK also uses KC_* and C_* prefixes occasionally; cover the common ones.
+    LC:    "$$mdi:apple-keyboard-control$$"
+    LS:    "$$mdi:apple-keyboard-shift$$"
+    LG:    "$$mdi:apple-keyboard-command$$"
   zmk_combos: {}
   zmk_preamble: '#define KEYMAP_DRAWER'
   zmk_additional_includes: []

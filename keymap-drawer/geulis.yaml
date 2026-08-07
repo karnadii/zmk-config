@@ -64,7 +64,7 @@ layers:
   - LALT
   - LGUI
   - Settings
-  - {t: SPACE, h: Settings}
+  - {t: SPACE, h: Functions}
   - RGUI
   - RCTRL
   Functions:
@@ -131,7 +131,7 @@ layers:
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - ''
-  - ''
+  - {type: held}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   Settings:

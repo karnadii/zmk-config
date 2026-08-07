@@ -400,8 +400,8 @@ path.combo { stroke: #7f7f7f; }
 <g transform="translate(591, 286) rotate(-12.0)" class="key keypos-63">
 <rect rx="6" ry="6" x="-75" y="-26" width="150" height="52" class="key"/>
 <text x="0" y="0" class="key tap">SPACE</text>
-<a href="#Settings">
-<text x="0" y="24" class="key hold layer-activator"><tspan style="font-size: 88%">Settings</tspan></text>
+<a href="#Functions">
+<text x="0" y="24" class="key hold layer-activator"><tspan style="font-size: 78%">Functions</tspan></text>
 </a></g>
 <g transform="translate(710, 265) rotate(-12.0)" class="key keypos-64">
 <rect rx="6" ry="6" x="-40" y="-26" width="80" height="52" class="key"/>
@@ -659,8 +659,8 @@ path.combo { stroke: #7f7f7f; }
 <g transform="translate(449, 302) rotate(12.0)" class="key keypos-62">
 <rect rx="6" ry="6" x="-26" y="-26" width="52" height="52" class="key"/>
 </g>
-<g transform="translate(591, 286) rotate(-12.0)" class="key keypos-63">
-<rect rx="6" ry="6" x="-75" y="-26" width="150" height="52" class="key"/>
+<g transform="translate(591, 286) rotate(-12.0)" class="key held keypos-63">
+<rect rx="6" ry="6" x="-75" y="-26" width="150" height="52" class="key held"/>
 </g>
 <g transform="translate(710, 265) rotate(-12.0)" class="key trans keypos-64">
 <rect rx="6" ry="6" x="-40" y="-26" width="80" height="52" class="key trans"/>

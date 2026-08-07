@@ -24,6 +24,7 @@ CONFIG_FLASH_MAP=y
 
 CONFIG_ZMK_USB=y
 CONFIG_ZMK_BLE=y
+CONFIG_ZMK_POINTING=y
 
 # Hardware driver selection (see boards/arm/geulis/Kconfig):
 #   GEULIS_DRIVER_ENCODER       — selects EC11 driver

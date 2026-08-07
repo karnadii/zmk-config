@@ -58,7 +58,7 @@
 
 / {
 
-    
+
     behaviors {
         // Volume and RGB controls
         MORPH(vol_next, &kp C_VOL_UP, &kp C_NEXT)
@@ -99,9 +99,30 @@
         MORPH(f7, &kp F7, &kp C_PREV)
         MORPH(f6, &kp F6, &rgb_ug RGB_BRI)
         MORPH(f5, &kp F5, &rgb_ug RGB_BRD)
-        MORPH(f4, &kp F4, &kp LG(E))
-        MORPH(f3, &kp F3, &kp LG(TAB))
-        MORPH(f3_mac, &kp F3, &kp LC(UP_ARROW))
+        // Default F3/F4 are Mac-style launch shortcuts:
+        //   f3 -> Cmd+Tab (App Switcher)
+        //   f4 -> Cmd+E (varies by app, e.g. "Use Selection for Find")
+        MORPH(f4,      &kp F4, &kp LG(E))
+        MORPH(f3,      &kp F3, &kp LG(TAB))
+        // Platform-specific alternates, selectable via ZMK Studio:
+        //   macOS alternatives (Cmd+LC+Up = Mission Control Show Desktop):
+        //     f3_mac -- Cmd+LC+Up (Show Desktop on macOS)
+        //     f4_mac -- Cmd+E (Use Selection for Find / open Explorer)
+        //   Windows (Win+Tab = Task View, Win+E = File Explorer):
+        //     f3_win -- Win+Tab (Task View)
+        //     f4_win -- Win+E (File Explorer)
+        //   Linux/GNOME (Ubuntu default; Super+Tab = window switcher, Super+E = Files):
+        //     f3_tux -- Super+Tab (window switcher)
+        //     f4_tux -- Super+E (open Files app)
+        // To switch host in ZMK Studio: rebind the F3 / F4 key on the FUN
+        // layer (or the SET-layer `&kp LG(TAB)` / `&kp LG(E)` slots) to one
+        // of the alternate morphs/labels above.
+        MORPH(f3_mac,  &kp F3, &kp LC(UP_ARROW))
+        MORPH(f4_mac,  &kp F4, &kp LG(E))
+        MORPH(f3_win,  &kp F3, &kp LG(TAB))
+        MORPH(f4_win,  &kp F4, &kp LG(E))
+        MORPH(f3_tux,  &kp F3, &kp LG(TAB))
+        MORPH(f4_tux,  &kp F4, &kp LG(E))
         MORPH(f2, &kp F2, &kp C_BRI_UP)
         MORPH(f1, &kp F1, &kp C_BRI_DN)
         MORPH(bt_rgb_tog, &out OUT_TOG, &rgb_ug RGB_TOG)
@@ -112,6 +133,27 @@
         MORPH(home_rst, &kp HOME, &sys_reset)
         MORPH(end_boot, &kp END, &bootloader)
         MORPH(pp_mute, &kp C_MUTE, &kp C_PP)
+
+        // Tap-dance layer-locks (user-facing UX for the FUN and SET layers).
+        // The two morphs share the same shape: a single tap fires the
+        // corresponding &mo N (momentary \u2014 layer active while held), while
+        // a double tap toggles the &tog N (lock \u2014 layer stays active until
+        // toggled again). Tuning the `tapping-term-ms` controls how quickly
+        // the second tap must follow the first to count as a double-tap.
+        //   fun_lock: SET 1 = momentary FUN; SET 2 = toggle-lock FUN
+        //   set_lock: SET 1 = momentary SET; SET 2 = toggle-lock SET
+        fun_lock: fun_lock {
+            compatible = "zmk,behavior-tap-dance";
+            #binding-cells = <0>;
+            tapping-term-ms = <200>;
+            bindings = <&mo 1>, <&tog 1>;
+        };
+        set_lock: set_lock {
+            compatible = "zmk,behavior-tap-dance";
+            #binding-cells = <0>;
+            tapping-term-ms = <200>;
+            bindings = <&mo 2>, <&tog 2>;
+        };
         // Caps Lock: morph — caps_word on plain tap, &kp CAPS when Shift/Cmd
         // is held. This is the original Geulis binding; user benefits from
         // caps-word ergonomics. (No LED indicator on v0.3 — the green LED is
@@ -289,7 +331,7 @@
  *   '-----'   +----------+-----+-----+-----+-----+-----+.      .--+-----+-----+-----+-----+-----+-----+--------------+.
  *            |    Shift   |  Z  |  X  |  C  |  V  |  B  |      |  B  |   N  |  M  |  ,  |  .  |  /  |   Shift   | Del |
  *            |------+-----+-----+-----+-----+-----+-----+-.    |-----+------+-----+-----+-----+-----+---------+------+'
- *            | Ctrl |          |  ALT  |     WIN    | Fn  |    |    Space     |  WIN  |                       | Ctrl |
+ *            | Ctrl |          |  ALT  |     WIN    | lk |    |    Space     |  lk  |                       | Ctrl |
  *            '------'          '--------------------------'    '----------------------'                       '------'
  *
  * The Geulis ships a single base layer now. We previously had a separate
@@ -306,13 +348,13 @@
  */
 
         default_layer {
-            display-name = "Default";
+            display-name = "DEF";
             bindings = <
 &pp_mute         &gresc             &kp N1  &kp N2  &kp N3    &kp N4    &kp N5  &kp N6      &kp N7       &kp N8    &kp N9  &kp N0     &kp MINUS  &kp EQUAL  &bspc_del  &kp DEL
 &kp PAGE_UP      &kp TAB            &kp Q   &kp W   &kp E     &kp R     &kp T               &kp Y        &kp U     &kp I   &kp O      &kp P      &kp LBKT   &kp RBKT   &kp BACKSLASH
 &kp PAGE_DOWN    &caps_word_caps    &kp A   &kp S   &kp D     &kp F     &kp G                            &kp H     &kp J   &kp K      &kp L      &kp SEMI   &kp SQT    &kp RET
                  &kp LSHFT          &kp Z   &kp X   &kp C     &kp V     &kp B               &kp B        &kp N     &kp M   &kp COMMA  &kp DOT    &kp FSLH   &kp RSHFT  &kp DEL
-                 &kp LCTRL                          &kp LALT  &kp LGUI    &mo 2               &lt 1 SPACE  &kp RGUI                                                      &kp RCTRL
+                 &kp LCTRL                          &kp LALT  &kp LGUI    &set_lock              &lt 1 SPACE  &fun_lock                                                   &kp RCTRL
             >;
 
             sensor-bindings = <&media_encoder>, <&mid_enc>, <&bot_enc>;
@@ -320,13 +362,13 @@
 
 
         functions {
-            display-name = "Functions";
+            display-name = "FUN";
             bindings = <
 &pp_mute     &gresc      &f1          &f2          &f3          &f4          &f5          &f6      &f7          &f8      &f9          &f10         &f11         &f12         &kp INSERT    &kp PAUSE_BREAK
 &kp HOME     &trans      &none          &none         &mmv MOVE_UP   &none         &none                          &none  &none     &kp UP    &none       &none            &none         &none         &none
 &kp END      &key_repeat  &none         &mmv MOVE_LEFT &mmv MOVE_DOWN &mmv MOVE_RIGHT  &none                          &none  &kp LEFT  &kp DOWN  &kp RIGHT         &none            &none         &trans
-             &trans         &none          &mkp LCLK      &mkp MCLK     &mkp RCLK     &none                  &none  &none   &none     &none     &none            &none       &trans            &trans
-             &trans                                    &trans        &trans        &none                  &none  &trans                                                                    &trans
+             &trans         &none         &mkp LCLK      &mkp MCLK     &mkp RCLK     &none                 &none &none   &none     &none     &none            &none       &trans            &trans
+             &trans                                    &trans        &trans        &trans                  &trans  &trans                                                                    &trans
             >;
 
             sensor-bindings = <&rgb_encoder 0 0>, <&mid_fn_enc>, <&bot_fn_enc>;
@@ -351,16 +393,27 @@
  * Layout stays consistent with the previous settings layout; the only swap
  * is `&ext_power EP_TOG` → `&tilde_power` on row 0 col 1 so the EP toggle
  * also covers the Tilde key on plain tap.
+ *
+ * Platform-specific shortcuts (row 0 cols 4 & 5):
+ *   The default firmware uses Mac-style launch shortcuts on `&kp LG(TAB)` /
+ *   `&kp LG(E)` — Cmd+Tab (App Switcher) and Cmd+E (varies by app).
+ *   For other hosts, override via ZMK Studio or a per-platform profile:
+ *     - Windows: `Win+Tab` (Task View) + `Win+E` (File Explorer)
+ *     - Linux:  `Super+Tab` (window switcher) + your launcher key
+ *   The DIAGRAM shows the macOS glyphs (apps / folder) since that's the
+ *   compiled default. On host switch, also remap the F3/F4 morph shifted
+ *   bindings in `behaviors { }` (`MORPH(f3, ..., &kp LG(TAB))`, etc.)
+ *   to match the new platform so the FUN-layer icons stay meaningful.
  */
 
         settings {
-            display-name = "Settings";
+            display-name = "SET";
             bindings = <
 &soft_off      &tilde_power  &kp C_BRI_DEC  &kp C_BRI_UP  &kp LG(TAB)   &kp LG(E)     &rgb_ug RGB_BRD  &rgb_ug RGB_BRI      &kp C_PREVIOUS   &kp C_PP         &kp C_NEXT       &kp C_MUTE       &kp C_VOL_DN     &kp C_VOL_UP  &rgb_ug RGB_TOG  &bt_clr_all
 &sys_reset     &out OUT_TOG   &bt BT_SEL 0   &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4                          &rgb_ug RGB_BRI  &rgb_ug RGB_HUI  &rgb_ug RGB_SAI  &rgb_ug RGB_SPI  &none            &none         &none            &rgb_ug RGB_EFF
-&bootloader    &studio_unlock &none          &none         &none         &none         &none                                                  &rgb_ug RGB_BRD  &rgb_ug RGB_HUD  &rgb_ug RGB_SAD  &rgb_ug RGB_SPD  &none         &none            &tog 1
-               &none          &none          &none         &none         &none         &none                                 &none            &none            &none            &none            &none            &none         &none            &bt_clr_all
-               &none                         &none         &none         &none                                 &none            &none                                                                                              &none
+&bootloader    &studio_unlock &none          &none         &none         &none         &none                                                  &rgb_ug RGB_BRD  &rgb_ug RGB_HUD  &rgb_ug RGB_SAD  &rgb_ug RGB_SPD  &none         &none            &none
+               &trans          &none          &none         &none         &none         &none                                 &none            &none            &none            &none            &none            &none         &none            &bt_clr_all
+               &trans                         &trans        &trans        &trans                                &trans           &trans                                                                                              &trans
             >;
 
              sensor-bindings = <&rgb_encoder 0 0>, <&mid_fn_enc>, <&bot_fn_enc>;
@@ -375,7 +428,7 @@
  *   .------'   +--------+-----+-----+-----+-----+-----+.        '-----+-----+-----+-----+-----+-----+-----+---------+.
  *   | --- |   |   ---    | --- | --- | --- | --- | --- |          | --- | --- | --- | --- | --- | --- |    ---       |
  *   '-----'   +----------+-----+-----+-----+-----+-----+.      .--+-----+-----+-----+-----+-----+-----+--------------+.
- *            |    ---     | --- | --- | --- | --- | --- |      | --- | --- | --- | --- | --- | --- |   ---    | ---   | 
+ *            |    ---     | --- | --- | --- | --- | --- |      | --- | --- | --- | --- | --- | --- |   ---    | ---   |
  *            |------+-----+-----+-----+-----+-----+-----+-.    |-----+------+-----+-----+-----+-----+---------+------+'
  *            | ---  |          |  ---  |     ---    | --- |    |    ---      |  ---   |                       | ---  |
  *            '------'          '--------------------------'    '----------------------'                       '------'
@@ -401,7 +454,7 @@
  *   .------'   +--------+-----+-----+-----+-----+-----+.        '-----+-----+-----+-----+-----+-----+-----+---------+.
  *   | --- |   |   ---    | --- | --- | --- | --- | --- |          | --- | --- | --- | --- | --- | --- |    ---       |
  *   '-----'   +----------+-----+-----+-----+-----+-----+.      .--+-----+-----+-----+-----+-----+-----+--------------+.
- *            |    ---     | --- | --- | --- | --- | --- |      | --- | --- | --- | --- | --- | --- |   ---    | ---   | 
+ *            |    ---     | --- | --- | --- | --- | --- |      | --- | --- | --- | --- | --- | --- |   ---    | ---   |
  *            |------+-----+-----+-----+-----+-----+-----+-.    |-----+------+-----+-----+-----+-----+---------+------+'
  *            | ---  |          |  ---  |     ---    | --- |    |    ---      |  ---    |                      | ---  |
  *            '------'          '--------------------------'    '----------------------'                       '------'

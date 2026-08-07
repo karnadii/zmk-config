@@ -50,11 +50,67 @@ parse_config:
     "&mkp LCLK":       "LCK"
     "&mkp MCLK":       "MID"
     "&mkp RCLK":       "ROK"
-    # Space (inner-thumb layer-tap): tap renders an MDI keyboard-space glyph,
-    # hold renders the functions layer (idx 1). Both halves carry `type: ghost`
-    # so the key visually reads as "optional" / modifier-locked position
-    # rather than a plain letter.
-    "&lt 1 SPACE":     {tap: "$$mdi:keyboard-space$$", hold: Functions, type: ghost}
+    # Layer-lock tap-dance bindings. keymap-drawer v0.23 doesn't recognize
+    # `compatible = "zmk,behavior-tap-dance"` so the bindings render as raw
+    # text ("&set_lock", "&fun_lock") by default. The two entries below
+    # override the rendering with action labels showing the tap/double-tap
+    # UX. The icons themselves are deliberate placeholders; the actual
+    # tap-dance entry references the behavior labels in the keymap.
+    #
+    # `&set_lock` (SET-layer lock): tap = momentary layer 2, double-tap =
+    # toggle-lock layer 2. We render "2" / "lock 2" because that's literally
+    # what the user typed in the binding cells; the action verb is the
+    # `'type': 'key tap dance'` annotation so keymap-drawer treats it as a
+    # tap-dance glyph rather than a plain keypress.
+    "&set_lock":    {tap: "Tap 2",   hold: "Lock 2"}
+    "&fun_lock":    {tap: "Tap 1",   hold: "Lock 1"}
+    # SET layer row 0 — host-app-launch shortcuts (LG = Cmd on Mac, Super+ on
+    # Linux, Win+ on Windows). Bindings here are full `&kp ...` strings so
+    # we don't accidentally map plain TAB / E (which are used elsewhere on
+    # the keyboard) to a launcher icon.
+    #
+    # `&kp LG(TAB)` — Cmd+Tab on Mac, Alt+Tab on Windows. Mapped to
+    # `mdi:apps` (3×3 grid) for the "App Switcher" / Task View metaphor.
+    "&kp LG(TAB)":     "$$mdi:apps$$"
+    # `&kp LG(E)` — Cmd+E on Mac (context-dependent, often "Use Selection
+    # for Find" in browsers and text editors) / Win+E on Windows (launches
+    # File Explorer universally). The `folder` glyph reads as "open files"
+    # on either platform; on Windows it matches the actual behavior exactly.
+    "&kp LG(E)":       "$$mdi:folder$$"
+    # Power / lock icons. ZMK behaviors `&studio_unlock` (combos unlock
+    # the on-keyboard remapping), `&soft_off` (firmware sleep), and
+    # `&ext_power EP_TOG/ON/OFF` (external power to USB / external).
+    # We use full binding strings here so plain `&kp LOCK` or other uses
+    # elsewhere are not affected.
+    #
+    # `&studio_unlock` — MDI's `lock-open-variant` shows an "unlocked" lock
+    # glyph without any encryption-style overlay, reading cleanly as
+    # "release the keymap's lock". The `lock-open-check` variant adds a tiny
+    # check-mark for an even clearer "unlock confirmed" reading.
+    "&studio_unlock":     "$$mdi:lock-open-variant$$"
+    # `&soft_off` — MDI has no literal `power-outline`; the closest is
+    # `power` (filled). For "shutdown" semantics `power-standby` reads as
+    # "system sleep / off" and is the universal pre-modern power-button
+    # glyph. Both work; the standby variant emphasizes "going to sleep".
+    "&soft_off":           "$$mdi:power-standby$$"
+    # `&ext_power EP_TOG` — outlined power icon. MDI doesn't have a
+    # `power-outline` family, so we use `power-plug-outline` instead —
+    # the outline-stroked version of a power plug, which reads as
+    # "external power toggle" / "USB power gating".
+    "&ext_power EP_TOG":   "$$mdi:power-plug-outline$$"
+    "&ext_power EP_ON":    "$$mdi:power-plug-outline$$"
+    "&ext_power EP_OFF":   "$$mdi:power-plug-outline$$"
+    # `&sys_reset` — reboot the microcontroller. The `restart-alert` glyph
+    # is a clockwise-arrow-with-exclamation-mark that conveys both "reload"
+    # AND a warning that this drops BLE state / RAM config — which matches
+    # the actual semantics of `&sys_reset`.
+    "&sys_reset":           "$$mdi:restart-alert$$"
+    # `&bootloader` — enter UF2 bootloader mode (USB Mass Storage mount).
+    # The `usb-flash-drive-outline` glyph reads as a USB stick, which is
+    # exactly what the user sees when they bootload: a new drive appears
+    # on their host computer. Outlined variant matches the styling used by
+    # other "secondary" actions in this config.
+    "&bootloader":          "$$mdi:usb-flash-drive-outline$$"
   sticky_label: sticky
   toggle_label: toggle
   tap_toggle_label: tap-toggle
@@ -234,6 +290,37 @@ parse_config:
     LSHIFT:    "$$mdi:apple-keyboard-shift$$"
     RSHIFT:    "$$mdi:apple-keyboard-shift$$"
     CAPS:      "$$mdi:keyboard-caps$$"
+    # Media / brightness keys for the SET layer (used by `&kp C_*`).
+    # MDI has no `volume-up` / `volume-down` icons, so we use the
+    # `volume-plus` and `volume-minus` glyphs (which depict the same
+    # concept). `C_PP` is paired play+pause (toggle play, toggle pause).
+    # Both 6-letter and 4-letter ZMK keycode aliases are listed because
+    # the Geulis uses both forms in different morphs (e.g. `C_PREV` on
+    # the FUN layer, `C_PREVIOUS` on the SET layer).
+    C_PREVIOUS: "$$mdi:skip-previous$$"
+    C_PREV:     "$$mdi:skip-previous$$"
+    C_PP:       "$$mdi:play-pause$$"
+    C_NEXT:     "$$mdi:skip-next$$"
+    C_MUTE:     "$$mdi:volume-mute$$"
+    C_VOL_DN:   "$$mdi:volume-minus$$"
+    C_VOL_UP:   "$$mdi:volume-plus$$"
+    # `brightness-4` and `brightness-7` are MDI's two endpoints of the
+    # brightness scale (25% / 100%); we use those for DEC and UP
+    # respectively so the SET layer's brightness column reads
+    # intuitively without needing directional arrows. Both 6-letter
+    # and 4-letter ZMK keycode aliases are listed.
+    C_BRI_DEC:  "$$mdi:brightness-4$$"
+    C_BRI_DN:   "$$mdi:brightness-4$$"
+    C_BRI_UP:   "$$mdi:brightness-7$$"
+    # Arrow keys (UP / DOWN / LEFT / RIGHT). Used on the FUN layer's
+    # navigation column. Single-line arrows use the `arrow-*` (thin)
+    # family which renders as a single stroke — visually lighter than
+    # the bold-outline variant, matches the typographic feel of the
+    # other thin-stroked arrows used in the FUN layer chip.
+    UP:    "$$mdi:arrow-up$$"
+    DOWN:  "$$mdi:arrow-down$$"
+    LEFT:  "$$mdi:arrow-left$$"
+    RIGHT: "$$mdi:arrow-right$$"
     # Modifiers — Apple-keyboard icons for keyboard diagrams. Match the
     # same visual language as iOS / iPadOS / macOS keyboards so the
     # modifier cluster reads as a coherent "Apple modifier set":

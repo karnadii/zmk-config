@@ -1,7 +1,7 @@
 layout: {zmk_keyboard: geulis}
 layers:
-  Default:
-  - {t: MUTE, s: PP}
+  DEF:
+  - {t: '$$mdi:volume-mute$$', s: '$$mdi:play-pause$$'}
   - {t: '$$mdi:keyboard-esc$$', s: '`'}
   - '1'
   - '2'
@@ -63,25 +63,25 @@ layers:
   - $$mdi:apple-keyboard-control$$
   - $$mdi:apple-keyboard-option$$
   - $$mdi:apple-keyboard-command$$
-  - Settings
-  - {t: '$$mdi:keyboard-space$$', h: Functions, type: ghost}
-  - $$mdi:apple-keyboard-command$$
+  - {t: Tap 2, h: Lock 2}
+  - {t: '$$mdi:keyboard-space$$', h: FUN}
+  - {t: Tap 1, h: Lock 1}
   - $$mdi:apple-keyboard-control$$
-  Functions:
-  - {t: MUTE, s: PP}
+  FUN:
+  - {t: '$$mdi:volume-mute$$', s: '$$mdi:play-pause$$'}
   - {t: '$$mdi:keyboard-esc$$', s: '`'}
-  - {t: F1, s: BRI DN}
-  - {t: F2, s: BRI UP}
-  - {t: F3, s: 'Gui+ $$mdi:keyboard-tab$$'}
-  - {t: F4, s: Gui+ E}
+  - {t: F1, s: '$$mdi:brightness-4$$'}
+  - {t: F2, s: '$$mdi:brightness-7$$'}
+  - {t: F3, s: '$$mdi:apps$$'}
+  - {t: F4, s: '$$mdi:folder$$'}
   - {t: F5, s: RGB BRD}
   - {t: F6, s: RGB BRI}
-  - {t: F7, s: PREV}
-  - {t: F8, s: PP}
-  - {t: F9, s: NEXT}
-  - {t: F10, s: MUTE}
-  - {t: F11, s: VOL DN}
-  - {t: F12, s: VOL UP}
+  - {t: F7, s: '$$mdi:skip-previous$$'}
+  - {t: F8, s: '$$mdi:play-pause$$'}
+  - {t: F9, s: '$$mdi:skip-next$$'}
+  - {t: F10, s: '$$mdi:volume-mute$$'}
+  - {t: F11, s: '$$mdi:volume-minus$$'}
+  - {t: F12, s: '$$mdi:volume-plus$$'}
   - INSERT
   - PAUSE BREAK
   - HOME
@@ -93,7 +93,7 @@ layers:
   - ''
   - ''
   - ''
-  - UP
+  - $$mdi:arrow-up$$
   - ''
   - ''
   - ''
@@ -107,9 +107,9 @@ layers:
   - M→
   - ''
   - ''
-  - LEFT
-  - DOWN
-  - RIGHT
+  - $$mdi:arrow-left$$
+  - $$mdi:arrow-down$$
+  - $$mdi:arrow-right$$
   - ''
   - ''
   - {t: ▽, type: trans}
@@ -130,28 +130,28 @@ layers:
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
-  - ''
-  - ''
+  - {t: ▽, type: trans}
+  - {type: held}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
-  Settings:
-  - '&soft_off'
-  - {t: '~', s: EP TOG}
-  - BRI DEC
-  - BRI UP
-  - Gui+ $$mdi:keyboard-tab$$
-  - Gui+ E
+  SET:
+  - $$mdi:power-standby$$
+  - {t: '~', s: '$$mdi:power-plug-outline$$'}
+  - $$mdi:brightness-4$$
+  - $$mdi:brightness-7$$
+  - $$mdi:apps$$
+  - $$mdi:folder$$
   - RGB BRD
   - RGB BRI
-  - PREVIOUS
-  - PP
-  - NEXT
-  - MUTE
-  - VOL DN
-  - VOL UP
+  - $$mdi:skip-previous$$
+  - $$mdi:play-pause$$
+  - $$mdi:skip-next$$
+  - $$mdi:volume-mute$$
+  - $$mdi:volume-minus$$
+  - $$mdi:volume-plus$$
   - RGB TOG
   - {t: BT CLR, s: BT CLR ALL}
-  - '&sys_reset'
+  - $$mdi:restart-alert$$
   - OUT TOG
   - {t: BT, h: '0'}
   - {t: BT, h: '1'}
@@ -166,8 +166,8 @@ layers:
   - ''
   - ''
   - RGB EFF
-  - '&bootloader'
-  - '&studio_unlock'
+  - $$mdi:usb-flash-drive-outline$$
+  - $$mdi:lock-open-variant$$
   - ''
   - ''
   - ''
@@ -179,8 +179,8 @@ layers:
   - RGB SPD
   - ''
   - ''
-  - {t: Functions, h: toggle}
   - ''
+  - {t: ▽, type: trans}
   - ''
   - ''
   - ''
@@ -194,28 +194,28 @@ layers:
   - ''
   - ''
   - {t: BT CLR, s: BT CLR ALL}
-  - ''
-  - ''
-  - ''
-  - {type: held}
-  - ''
-  - ''
-  - ''
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
 combos:
 - p: [14, 32]
-  k: '&studio_unlock'
+  k: $$mdi:lock-open-variant$$
 - p: [24, 32]
-  k: '&studio_unlock'
+  k: $$mdi:lock-open-variant$$
 - p: [50, 32]
-  k: '&bootloader'
+  k: $$mdi:usb-flash-drive-outline$$
 - p: [51, 32]
-  k: '&bootloader'
+  k: $$mdi:usb-flash-drive-outline$$
 - p: [21, 32]
-  k: '&sys_reset'
+  k: $$mdi:restart-alert$$
 - p: [34, 32]
-  k: '&soft_off'
+  k: $$mdi:power-standby$$
 - p: [27, 32]
-  k: EP TOG
+  k: $$mdi:power-plug-outline$$
 - p: [25, 17]
   k: INSERT
 - p: [27, 17]
@@ -223,9 +223,9 @@ combos:
 - p: [17, 63]
   k: PAUSE BREAK
 - p: [2, 32]
-  k: EP ON
+  k: $$mdi:power-plug-outline$$
 - p: [11, 32]
-  k: EP OFF
+  k: $$mdi:power-plug-outline$$
 - p: [61, 63, 27]
   k: '&win_shutdown'
 - p: [61, 63, 34]

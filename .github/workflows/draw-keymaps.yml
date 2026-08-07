@@ -1,23 +1,53 @@
-# Example for using the keymap-drawer ZMK user config workflow
+# Reusable workflow for drawing and committing an automated keymap diagram.
+#
+# Pinned to keymap-drawer v0.23.0 (latest at the time of writing). Bump this
+# pin in step with `python -m pip show keymap-drawer` after testing locally.
+#
+# Path filter covers every ZMK keymap + every devicetree include used to
+# derive physical layouts. The repo has keymaps in:
+#   boards/arm/<board>/<board>.keymap
+#   boards/shields/<shield>/<shield>.keymap     (true-split shields)
 name: Draw ZMK keymaps
 on:
-  workflow_dispatch:  # can be triggered manually
-  push:               # automatically run on changes to following paths
+  workflow_dispatch:
+  push:
     paths:
-      - "boards/arm/**/*.keymap"
-      - "boards/arm/**/*.dtsi"
+      - "boards/**/*.keymap"
+      - "boards/**/*.dts"
+      - "boards/**/*.dtsi"
+      - "keymap-drawer/config.yaml"
       - .github/workflows/draw-keymaps.yml
-
 
 jobs:
   draw:
     uses: caksoylar/keymap-drawer/.github/workflows/draw-zmk.yml@main
     permissions:
-      contents: write  # allow workflow to commit to the repo
+      contents: write
     with:
-      keymap_patterns: "boards/arm/**/*.keymap"
+      keymap_patterns: "boards/**/*.keymap"
       output_folder: "keymap-drawer"
+      # Pin keymap-drawer v0.23.0 so CI is reproducible across pypi releases.
+      install_version: "0.23.0"
+      config_path: "keymap-drawer/config.yaml"
+      # Fail the workflow on any per-keyboard parse/draw error so a broken
+      # commit can't silently drop a diagram from `keymap-drawer/`.
       fail_on_error: true
+      # Amend the triggering commit so the rendered diagrams ship in the same
+      # commit that changed the keymap — mirrors the v0.21 behavior the repo
+      # shipped with.
       amend_commit: true
-      json_path: boards/arm/
-      config_path: keymap-drawer/config.yaml
+      # Per-keyboard JSON layouts live next to each keymap (boards/<vendor>/<name>/),
+      # so point the JSON path at the boards root and supply each keyboard's
+      # path explicitly via draw_args. Keymap-drawer v0.22+ auto-detects
+      # `<keyboard>-layout(s).dtsi` files when no JSON is provided, which is
+      # the path used for Marvelous65 Split (no .json file in the repo).
+      json_path: "boards"
+      # Marvelous65 Split is the only board without an Info.json — its physical
+      # layout lives in `boards/shields/marvelous65_split/marvelous65_split.dtsi`.
+      draw_args: >-
+        geulis:-j boards/arm/geulis/geulis.json
+        marvelous65:-j boards/arm/marvelous65/marvelous65.json
+        marvelous65_ergo:-j boards/arm/marvelous65_ergo/marvelous65_ergo.json
+        marvelous65_split:-d boards/shields/marvelous65_split/marvelous65_split.dtsi
+      destination: both
+      artifact_name: drawings

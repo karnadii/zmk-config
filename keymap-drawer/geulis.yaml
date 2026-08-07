@@ -1,3 +1,4 @@
+layout: {zmk_keyboard: geulis}
 layers:
   Macos:
   - {t: MUTE, s: PP}
@@ -134,8 +135,8 @@ layers:
   - RALT
   - RCTRL
   Functions:
-  - {t: PP, s: '&soft_off'}
-  - {t: '~', s: EP TOG}
+  - {t: MUTE, s: PP}
+  - {t: ESC, s: '`'}
   - {t: F1, s: BRI DN}
   - {t: F2, s: BRI UP}
   - {t: F3, s: Gui+ TAB}
@@ -148,29 +149,29 @@ layers:
   - {t: F10, s: MUTE}
   - {t: F11, s: VOL DN}
   - {t: F12, s: VOL UP}
-  - RGB TOG
-  - {t: BT CLR, s: BT CLR ALL}
-  - {t: HOME, s: '&sys_reset'}
-  - OUT TOG
-  - {t: BT, h: '0'}
-  - {t: BT, h: '1'}
-  - {t: BT, h: '2'}
-  - {t: BT, h: '3'}
-  - {t: BT, h: '4'}
+  - INSERT
+  - PAUSE BREAK
+  - HOME
+  - TAB
+  - ''
+  - ''
+  - M↑
+  - ''
+  - ''
   - ''
   - ''
   - UP
   - ''
-  - PRINTSCREEN
-  - INSERT
-  - PAUSE BREAK
-  - RGB EFF
-  - {t: END, s: '&bootloader'}
   - ''
   - ''
   - ''
   - ''
+  - END
+  - '&key_repeat'
   - ''
+  - M←
+  - M↓
+  - M→
   - ''
   - ''
   - LEFT
@@ -178,12 +179,12 @@ layers:
   - RIGHT
   - ''
   - ''
-  - {t: Windows, h: toggle}
+  - RET
   - LSHFT
   - ''
-  - ''
-  - ''
-  - ''
+  - LCK
+  - MID
+  - ROK
   - ''
   - ''
   - ''
@@ -192,7 +193,7 @@ layers:
   - ''
   - ''
   - RSHFT
-  - {t: BT CLR, s: BT CLR ALL}
+  - DEL
   - LCTRL
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
@@ -202,7 +203,7 @@ layers:
   - RCTRL
   Settings:
   - '&soft_off'
-  - EP TOG
+  - {t: '~', s: EP TOG}
   - BRI DEC
   - BRI UP
   - Gui+ TAB
@@ -267,140 +268,6 @@ layers:
   - ''
   - ''
   - ''
-  extra1:
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  extra2:
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
 combos:
 - p: [14, 32]
   k: '&studio_unlock'

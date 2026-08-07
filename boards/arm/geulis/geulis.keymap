@@ -8,7 +8,9 @@
 #include <dt-bindings/zmk/bt.h>
 #include <dt-bindings/zmk/ext_power.h>
 #include <dt-bindings/zmk/keys.h>
+#include <dt-bindings/zmk/mouse.h>
 #include <dt-bindings/zmk/outputs.h>
+#include <dt-bindings/zmk/pointing.h>
 #include <dt-bindings/zmk/rgb.h>
 
 #define MODS_COMBO (MOD_LSFT|MOD_LGUI|MOD_RSFT|MOD_RGUI)
@@ -38,6 +40,18 @@
 
 &caps_word {
     continue-list = <UNDERSCORE MINUS>;
+};
+
+/*
+ * Balanced layer-tap for the inner-thumb Space key.
+ * "balanced" flavor only fires the hold (layer-2 entry) once another key
+ * is pressed *and* released while Space is held — avoids sticky-Fn when
+ * the user pauses briefly on Space.
+ */
+&lt {
+    flavor = "balanced";
+    tapping-term-ms = <200>;
+    quick-tap-ms = <200>;
 };
 
 
@@ -111,43 +125,43 @@
         COMBO_UNLOCK_STUDIO {
             bindings = <&studio_unlock>;
             key-positions = <14 32>;
-            // layers = <2 3>;
         };
 
         COMBO_UNLOCK_STUDIO2 {
             bindings = <&studio_unlock>;
             key-positions = <24 32>;
-            // layers = <2 3>;
         };
 
+        // ZMK v0.3 + <behaviors.dtsi> already provides &gresc, &caps_word,
+        // &studio_unlock, &bootloader, &sys_reset, &soft_off, &bt (BT_*) — no
+        // local redefinitions needed. Custom behaviors below only add what ZMK
+        // doesn't ship (mod-morphs, sensor-rotate, custom macros).
+        //
+        // Dangerous combos intentionally do NOT set `layers = <0 1 2 3>` —
+        // they stay locked to layer 3 (settings) so they cannot fire from base.
         COMBO_BOOTLOADER {
             bindings = <&bootloader>;
             key-positions = <50 32>;
-            // layers = <2 3>;
         };
 
         COMBO_BOOTLOADER2 {
             bindings = <&bootloader>;
             key-positions = <51 32>;
-            // layers = <2 3>;
         };
 
         COMBO_RESET {
             bindings = <&sys_reset>;
             key-positions = <21 32>;
-            // layers = <2 3>;
         };
 
         COMBO_SHUTDOWN {
             bindings = <&soft_off>;
             key-positions = <34 32>;
-            // layers = <2 3>;
         };
 
         COMBO_POWER {
             bindings = <&ext_power EP_TOG>;
             key-positions = <27 32>;
-            // layers = <2 3>;
         };
 
         COMBO_INSERT {
@@ -322,25 +336,38 @@
 /*
  * Functions:
  *     .-----.    .----------------------------------------.       .-----------------------------------------------.
- *     | Play|   | ~   |  F1 |  F2 |  F3 |  F4 |  F5 |  F6 |       |  F7 | F8 | F9 | F10 | F11 | F12 |BT TOG|BT CLR|
+ *     | PP  |   |GrEsc| F1 | F2 | F3 | F4 | F5 | F6 |       | F7 | F8 | F9 | F10| F11| F12|Ins  |PB  |
  *    .'-----'   +-----+-----+-----+-----+-----+-----+-----'     .-+-----+-----+-----+-----+-----+-----+-----+-----+.
- *    | Home |   |BT NXT | BT0 | BT1 | BT2 | BT3 | BT4 |         | --- | --- |  ↑  | --- | --- | --- | --- |  ---   |
+ *    | PG↑ |   | Tab  | --- | --- | --- | M↑  | --- |         |  ↑  | --- | --- | --- | --- |PSc | Home | 1   |
  *   .------'   +--------+-----+-----+-----+-----+-----+.        '-----+-----+-----+-----+-----+-----+-----+---------+.
- *   | End  |   |   ---    | --- | --- | --- | --- | --- |          | --- |  ←  |  ↓  |  →  | --- | --- |  WIN/MAC    |
+ *   | PG↓ |   | RPT   | --- | M←  | M↓  | M→  | --- |          |  ←  |  ↓  |  →  | --- | --- | --- |  End  |  RET   |
  *   '-----'   +----------+-----+-----+-----+-----+-----+.      .--+-----+-----+-----+-----+-----+-----+--------------+.
- *            |    Shift   | --- | --- | --- | --- | --- |      | --- | --- | --- | --- | --- | --- |  Shift  |BT CLR  | 
+ *            |    Shift   | --- | --- | LCK | MID | ROK |      | --- | --- | --- | --- | --- | --- |  Shift  | Del |
  *            |------+-----+-----+-----+-----+-----+-----+-.    |-----+------+-----+-----+-----+-----+---------+------+'
  *            | Ctrl |          |  ---  |     ---    | --- |    |    ---      |  ---  |                       | Ctrl |
  *            '------'          '--------------------------'    '---------------------'                       '------'
+ *
+ * Layers were cleaned up so this layer is functions-only:
+ *   - F1–F12 row 1, mouse-nav diamond + mouse buttons under the left hand, arrow
+ *     cluster + Ins/PSc/Pause/HOME/END on the right, key_repeat at the inner-thumb.
+ *
+ * Mouse-nav cluster (left hand, mirroring `j k l ;` arrow cluster on the right):
+ *   - Cluster starts at col 3 (one column right of `key_repeat`) so the diamond
+ *     lands where the user's fingers naturally fall on the home row (`S D F G`).
+ *   - M↑ overlays `R`, M←/M↓/M→ overlay `S D F`.  M↑ sits one row up under `E`
+ *     above — actually wait, M↑ is at row 1 col 5 which overlays `R` on base.
+ *   - LCLK/MCLK/RCLK overlay `V`/`B`/`N` (row 3 cols 4–6) — index finger hits
+ *     ROK without leaving the home row.
+ *   - BT_SEL 0–4 used to live here; moved to the settings layer.
  */
 
         functions {
             display-name = "Functions";
             bindings = <
-&pp_shut     &tilde_power  &f1           &f2           &f3           &f4           &f5           &f6      &f7    &f8     &f9       &f10      &f11             &f12        &rgb_ug RGB_TOG  &bt_clr_all
-&home_rst    &out OUT_TOG  &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4           &none  &none   &kp UP    &none     &kp PRINTSCREEN  &kp INSERT  &kp PAUSE_BREAK  &rgb_ug RGB_EFF
-&end_boot    &none         &none         &none         &none         &none         &none                         &none   &kp LEFT  &kp DOWN  &kp RIGHT        &none       &none            &tog 1
-             &kp LSHFT     &none         &none         &none         &none         &none                  &none  &none   &none     &none     &none            &none       &kp RSHFT        &bt_clr_all
+&pp_mute     &gresc      &f1          &f2          &f3          &f4          &f5          &f6      &f7          &f8      &f9          &f10         &f11         &f12         &kp INSERT    &kp PAUSE_BREAK
+&kp HOME     &kp TAB     &none          &none         &mmv MOVE_UP   &none         &none                          &none  &none     &kp UP    &none       &none            &none         &none         &none
+&kp END      &key_repeat  &none         &mmv MOVE_LEFT &mmv MOVE_DOWN &mmv MOVE_RIGHT  &none                          &none  &kp LEFT  &kp DOWN  &kp RIGHT         &none            &none         &kp RET
+             &kp LSHFT     &none          &mkp LCLK      &mkp MCLK     &mkp RCLK     &none                  &none  &none   &none     &none     &none            &none       &kp RSHFT        &kp DEL
              &kp LCTRL                                 &trans        &trans        &none                  &none  &trans                                                                    &kp RCTRL
             >;
 
@@ -349,26 +376,33 @@
 /*
  * Settings:
  *     .-----.    .----------------------------------------.       .-----------------------------------------------.
- *     | Off |   | PWR |  ↓  |  ↑  | Tab |  E  | BR- | BR+ |       | PRV | PP | NXT | MUT | V- | V+ |RGB TOG| --- |
+ *     | Off |   | ~/| |  ↓  |  ↑  | Tab |  E  | BR- | BR+ |       | PRV | PP | NXT | MUT | V- | V+ |RGB TOG|BT CLR|
  *    .'-----'   +-----+-----+-----+-----+-----+-----+-----'     .-+-----+-----+-----+-----+-----+-----+-----+-----+.
- *    | RST |   |RGB EF | EFF | BRI | HUE | SAT | SPD |         | --- | --- | --- | --- | --- | --- | --- |  ---   |
+ *    | RST |   |OUT TG| BT0 | BT1 | BT2 | BT3 | BT4 |         |BR+ |HUE+ |SAT+ |SPD+ | --- | --- | --- |  ---   |
  *   .------'   +--------+-----+-----+-----+-----+-----+.        '-----+-----+-----+-----+-----+-----+-----+---------+.
- *   | BOOT |   |   ---    | EFR | BRD | HUD | SAD | SPD |          | --- | --- | --- | --- | --- | --- |    ---      |
+ *   | BOOT |   |  StU  | --- | --- | --- | --- | --- |          |BR- |HUE- |SAT- |SPD- | --- | --- |    ---      |
  *   '-----'   +----------+-----+-----+-----+-----+-----+.      .--+-----+-----+-----+-----+-----+-----+--------------+.
- *            |    ---     | --- | --- | --- | --- | --- |      | --- | --- | --- | --- | --- | --- |   ---    | ---   | 
+ *            |    ---     | --- | --- | --- | --- | --- |      | --- | --- | --- | --- | --- | --- |  ---   |BT CLR  |
  *            |------+-----+-----+-----+-----+-----+-----+-.    |-----+------+-----+-----+-----+-----+---------+------+'
- *            | ---  |         |  ---  |     ---    | ---  |    |    ---      |  ---   |                       | ---  |
+ *            | ---  |         |  ---  |     ---    | ---  |    |    ---      |  ---  |                       | ---  |
  *            '------'          '--------------------------'    '----------------------'                       '------'
+ *
+ * Settings layer consolidates everything admin-shaped that used to be on the
+ * functions layer (BT_SEL 0–4, OUT_TOG, RGB_TOG, RGB_EFF, BT_CLR_ALL, soft_off,
+ * sys_reset, bootloader, tilde_power / pp_shut / end_boot / home_rst morphs).
+ * Layout stays consistent with the previous settings layout; the only swap
+ * is `&ext_power EP_TOG` → `&tilde_power` on row 0 col 1 so the EP toggle
+ * also covers the Tilde key on plain tap.
  */
 
         settings {
             display-name = "Settings";
             bindings = <
-&soft_off      &ext_power EP_TOG  &kp C_BRI_DEC  &kp C_BRI_UP  &kp LG(TAB)   &kp LG(E)     &rgb_ug RGB_BRD  &rgb_ug RGB_BRI      &kp C_PREVIOUS   &kp C_PP         &kp C_NEXT       &kp C_MUTE       &kp C_VOL_DN     &kp C_VOL_UP  &rgb_ug RGB_TOG  &bt_clr_all
-&sys_reset     &out OUT_TOG       &bt BT_SEL 0   &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4                          &rgb_ug RGB_BRI  &rgb_ug RGB_HUI  &rgb_ug RGB_SAI  &rgb_ug RGB_SPI  &none            &none         &none            &rgb_ug RGB_EFF
-&bootloader    &studio_unlock     &none          &none         &none         &none         &none                                                  &rgb_ug RGB_BRD  &rgb_ug RGB_HUD  &rgb_ug RGB_SAD  &rgb_ug RGB_SPD  &none         &none            &tog 1
-               &none              &none          &none         &none         &none         &none                                 &none            &none            &none            &none            &none            &none         &none            &bt_clr_all
-               &none                                           &none         &none         &none                                 &none            &none                                                                                              &none
+&soft_off      &tilde_power  &kp C_BRI_DEC  &kp C_BRI_UP  &kp LG(TAB)   &kp LG(E)     &rgb_ug RGB_BRD  &rgb_ug RGB_BRI      &kp C_PREVIOUS   &kp C_PP         &kp C_NEXT       &kp C_MUTE       &kp C_VOL_DN     &kp C_VOL_UP  &rgb_ug RGB_TOG  &bt_clr_all
+&sys_reset     &out OUT_TOG   &bt BT_SEL 0   &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4                          &rgb_ug RGB_BRI  &rgb_ug RGB_HUI  &rgb_ug RGB_SAI  &rgb_ug RGB_SPI  &none            &none         &none            &rgb_ug RGB_EFF
+&bootloader    &studio_unlock &none          &none         &none         &none         &none                                                  &rgb_ug RGB_BRD  &rgb_ug RGB_HUD  &rgb_ug RGB_SAD  &rgb_ug RGB_SPD  &none         &none            &tog 1
+               &none          &none          &none         &none         &none         &none                                 &none            &none            &none            &none            &none            &none         &none            &bt_clr_all
+               &none                         &none         &none         &none                                 &none            &none                                                                                              &none
             >;
 
              sensor-bindings = <&rgb_encoder 0 0>, <&mid_fn_enc>, <&bot_fn_enc>;

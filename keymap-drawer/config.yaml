@@ -6,7 +6,7 @@ draw_config:
   combo_h: 26
   key_rx: 6.0
   key_ry: 6.0
-  dark_mode: false
+  dark_mode: true
   n_columns: 1
   separate_combo_diagrams: true
   combo_diagrams_scale: 2
@@ -39,7 +39,17 @@ draw_config:
 parse_config:
   preprocess: true
   skip_binding_parsing: false
-  raw_binding_map: {}
+  # Mouse nav bindings (added for the Geulis functions layer). Keymap-drawer
+  # has no native support for these ZMK v0.3 two-axis mouse behaviors yet, so
+  # we map them to legible labels here.
+  raw_binding_map:
+    "&mmv MOVE_UP":    "M↑"
+    "&mmv MOVE_DOWN":  "M↓"
+    "&mmv MOVE_LEFT":  "M←"
+    "&mmv MOVE_RIGHT": "M→"
+    "&mkp LCLK":       "LCK"
+    "&mkp MCLK":       "MID"
+    "&mkp RCLK":       "ROK"
   sticky_label: sticky
   toggle_label: toggle
   tap_toggle_label: tap-toggle

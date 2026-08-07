@@ -33,6 +33,10 @@ __pycache__/
 # Crush (AI CLI session state — see https://github.com/charmbracelet/crush)
 .crush/
 
+# Local preview tooling (keymap-drawer SVG/HTML server)
+/serve.py
+/.playwright-mcp/
+
 # OS junk
 .DS_Store
 Thumbs.db

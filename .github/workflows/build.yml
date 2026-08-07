@@ -177,12 +177,19 @@ jobs:
 
   release:
     name: Publish UF2 firmware
-    # Publish on either a push to v0.3-stable (the default branch) or
-    # a manual `workflow_dispatch` run. PR builds and the weekly
-    # schedule never trigger a release — that just exercises the
-    # build matrix to catch regressions.
+    # Publish on either a push to a release branch (v0.3-stable, main) or
+    # a manual `workflow_dispatch` run. PR builds and the weekly schedule
+    # never trigger a release — those just exercise the build matrix to
+    # catch regressions.
+    #
+    # Each release uses a fresh, unique tag (build-<run_id>) so we never
+    # overwrite an existing release. The release body is set explicitly
+    # (no `generate_release_notes`) so it does not accumulate between
+    # runs, and `make_latest` re-points GitHub's "Latest" badge to the
+    # newest release. Old releases are pruned to keep the list from
+    # growing without bound.
     if: >-
-      (github.event_name == 'push' && github.ref == 'refs/heads/v0.3-stable')
+      (github.event_name == 'push' && (github.ref == 'refs/heads/v0.3-stable' || github.ref == 'refs/heads/main'))
       || github.event_name == 'workflow_dispatch'
     needs: build
     runs-on: ubuntu-latest
@@ -193,20 +200,124 @@ jobs:
           path: artifacts
           merge-multiple: true
 
-      - name: List artifacts
+      - name: Group artifacts by keyboard
         run: |
+          set -euo pipefail
+          mkdir -p grouped
+          for uf2 in artifacts/*.uf2; do
+            [ -f "$uf2" ] || continue
+            # Artifact names look like "<keyboard>-zmk[-<variant>].uf2"
+            # (e.g. geulis-zmk.uf2, nrfmicro_13-marvelous65_split_left-zmk.uf2).
+            # Strip the trailing "-zmk[-<variant>].uf2" to recover the
+            # keyboard directory. The `-(zmk|zmk-.+)` capture handles
+            # both the base build and the studio/logging/reset variants.
+            base=$(basename "$uf2" .uf2)
+            keyboard=$(printf '%s' "$base" | sed -E 's/-zmk(-.+)?$//')
+            mkdir -p "grouped/${keyboard}"
+            cp "$uf2" "grouped/${keyboard}/"
+          done
           echo "## UF2 files to release:"
-          find artifacts -name '*.uf2' -type f | sort
+          find grouped -name '*.uf2' -type f | sort
 
-      - name: Create / update "latest" GitHub release
-        uses: softprops/action-gh-release@v2
+      - name: Determine release metadata
+        id: meta
+        run: |
+          set -euo pipefail
+          # Build a UTC date (YYYY-MM-DD) and a short SHA so the release
+          # name is human-readable and reproducible from the workflow
+          # inputs alone.
+          date=$(date -u +%Y-%m-%d)
+          short_sha=${GITHUB_SHA::7}
+          branch=${GITHUB_REF_NAME}
+          # Tag MUST be unique per run so softprops/action-gh-release
+          # always takes the "create" path. github.run_id is unique
+          # across all workflow runs in a repo.
+          tag="build-${date}-${short_sha}-${GITHUB_RUN_ID}"
+          name="ZMK Firmware — ${branch} @ ${short_sha} (${date})"
+          {
+            echo "tag=${tag}"
+            echo "name=${name}"
+            echo "date=${date}"
+            echo "short_sha=${short_sha}"
+            echo "branch=${branch}"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create release
+        uses: softprops/action-gh-release@v3
         with:
-          name: ZMK Firmware / latest
-          tag_name: latest
-          generate_release_notes: true
-          files: |
-            artifacts/**/*.uf2
+          tag_name: ${{ steps.meta.outputs.tag }}
+          name: ${{ steps.meta.outputs.name }}
+          make_latest: 'true'
           fail_on_unmatched_files: false
+          body: |
+            ZMK firmware built from **${{ steps.meta.outputs.branch }}** @ `${{ steps.meta.outputs.short_sha }}` on ${{ steps.meta.outputs.date }} (UTC).
+
+            Artifacts are grouped by keyboard:
+            - `geulis/` — Geulis (Alice, 7×10)
+            - `marvelous65/` — Marvelous65 Rev2 (65% ANSI)
+            - `marvelous65_ergo/` — Marvelous65 Ergo (65% ergo, split B)
+            - `nrfmicro_13-marvelous65_split_{left,right}/` — Marvelous65 Split halves (nrfmicro_13)
+
+            See the [workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for the full build log.
+          files: |
+            grouped/**/*.uf2
+
+      - name: Prune old releases
+        # Keep at most `keep_count` most-recent releases on this branch
+        # so the releases page doesn't grow unbounded. Never deletes
+        # the release we just created in this run.
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ steps.meta.outputs.branch }}
+          current_tag: ${{ steps.meta.outputs.tag }}
+          keep_count: 5
+        run: |
+          set -euo pipefail
+          echo "::group::Listing releases tagged on branch '${branch}'"
+          mapfile -t releases < <(
+            gh release list \
+              --repo "${{ github.repository }}" \
+              --limit 100 \
+              --json tagName,name,isDraft,isPrerelease,createdAt \
+              --jq '.[] | select(.tagName | startswith("build-")) | "\(.tagName)\t\(.createdAt)"' \
+              | sort -k2 -r \
+              | awk -F'\t' '{print $1}'
+          )
+          printf '%s\n' "${releases[@]}"
+          echo "::endgroup::"
+
+          total=${#releases[@]}
+          if [ "$total" -le "$keep_count" ]; then
+            echo "Nothing to prune (${total} release(s) ≤ keep_count=${keep_count})."
+            exit 0
+          fi
+
+          echo "::group::Deleting ${keep_count} oldest releases"
+          for tag in "${releases[@]:$keep_count}"; do
+            # Skip the release we just published, even though it should
+            # always be at the top of the list. Belt-and-braces.
+            if [ "$tag" = "$current_tag" ]; then
+              continue
+            fi
+            echo "Deleting release ${tag}"
+            gh release delete --repo "${{ github.repository }}" --yes --cleanup-tag "$tag"
+          done
+          echo "::endgroup::"
+
+      - name: Delete legacy 'latest' release
+        # The pre-existing `latest` release accumulates body text on
+        # every run and is no longer the canonical "Latest". Remove
+        # it (and its tag) so the new per-run releases own the page.
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          if gh release view --repo "${{ github.repository }}" latest >/dev/null 2>&1; then
+            echo "Deleting legacy 'latest' release"
+            gh release delete --repo "${{ github.repository }}" --yes --cleanup-tag latest
+          else
+            echo "No legacy 'latest' release found — skipping."
+          fi
 
   purge:
     if: github.event_name == 'schedule'

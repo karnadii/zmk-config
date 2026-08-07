@@ -95,12 +95,12 @@ layers:
   - ''
   - $$mdi:arrow-up$$
   - ''
-  - ''
   - PRINTSCREEN
   - INSERT
   - PAUSE BREAK
-  - END
   - ''
+  - END
+  - {t: ▽, type: trans}
   - ''
   - M←
   - M↓

@@ -152,7 +152,7 @@ layers:
   - INSERT
   - PAUSE BREAK
   - HOME
-  - TAB
+  - {t: ▽, type: trans}
   - ''
   - ''
   - M↑
@@ -179,8 +179,8 @@ layers:
   - RIGHT
   - ''
   - ''
-  - RET
-  - LSHFT
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
   - ''
   - LCK
   - MID
@@ -192,15 +192,15 @@ layers:
   - ''
   - ''
   - ''
-  - RSHFT
-  - DEL
-  - LCTRL
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - ''
   - {type: held}
   - {t: ▽, type: trans}
-  - RCTRL
+  - {t: ▽, type: trans}
   Settings:
   - '&soft_off'
   - {t: '~', s: EP TOG}

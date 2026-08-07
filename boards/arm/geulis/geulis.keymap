@@ -365,10 +365,10 @@
             display-name = "Functions";
             bindings = <
 &pp_mute     &gresc      &f1          &f2          &f3          &f4          &f5          &f6      &f7          &f8      &f9          &f10         &f11         &f12         &kp INSERT    &kp PAUSE_BREAK
-&kp HOME     &kp TAB     &none          &none         &mmv MOVE_UP   &none         &none                          &none  &none     &kp UP    &none       &none            &none         &none         &none
-&kp END      &key_repeat  &none         &mmv MOVE_LEFT &mmv MOVE_DOWN &mmv MOVE_RIGHT  &none                          &none  &kp LEFT  &kp DOWN  &kp RIGHT         &none            &none         &kp RET
-             &kp LSHFT     &none          &mkp LCLK      &mkp MCLK     &mkp RCLK     &none                  &none  &none   &none     &none     &none            &none       &kp RSHFT        &kp DEL
-             &kp LCTRL                                 &trans        &trans        &none                  &none  &trans                                                                    &kp RCTRL
+&kp HOME     &trans      &none          &none         &mmv MOVE_UP   &none         &none                          &none  &none     &kp UP    &none       &none            &none         &none         &none
+&kp END      &key_repeat  &none         &mmv MOVE_LEFT &mmv MOVE_DOWN &mmv MOVE_RIGHT  &none                          &none  &kp LEFT  &kp DOWN  &kp RIGHT         &none            &none         &trans
+             &trans         &none          &mkp LCLK      &mkp MCLK     &mkp RCLK     &none                  &none  &none   &none     &none     &none            &none       &trans            &trans
+             &trans                                    &trans        &trans        &none                  &none  &trans                                                                    &trans
             >;
 
             sensor-bindings = <&rgb_encoder 0 0>, <&mid_fn_enc>, <&bot_fn_enc>;

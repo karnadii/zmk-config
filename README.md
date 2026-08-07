@@ -17,6 +17,13 @@ shields is `nrfmicro_13`; override with `--board <name>`.
 Each board/shield has its own `## <Name>` section below with hardware
 notes, build commands, and any caveats.
 
+## TODO
+
+- Create `zmk,physical-layout` definitions and enable ZMK Studio for all
+  Marvelous65 variants: Rev2, Ergo, and Split.
+- Add dongle support for every keyboard, with all keyboards connecting
+  through one shared dongle.
+
 ## Keymap
 
 ![keymap](/keymap-drawer/geulis.svg)

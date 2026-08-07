@@ -279,87 +279,45 @@
         compatible = "zmk,keymap";
 
 /*
- * Macos:
+ * Default layer:
  *     .-----.    .----------------------------------------.       .-----------------------------------------------.
- *     | Mute|   | Esc |  1  |  2  |  3  |  4  |  5  |  6  |       |  7  |  8  |  9  |  0  |  -  |  =  | Bsp | Del |
+ *     | PP  |   |  ~| |  1  |  2  |  3  |  4  |  5  |  6  |       |  7  |  8  |  9  |  0  |  -  |  =  | Bsp | Del |
  *    .'-----'   +-----+-----+-----+-----+-----+-----+-----'     .-+-----+-----+-----+-----+-----+-----+-----+-----+.
- *    | PUp |   |  Tab   |  Q  |  W  |  E  |  R  |  T  |         |  Y  |  U  |  I  |  O  |  P  |  [  |  ]  |    \   |
+ *    | PgUp|   |  Tab  |  Q  |  W  |  E  |  R  |  T  |         |  Y  |  U  |  I  |  O  |  P  |  [  |  ]  |    \   |
  *   .------'   +--------+-----+-----+-----+-----+-----+.        '-----+-----+-----+-----+-----+-----+-----+---------+.
- *   | PDn |   |   Caps   |  A  |  S  |  D  |  F  |  G  |          |  H  |  J  |  K  |  L  |  ;  |  '  |    Enter     |
+ *   | PgDn|   |  Caps   |  A  |  S  |  D  |  F  |  G  |          |  H  |  J  |  K  |  L  |  ;  |  '  |    Enter     |
  *   '-----'   +----------+-----+-----+-----+-----+-----+.      .--+-----+-----+-----+-----+-----+-----+--------------+.
- *            |    Shift   |  Z  |  X  |  C  |  V  |  B  |      |  B  |   N  |  M  |  ,  |  .  |  /  |   Shift   | Del | 
+ *            |    Shift   |  Z  |  X  |  C  |  V  |  B  |      |  B  |   N  |  M  |  ,  |  .  |  /  |   Shift   | Del |
  *            |------+-----+-----+-----+-----+-----+-----+-.    |-----+------+-----+-----+-----+-----+---------+------+'
  *            | Ctrl |          |  ALT  |     WIN    | Fn  |    |    Space     |  WIN  |                       | Ctrl |
  *            '------'          '--------------------------'    '----------------------'                       '------'
+ *
+ * The Geulis ships a single base layer now. We previously had a separate
+ * `macos` and `windows` layer that only differed in the ALT/GUI swap; users
+ * switching platforms had to flash two different firmwares. The repo is built
+ * with the `studio-rpc-usb-uart` snippet on `default` variant, so modifier
+ * positions can be remapped live via ZMK Studio — no flash needed when you
+ * plug the keyboard into a different OS.
+ *
+ * Modifier layout is currently Mac-style (Cmd next to space, Opt further left).
+ * To switch to Windows-style with ZMK Studio: remap the inner-thumb positions
+ * (Fn row, between Ctrl and Space) so LEFT WIN / LEFT ALT swap, and same on
+ * the inner-right side of the thumb.
  */
 
-        macos {
-            display-name = "Macos";
+        default_layer {
+            display-name = "Default";
             bindings = <
 &pp_mute         &gresc             &kp N1  &kp N2  &kp N3    &kp N4    &kp N5  &kp N6      &kp N7       &kp N8    &kp N9  &kp N0     &kp MINUS  &kp EQUAL  &bspc_del  &kp DEL
 &kp PAGE_UP      &kp TAB            &kp Q   &kp W   &kp E     &kp R     &kp T               &kp Y        &kp U     &kp I   &kp O      &kp P      &kp LBKT   &kp RBKT   &kp BACKSLASH
 &kp PAGE_DOWN    &caps_word_caps    &kp A   &kp S   &kp D     &kp F     &kp G                            &kp H     &kp J   &kp K      &kp L      &kp SEMI   &kp SQT    &kp RET
                  &kp LSHFT          &kp Z   &kp X   &kp C     &kp V     &kp B               &kp B        &kp N     &kp M   &kp COMMA  &kp DOT    &kp FSLH   &kp RSHFT  &kp DEL
-                 &kp LCTRL                          &kp LALT  &kp LGUI  &mo 3               &lt 2 SPACE  &kp RGUI                                                      &kp RCTRL
+                 &kp LCTRL                          &kp LALT  &kp LGUI    &mo 2               &lt 2 SPACE  &kp RGUI                                                      &kp RCTRL
             >;
 
             sensor-bindings = <&media_encoder>, <&mid_enc>, <&bot_enc>;
         };
 
-/*
- * Windows:
- *     .-----.    .----------------------------------------.       .-----------------------------------------------.
- *     | Mute|   | Esc |  1  |  2  |  3  |  4  |  5  |  6  |       |  7  |  8  |  9  |  0  |  -  |  =  | Bsp | Del |
- *    .'-----'   +-----+-----+-----+-----+-----+-----+-----'     .-+-----+-----+-----+-----+-----+-----+-----+-----+.
- *    | PUp |   |  Tab   |  Q  |  W  |  E  |  R  |  T  |         |  Y  |  U  |  I  |  O  |  P  |  [  |  ]  |    \   |
- *   .------'   +--------+-----+-----+-----+-----+-----+.        '-----+-----+-----+-----+-----+-----+-----+---------+.
- *   | PDn |   |   Caps   |  A  |  S  |  D  |  F  |  G  |          |  H  |  J  |  K  |  L  |  ;  |  '  |    Enter     |
- *   '-----'   +----------+-----+-----+-----+-----+-----+.      .--+-----+-----+-----+-----+-----+-----+--------------+.
- *            |    Shift   |  Z  |  X  |  C  |  V  |  B  |      |  B  |   N  |  M  |  ,  |  .  |  /  |   Shift   | Del | 
- *            |------+-----+-----+-----+-----+-----+-----+-.    |-----+------+-----+-----+-----+-----+---------+------+'
- *            | Ctrl |          |  WIN  |    ALT     | Fn  |    |    Space     |  Alt  |                       | Ctrl |
- *            '------'          '--------------------------'    '----------------------'                       '------'
- */
-
-        windows {
-            display-name = "Windows";
-            bindings = <
-&pp_mute         &gresc            &kp N1  &kp N2  &kp N3    &kp N4    &kp N5  &kp N6      &kp N7       &kp N8    &kp N9  &kp N0     &kp MINUS  &kp EQUAL  &bspc_del  &kp DEL
-&kp PAGE_UP      &kp TAB           &kp Q   &kp W   &kp E     &kp R     &kp T               &kp Y        &kp U     &kp I   &kp O      &kp P      &kp LBKT   &kp RBKT   &kp BACKSLASH
-&kp PAGE_DOWN    &caps_word_caps   &kp A   &kp S   &kp D     &kp F     &kp G                            &kp H     &kp J   &kp K      &kp L      &kp SEMI   &kp SQT    &kp RET
-                 &kp LSHFT         &kp Z   &kp X   &kp C     &kp V     &kp B               &kp B        &kp N     &kp M   &kp COMMA  &kp DOT    &kp FSLH   &kp RSHFT  &kp DEL
-                 &kp LCTRL                         &kp LGUI  &kp LALT  &mo 3               &lt 2 SPACE  &kp RALT                                                      &kp RCTRL
-            >;
-
-            sensor-bindings = <&media_encoder>, <&mid_enc>, <&bot_enc>;
-        };
-/*
- * Functions:
- *     .-----.    .----------------------------------------.       .-----------------------------------------------.
- *     | PP  |   |GrEsc| F1 | F2 | F3 | F4 | F5 | F6 |       | F7 | F8 | F9 | F10| F11| F12|Ins  |PB  |
- *    .'-----'   +-----+-----+-----+-----+-----+-----+-----'     .-+-----+-----+-----+-----+-----+-----+-----+-----+.
- *    | PG↑ |   | Tab  | --- | --- | --- | M↑  | --- |         |  ↑  | --- | --- | --- | --- |PSc | Home | 1   |
- *   .------'   +--------+-----+-----+-----+-----+-----+.        '-----+-----+-----+-----+-----+-----+-----+---------+.
- *   | PG↓ |   | RPT   | --- | M←  | M↓  | M→  | --- |          |  ←  |  ↓  |  →  | --- | --- | --- |  End  |  RET   |
- *   '-----'   +----------+-----+-----+-----+-----+-----+.      .--+-----+-----+-----+-----+-----+-----+--------------+.
- *            |    Shift   | --- | --- | LCK | MID | ROK |      | --- | --- | --- | --- | --- | --- |  Shift  | Del |
- *            |------+-----+-----+-----+-----+-----+-----+-.    |-----+------+-----+-----+-----+-----+---------+------+'
- *            | Ctrl |          |  ---  |     ---    | --- |    |    ---      |  ---  |                       | Ctrl |
- *            '------'          '--------------------------'    '---------------------'                       '------'
- *
- * Layers were cleaned up so this layer is functions-only:
- *   - F1–F12 row 1, mouse-nav diamond + mouse buttons under the left hand, arrow
- *     cluster + Ins/PSc/Pause/HOME/END on the right, key_repeat at the inner-thumb.
- *
- * Mouse-nav cluster (left hand, mirroring `j k l ;` arrow cluster on the right):
- *   - Cluster starts at col 3 (one column right of `key_repeat`) so the diamond
- *     lands where the user's fingers naturally fall on the home row (`S D F G`).
- *   - M↑ overlays `R`, M←/M↓/M→ overlay `S D F`.  M↑ sits one row up under `E`
- *     above — actually wait, M↑ is at row 1 col 5 which overlays `R` on base.
- *   - LCLK/MCLK/RCLK overlay `V`/`B`/`N` (row 3 cols 4–6) — index finger hits
- *     ROK without leaving the home row.
- *   - BT_SEL 0–4 used to live here; moved to the settings layer.
- */
 
         functions {
             display-name = "Functions";

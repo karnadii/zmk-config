@@ -1,6 +1,6 @@
 layout: {zmk_keyboard: geulis}
 layers:
-  Macos:
+  Default:
   - {t: MUTE, s: PP}
   - {t: ESC, s: '`'}
   - '1'
@@ -64,75 +64,8 @@ layers:
   - LALT
   - LGUI
   - Settings
-  - {t: SPACE, h: Functions}
+  - {t: SPACE, h: Settings}
   - RGUI
-  - RCTRL
-  Windows:
-  - {t: MUTE, s: PP}
-  - {t: ESC, s: '`'}
-  - '1'
-  - '2'
-  - '3'
-  - '4'
-  - '5'
-  - '6'
-  - '7'
-  - '8'
-  - '9'
-  - '0'
-  - '-'
-  - '='
-  - {t: BACKSPACE, s: DEL}
-  - DEL
-  - PAGE UP
-  - TAB
-  - Q
-  - W
-  - E
-  - R
-  - T
-  - Y
-  - U
-  - I
-  - O
-  - P
-  - '['
-  - ']'
-  - \
-  - PAGE DOWN
-  - {t: '&caps_word', s: CAPS}
-  - A
-  - S
-  - D
-  - F
-  - G
-  - H
-  - J
-  - K
-  - L
-  - ;
-  - ''''
-  - RET
-  - LSHFT
-  - Z
-  - X
-  - C
-  - V
-  - B
-  - B
-  - N
-  - M
-  - ','
-  - .
-  - /
-  - RSHFT
-  - DEL
-  - LCTRL
-  - LGUI
-  - LALT
-  - Settings
-  - {t: SPACE, h: Functions}
-  - RALT
   - RCTRL
   Functions:
   - {t: MUTE, s: PP}
@@ -198,7 +131,7 @@ layers:
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - ''
-  - {type: held}
+  - ''
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   Settings:
@@ -246,7 +179,7 @@ layers:
   - RGB SPD
   - ''
   - ''
-  - {t: Windows, h: toggle}
+  - {t: Functions, h: toggle}
   - ''
   - ''
   - ''

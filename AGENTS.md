@@ -220,7 +220,9 @@ intentional.
 
 ## Keymap structure (`boards/arm/geulis/geulis.keymap`)
 
-- **Layers:** 4 — `macos`, `windows`, `functions` (layer 2), `settings` (layer 3).
+- **Layers:** 3 — `default` (the only base layer; modifier positions can be
+  remapped live via ZMK Studio for switching between Mac and Windows layouts),
+  `functions` (layer 2), `settings` (layer 3).
 - **`behaviors`** block defines many custom behaviors via two macros at the top of the file:
   - `MORPH(name, primary, secondary)` — `behavior-mod-morph`; secondary activates on Shift/GUI held.
   - `ENCODER(name, prev, next)` — `behavior-sensor-rotate`; binds to one sensor.

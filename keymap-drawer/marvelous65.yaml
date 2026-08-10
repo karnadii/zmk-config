@@ -1,0 +1,153 @@
+layout: {zmk_keyboard: marvelous65}
+layers:
+  MACOS: ['$$mdi:keyboard-esc$$', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', EQL, BKSP, '$$mdi:backspace-reverse-outline$$', '$$mdi:keyboard-tab$$', Q,
+    W, E, R, T, Y, U, I, O, P, '[', ']', \, '$$mdi:play-pause$$', CLCK, A, S, D, F, G, H, J, K, L, SCLN, QUOT, '$$mdi:keyboard-return$$', LSFT, \, Z, X, C, V, B,
+    N, M, CMMA, ., /, RSFT, '$$mdi:arrow-up$$', '$$mdi:apple-keyboard-control$$', '$$mdi:apple-keyboard-option$$', '$$mdi:apple-keyboard-command$$', SPC, SETTINGS,
+    SPC, '$$mdi:apple-keyboard-command$$', FUNCTIONS, '$$mdi:apple-keyboard-control$$', '$$mdi:arrow-left$$', '$$mdi:arrow-down$$', '$$mdi:arrow-right$$']
+  WINDOWS: ['$$mdi:keyboard-esc$$', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', EQL, BKSP, '$$mdi:backspace-reverse-outline$$', '$$mdi:keyboard-tab$$',
+    Q, W, E, R, T, Y, U, I, O, P, '[', ']', \, '$$mdi:play-pause$$', CLCK, A, S, D, F, G, H, J, K, L, SCLN, QUOT, '$$mdi:keyboard-return$$', LSFT, \, Z, X, C, V,
+    B, N, M, CMMA, ., /, RSFT, '$$mdi:arrow-up$$', '$$mdi:apple-keyboard-control$$', '$$mdi:apple-keyboard-command$$', '$$mdi:apple-keyboard-option$$', SPC, SETTINGS,
+    SPC, '$$mdi:apple-keyboard-option$$', FUNCTIONS, '$$mdi:apple-keyboard-control$$', '$$mdi:arrow-left$$', '$$mdi:arrow-down$$', '$$mdi:arrow-right$$']
+  FUNCTIONS:
+  - '`'
+  - F1
+  - F2
+  - F3
+  - F4
+  - F5
+  - F6
+  - F7
+  - F8
+  - F9
+  - F10
+  - F11
+  - F12
+  - $$mdi:backspace-reverse-outline$$
+  - $$mdi:play-pause$$
+  - BT CLR
+  - {t: BT, h: '0'}
+  - {t: BT, h: '1'}
+  - {t: BT, h: '2'}
+  - {t: BT, h: '3'}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - $$mdi:play-pause$$
+  - OUT TOG
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: WINDOWS, h: toggle}
+  - LSFT
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - RSFT
+  - PG UP
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {type: held}
+  - {t: ▽, type: trans}
+  - HOME
+  - PG DN
+  - END
+  SETTINGS:
+  - RGB TOG
+  - $$mdi:brightness-4$$
+  - $$mdi:brightness-7$$
+  - RGB HUD
+  - RGB HUI
+  - RGB BRD
+  - RGB BRI
+  - $$mdi:skip-previous$$
+  - $$mdi:play-pause$$
+  - $$mdi:skip-next$$
+  - MUTE
+  - $$mdi:volume-minus$$
+  - $$mdi:volume-plus$$
+  - RGB EFF
+  - $$mdi:play-pause$$
+  - BT CLR
+  - {t: BT, h: '0'}
+  - {t: BT, h: '1'}
+  - {t: BT, h: '2'}
+  - {t: BT, h: '3'}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - $$mdi:play-pause$$
+  - OUT TOG
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: WINDOWS, h: toggle}
+  - LSFT
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - RSFT
+  - PG UP
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {type: held}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - HOME
+  - PG DN
+  - END
+combos:
+- p: [0, 1]
+  k: $$mdi:lock-open-variant$$

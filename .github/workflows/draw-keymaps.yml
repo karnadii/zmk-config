@@ -46,7 +46,7 @@ jobs:
       # layout lives in `boards/shields/marvelous65_split/marvelous65_split.dtsi`.
       draw_args: >-
         geulis:-j boards/arm/geulis/geulis.json
-        marvelous65:-j boards/arm/marvelous65/marvelous65.json
+        marvelous65:-j boards/arm/marvelous65/marvelous65-ansi.json
         marvelous65_ergo:-j boards/arm/marvelous65_ergo/marvelous65_ergo.json
         marvelous65_split:-d boards/shields/marvelous65_split/marvelous65_split.dtsi
       destination: both

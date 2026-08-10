@@ -12,6 +12,28 @@
 #include <dt-bindings/led/led.h>
 
 #include "marvelous65-pinctrl.dtsi"
+#include "marvelous65-ansi-layout.dtsi"
+#include "marvelous65-ansi-transform.dtsi"
+#include "marvelous65-iso-layout.dtsi"
+#include "marvelous65-iso-transform.dtsi"
+
+&ansi_layout_0 { transform = <&ansi_transform_0>; };
+&ansi_layout_1 { transform = <&ansi_transform_1>; };
+&ansi_layout_2 { transform = <&ansi_transform_2>; };
+&ansi_layout_3 { transform = <&ansi_transform_3>; };
+&ansi_layout_4 { transform = <&ansi_transform_4>; };
+&ansi_layout_5 { transform = <&ansi_transform_5>; };
+&ansi_layout_6 { transform = <&ansi_transform_6>; };
+&ansi_layout_7 { transform = <&ansi_transform_7>; };
+
+&iso_layout_0 { transform = <&iso_transform_0>; };
+&iso_layout_1 { transform = <&iso_transform_1>; };
+&iso_layout_2 { transform = <&iso_transform_2>; };
+&iso_layout_3 { transform = <&iso_transform_3>; };
+&iso_layout_4 { transform = <&iso_transform_4>; };
+&iso_layout_5 { transform = <&iso_transform_5>; };
+&iso_layout_6 { transform = <&iso_transform_6>; };
+&iso_layout_7 { transform = <&iso_transform_7>; };
 
 / {
     model = "Marvelous65";
@@ -24,26 +46,9 @@
         zephyr,flash = &flash0;
         zmk,battery = &vbatt;
         zmk,kscan = &kscan0;
-        zmk,matrix_transform = &default_transform;
+        zmk,physical-layout = &ansi_layout_0;
         zmk,underglow = &led_strip;
         zephyr,display = &oled;
-    };
-
-    default_transform: keymap_transform_0 {
-        compatible = "zmk,matrix-transform";
-        columns = <8>;
-        rows = <10>;
-
-        // 65% layout: row 0 = ESC..DEL+ENC (15 keys mapped),
-        // row 1 = TAB..BSLH+ENC (15), row 2 = CAPS..ENTER (14),
-        // row 3 = SHIFT..SHIFT+UP (14), row 4 = CTL..RIGHT (12).
-        map = <
-RC(1,0) RC(0,1) RC(1,1) RC(0,2) RC(1,2) RC(0,3) RC(1,3) RC(0,4) RC(1,4) RC(0,5) RC(1,5) RC(0,6) RC(1,6) RC(0,7) RC(1,7)
-RC(3,0) RC(2,1) RC(3,1) RC(2,2) RC(3,2) RC(2,3) RC(3,3) RC(2,4) RC(3,4) RC(2,5) RC(3,5) RC(2,6) RC(3,6) RC(2,7) RC(3,7)
-RC(5,0) RC(4,1) RC(5,1) RC(4,2) RC(5,2) RC(4,3) RC(5,3) RC(4,4) RC(5,4) RC(4,5) RC(5,5) RC(4,6)                 RC(5,7)
-RC(6,0) RC(7,1) RC(6,1) RC(7,2) RC(6,2) RC(7,3) RC(6,3) RC(7,4) RC(6,4) RC(7,5) RC(6,5) RC(7,6)         RC(6,7) RC(7,7)
-RC(8,0) RC(9,1) RC(8,1) RC(9,2)         RC(8,3)         RC(9,4)         RC(8,5) RC(9,5) RC(8,6) RC(9,6) RC(8,7) RC(9,7)
-        >;
     };
 
     kscan0: kscan_0 {
@@ -77,9 +82,9 @@ RC(8,0) RC(9,1) RC(8,1) RC(9,2)         RC(8,3)         RC(9,4)         RC(8,5) 
             ;
     };
 
-    left_encoder: encoder_left {
+    right_encoder: encoder_right {
         compatible = "alps,ec11";
-        label = "LEFT_ENCODER";
+        label = "RIGHT_ENCODER";
         a-gpios = <&gpio0 9 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>;
         b-gpios = <&gpio0 10 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>;
         steps = <80>;
@@ -88,7 +93,7 @@ RC(8,0) RC(9,1) RC(8,1) RC(9,2)         RC(8,3)         RC(9,4)         RC(8,5) 
 
     sensors {
         compatible = "zmk,keymap-sensors";
-        sensors = <&left_encoder>;
+        sensors = <&right_encoder>;
         triggers-per-rotation = <20>;
     };
 

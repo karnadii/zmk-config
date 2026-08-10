@@ -34,6 +34,10 @@ include:
   - board: marvelous65
     artifact-name: marvelous65-zmk
   - board: marvelous65
+    snippet: studio-rpc-usb-uart
+    cmake-args: -DCONFIG_ZMK_STUDIO=y
+    artifact-name: marvelous65-zmk-studio
+  - board: marvelous65
     snippet: zmk-usb-logging
     artifact-name: marvelous65-zmk-logging
   - board: marvelous65

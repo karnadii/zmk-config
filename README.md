@@ -1,282 +1,165 @@
-# ZMK user-config for my keyboards
+# ZMK user-config
 
-ZMK v0.3 user-config repository for my keyboard builds. Each
-keyboard lives under `boards/karnadii/<keyboard>/` (monolithic board)
-or `boards/shields/<keyboard>/` (split shield). Default board for
-shields is `nrfmicro_13`; override with `--board <name>`.
+Personal ZMK v0.3 user-config repository supporting multiple keyboards: **Geulis**, **Marvelous65** (Rev2, Ergo, Split), and **Sofle RGB v2.1**.
 
 ## Keyboards
 
-| Keyboard | Path | Layout | Build command |
-| --- | --- | --- | --- |
-| **Geulis** (Alice, 7×10) | `boards/arm/geulis/` | monolithic nRF52840 board | `./docker/build.sh --regular --board geulis` |
-| **Marvelous65 Rev2** (65% ANSI) | `boards/arm/marvelous65/` | monolithic nRF52840 board | `./docker/build.sh --regular --board marvelous65` |
-| **Marvelous65 Ergo** (65% ergo, split B) | `boards/arm/marvelous65_ergo/` | monolithic nRF52840 board | `./docker/build.sh --regular --board marvelous65_ergo` |
-| **Marvelous65 Split** | `boards/shields/marvelous65_split/` | shield on Pro Micro pin-compatible MCU | `./docker/build.sh --regular --shield marvelous65_split_left` and `--shield marvelous65_split_right` |
-| **Sofle RGB v2.1** | upstream `sofle_left` / `sofle_right` shields | `nrfmicro_13` with external 32.768 kHz crystal; OLED + encoder, no RGB; right half is central | build the right-central and left-peripheral variants below |
+| Keyboard | Type | Controller / MCU | Features | Build Command |
+|---|---|---|---|---|
+| **Geulis** | Alice (7×10) | Integrated nRF52840 | 3× Encoders, WS2812 RGB, OLED, ZMK Studio | `./docker/build.sh --studio --board geulis` |
+| **Sofle RGB v2.1** | Split (6×12) | `nrfmicro_13` (nRF52840 + XTAL) | 2× Encoders, `nice!oled` (Bongo Cat WPM), Pointing / Mouse, ZMK Studio | `./docker/build.sh --studio --board nrfmicro_13 --shield "sofle_right nice_oled"` |
+| **Marvelous65 Rev2** | 65% ANSI | Integrated nRF52840 | 1× Encoder, WS2812 RGB, OLED | `./docker/build.sh --regular --board marvelous65` |
+| **Marvelous65 Ergo** | 65% Ergo | Integrated nRF52840 | 1× Encoder, Split B, WS2812 RGB, OLED | `./docker/build.sh --regular --board marvelous65_ergo` |
+| **Marvelous65 Split** | True Split 65% | `nrfmicro_13` (nRF52840) | 2× Encoders, WS2812 RGB, OLED | `./docker/build.sh --regular --shield marvelous65_split_right` |
 
-Each board/shield has its own `## <Name>` section below with hardware
-notes, build commands, and any caveats.
+---
 
-## TODO
+## Visual Keymaps
 
-- Create `zmk,physical-layout` definitions and enable ZMK Studio for all
-  Marvelous65 variants: Rev2, Ergo, and Split.
-- Add dongle support for every keyboard, with all keyboards connecting
-  through one shared dongle.
+Keymaps are automatically parsed and rendered into vector SVGs on push by CI via `keymap-drawer`.
 
-## Keymap
+| Geulis (Alice) | Sofle RGB v2.1 | Marvelous65 |
+|:---:|:---:|:---:|
+| [![Geulis Keymap](keymap-drawer/geulis.svg)](keymap-drawer/geulis.svg) | [![Sofle Keymap](keymap-drawer/sofle.svg)](keymap-drawer/sofle.svg) | [![Marvelous65 Keymap](keymap-drawer/marvelous65.svg)](keymap-drawer/marvelous65.svg) |
 
-![keymap](/keymap-drawer/geulis.svg)
+---
 
-(Rendered automatically by CI on changes to any `.keymap` or `.dtsi`.)
-
-## Repository layout
+## Repository Layout
 
 ```
 .
-├── build.yaml                # CI build matrix
-├── config/west.yml           # West manifest (zmkfirmware/zmk @ v0.3)
+├── build.yaml                # GitHub Actions CI build matrix
+├── config/
+│   ├── west.yml              # West manifest (ZMK @ v0.3 + zmk-nice-oled)
+│   ├── sofle.keymap          # Sofle keymap, custom behaviors, & layers
+│   └── sofle.conf            # Sofle Kconfig (nice!oled, pointing, PM, sleep)
 ├── zephyr/module.yml         # Registers this repo as a Zephyr module
 ├── boards/
 │   ├── arm/
-│   │   ├── geulis/                # Alice (nRF52840)
-│   │   ├── marvelous65/           # 65% ANSI (nRF52840)
-│   │   └── marvelous65_ergo/      # 65% ergo, split B (nRF52840)
+│   │   ├── geulis/           # Geulis Alice (nRF52840) board definition
+│   │   ├── marvelous65/      # Marvelous65 65% ANSI (nRF52840)
+│   │   └── marvelous65_ergo/ # Marvelous65 Ergo (nRF52840)
 │   └── shields/
-│       └── marvelous65_split/     # Split (Pro Micro pin-compatible)
-├── keymap-drawer/            # Generated SVG / YAML (CI-updated)
-├── docker/                   # Local build toolchain
+│       └── marvelous65_split/# Marvelous65 split shields (left / right)
+├── keymap-drawer/            # Rendered keymap SVGs, YAML, and config
+├── docker/                   # Local containerized build toolchain
+│   ├── Dockerfile            # Wraps zmk-build-arm:stable
+│   ├── docker-compose.yml    # Docker Compose service with cache volume
+│   └── build.sh              # Local build helper script
 └── .github/workflows/
-    ├── build.yml             # CI firmware builds
-    └── draw-keymaps.yml      # CI keymap-drawer renders
+    ├── build.yml             # Automated CI firmware compilation & releases
+    └── draw-keymaps.yml      # Automated keymap diagram generation
 ```
 
-## Building the firmware
+---
 
-### Prerequisites
+## Building the Firmware
 
-- Docker with the Compose plugin (`docker compose version`)
-- A working USB connection if you plan to flash (UF2 bootloader)
+Local builds run in an isolated Docker container with automated toolchain caching in a named volume (`zmk_workspace_cache`).
 
-### One-time setup
+### 1. One-Time Setup
 
 ```bash
 docker compose -f docker/docker-compose.yml build
 ```
 
-The first build pulls ~1 GB of toolchain. Subsequent builds reuse the
-cached image and the named `zmk_workspace_cache` volume (≈5 min on
-first west update, near-instant on subsequent builds).
+### 2. Build Commands
 
-### Variants
-
-Each board/shield produces four UF2 files (one per `--action`):
-
-| Action | Flag | Artifact | Notes |
-| --- | --- | --- | --- |
-| `regular` | `--regular` | `<board>-zmk.uf2` | Plain USB HID + BLE. Daily-use firmware. |
-| `studio` | `--studio` | `<board>-zmk-studio.uf2` | ZMK Studio (needs `zmk,physical-layout`). |
-| `logging` | `--logging` | `<board>-zmk-logging.uf2` | USB CDC logging for debugging. |
-| `reset` | `--reset` | `<board>-zmk-reset.uf2` | Factory-reset (clears bonding, RGB, etc.). |
-
-For shields, the artifact name is `<board>-<shield>-zmk.uf2` so left
-and right halves don't clobber each other. Example: `nrfmicro_13-marvelous65_split_left-zmk.uf2`.
-
-### Examples
-
+#### Sofle RGB v2.1 (with `nice!oled` + Mouse Keys)
 ```bash
-# All four variants for the default board (geulis)
-./docker/build.sh --regular
-./docker/build.sh --studio
-./docker/build.sh --logging
-./docker/build.sh --reset
+# Left half (Peripheral)
+./docker/build.sh --board nrfmicro_13 --shield "sofle_left nice_oled"
 
-# Specific board
+# Right half (Central / USB - ZMK Studio enabled)
+./docker/build.sh --studio --board nrfmicro_13 --shield "sofle_right nice_oled"
+
+# Right half (Central / USB - Standard)
+./docker/build.sh --board nrfmicro_13 --shield "sofle_right nice_oled"
+
+# Factory reset firmware (if needing to re-pair or wipe persistent bonds)
+./docker/build.sh --reset --board nrfmicro_13 --shield sofle_left
+./docker/build.sh --reset --board nrfmicro_13 --shield sofle_right
+```
+
+#### Geulis (Alice)
+```bash
+./docker/build.sh --studio --board geulis       # ZMK Studio (Recommended)
+./docker/build.sh --regular --board geulis      # Standard HID
+./docker/build.sh --logging --board geulis      # USB CDC Logging
+./docker/build.sh --reset --board geulis        # Factory Reset
+```
+
+#### Marvelous65 Variants
+```bash
+# Marvelous65 Rev2 & Ergo
 ./docker/build.sh --regular --board marvelous65
 ./docker/build.sh --regular --board marvelous65_ergo
 
-# Split keyboard: build both halves
+# Marvelous65 Split
 ./docker/build.sh --regular --shield marvelous65_split_left
 ./docker/build.sh --regular --shield marvelous65_split_right
-
-# Sofle RGB v2.1 — right half is central, left half is peripheral
-./docker/build.sh --regular --board nrfmicro_13 --shield sofle_right
-./docker/build.sh --regular --board nrfmicro_13 --shield sofle_left
-
-# Sofle ZMK Studio — right half only
-./docker/build.sh --studio --board nrfmicro_13 --shield sofle_right
 ```
 
-The upstream Sofle shield includes a physical layout, so the right/master
-Studio build is supported. The left half remains the regular BLE peripheral.
-With Studio locking enabled, press the first two keys of the right half's
-top row together to unlock Studio.
+### 3. Flashing Firmware
 
-If `--studio` fails with `static assertion failed` mentioning
-`zmk,physical-layout`, that board doesn't yet declare a physical
-layout — add one in its DTS before requesting Studio.
-
-### Other commands
-
-```bash
-./docker/build.sh --clean          # wipe build cache
-./docker/build.sh --init           # run only west init + west update
-./docker/build.sh --shell          # bash inside the container
-docker compose -f docker/docker-compose.yml down -v   # wipe west cache
-```
-
-### Flashing
-
-1. Put the keyboard into bootloader mode — double-tap the reset
-   button, or use the `&bootloader` binding or `<BOOT>` combo.
-2. The host mounts a new USB drive labelled with the keyboard name
-   (e.g. `GEULIS`).
-3. Copy the `.uf2` file onto that drive:
+1. Put the controller into bootloader mode by **double-tapping the reset button** (or pressing the `&bootloader` key / combo).
+2. The board mounts as a mass-storage drive (e.g. `NICENANO` / `NRFMICRO` / `GEULIS`).
+3. Drag and drop (or `cp`) the generated `.uf2` from `firmware/` to the mounted drive:
    ```bash
-   cp firmware/geulis-zmk.uf2 /media/$USER/GEULIS/
+   cp firmware/nrfmicro_13-sofle_right-nice_oled-zmk-studio.uf2 /media/$USER/NRFMICRO/
    ```
-4. The keyboard reboots automatically after ~2 seconds.
+4. The device reboots automatically into the new firmware.
 
-To factory-reset, flash the `-reset.uf2` artifact first, then re-flash
-the regular variant.
+> [!TIP]
+> For split keyboards (Sofle & Marvelous65 Split), flash the **left half first**, then flash the **right (central) half**.
 
-## Toggling hardware features (per-board)
+---
 
-Each board's `## <Name>` section below documents the per-feature
-toggles. Most Marvelous65 variants are monolithic — RGB + OLED +
-encoder are always compiled in. The Geulis uses a per-feature
-`geulis_options.h` header (see the Geulis section).
+## Keyboard Details
 
-## CI
+### Sofle RGB v2.1
 
-Pull requests, pushes to `v0.3-stable` or `main`, weekly schedules,
-and manual `workflow_dispatch` runs all trigger `.github/workflows/build.yml`.
-The build matrix is `build.yaml` (16 entries — all 4 boards ×
-variants). Each entry produces one UF2 file.
-
-A successful push to `v0.3-stable` (or a manual dispatch) publishes
-all the UF2 files to a rolling `latest` GitHub release via
-`softprops/action-gh-release@v2`. The weekly schedule and PR builds
-just exercise the matrix without publishing.
-
-## Boards
+- **MCU:** `nrfmicro_13` (nRF52840 with populated 32.768 kHz external crystal).
+- **Split Architecture:** Right half acts as central (USB / Bluetooth master), Left half acts as peripheral.
+- **OLED Display (`nice!oled`):**
+  - **Right Half (Central):** Bongo Cat typing speed (WPM) animation, live modifier icons (`Shift`, `Ctrl`, `Alt`, `GUI`), active layer name (`DEF`, `LWR`, `RSE`, `ADJ`), battery %, and Bluetooth profile.
+  - **Left Half (Peripheral):** Animated Cat companion and sleep/idle artwork.
+  - Standalone mode — no background host application required.
+- **Rotary Encoders:**
+  - `default` layer: Left = Volume (`C_VOL_UP`/`C_VOL_DN`), Right = Media Track (`C_NEXT`/`C_PREV`).
+  - `lower` layer: Left = Page Navigation (`PG_UP`/`PG_DN`), Right = Word Navigation (`Ctrl+Right`/`Ctrl+Left`).
+  - `raise` layer: Left = Mouse Vertical Scroll (`SCRL_UP`/`SCRL_DOWN`), Right = Mouse Horizontal Scroll (`SCRL_RIGHT`/`SCRL_LEFT`).
+- **Mouse / Pointing (`CONFIG_ZMK_POINTING=y`):** Mouse cursor movement (`&mmv`), mouse clicks (`&mkp`), and scroll wheels (`&msc`) available directly on the `raise` layer.
+- **Keymap Enhancements:**
+  - `bspc_del`: Tap for Backspace, Shift/GUI for Delete (preserves `Ctrl+Alt+Del`).
+  - `btick_code`: Tap for ``` ` ```, hold for Markdown code fence (` ``` ↵↵ ``` `).
+  - `combo_jk_esc`: `J + K` pressed together fires `ESC` (base layer only, 40 ms timeout).
+  - `caps_word`: Extended continue-list (`_`, `-`, Backspace, Delete) for smooth typo fixes and kebab-case typing.
+  - Universal Media Play/Pause via `&kp C_PP`.
 
 ### Geulis
 
-**Path:** `boards/arm/geulis/` &nbsp;·&nbsp; **Layout:** Alice (7 rows × 10 cols, 1.5°–12° slanted halves merged into one PCB with thumb cluster) &nbsp;·&nbsp; **MCU:** nRF52840
+- **MCU:** Integrated nRF52840.
+- **Layout:** Alice 7×10 matrix with 4 physical backspace/shift variants (`&layout0`–`&layout3`).
+- **Hardware:** 3 EC11 rotary encoders, 18-LED WS2812 RGB underglow (SPI3), SSD1306 128×32 OLED (I2C0), battery sense (AIN2), `EXT_POWER` control (P1.09).
+- **ZMK Studio:** Fully supported with live remapping and unlock combo (`<14 32>`, `<24 32>`).
+- **Hardware Toggles:** Configured via `boards/arm/geulis/geulis_options.h` and `geulis_defconfig`.
 
-Hardware: 3 EC11 rotary encoders, WS2812 RGB underglow (18 LEDs on
-SPI3), SSD1306 128×32 OLED on I2C0, battery sense on AIN2, EXT_POWER
-on P1.09.
+### Marvelous65 (Rev2, Ergo, Split)
 
-ZMK Studio supported — board declares a `zmk,physical-layout`.
+- **Rev2:** 65% ANSI layout, 1 EC11 encoder (top-right), WS2812 RGB underglow (14 LEDs), SSD1306 OLED.
+- **Ergo:** 65% ergo layout with split B key across row 3/4.
+- **Split:** True split 65% on `nrfmicro_13`, 2× encoders, RGB underglow, and OLED.
 
-Build: `./docker/build.sh --regular --board geulis` (or any variant).
+---
 
-#### Feature toggles
+## Continuous Integration (CI)
 
-Geulis uses a per-feature toggle header `boards/arm/geulis/geulis_options.h`.
-Set `GEULIS_*_ON` to `0` to remove the matching node from the
-devicetree. Pair with the matching `CONFIG_GEULIS_DRIVER_*` Kconfig
-in `geulis_defconfig` to also disable the driver source.
+- **Build Matrix (`build.yml`):** Runs on push to `v0.3-stable` / `main` and compiles all board and shield combinations in parallel. Releases UF2 artifacts to GitHub Releases.
+- **Keymap Drawer (`draw-keymaps.yml`):** Automatically re-parses all `.keymap` files and updates the SVG diagrams in `keymap-drawer/`.
 
-| Feature | options.h macro | defconfig symbol |
-| --- | --- | --- |
-| Top encoder (P0.26 / P0.06) | `GEULIS_ENCODER_TOP_ON` | `CONFIG_GEULIS_DRIVER_ENCODER` |
-| Middle encoder (P0.08 / P0.27) | `GEULIS_ENCODER_MID_ON` | `CONFIG_GEULIS_DRIVER_ENCODER` |
-| Bottom encoder (P1.08 / P0.11) | `GEULIS_ENCODER_BOT_ON` | `CONFIG_GEULIS_DRIVER_ENCODER` |
-| WS2812 underglow (SPI3, P0.05) | `GEULIS_RGB_UNDERGLOW_ON` | `CONFIG_GEULIS_DRIVER_RGB_UNDERGLOW` |
-| SSD1306 OLED (I2C0, 0x3C) | `GEULIS_OLED_ON` | `CONFIG_GEULIS_DRIVER_OLED` |
+---
 
-At least one encoder must be enabled — `geulis.dts` has a `#error`
-if all three are `0`.
+## License
 
-#### Layout variants
-
-The board has 4 backspace × right-shift variants. Set
-`zmk,physical-layout = &layout0..&layout3` in `geulis.dts` to
-switch. See `geulis-layout.dtsi` for the position map.
-
-#### Keymap notes
-
-- Layers: `macos` (0), `windows` (1), `functions` (2), `settings` (3)
-- Top encoder: volume on layers 0/1, RGB brightness+hue on 2/3
-- Middle encoder: vertical scroll on 0/1, Ctrl+Z / Ctrl+Y on 2/3
-- Bottom encoder: horizontal scroll on 0/1, browser back/forward on 2/3
-
-### Marvelous65 Rev2
-
-**Path:** `boards/arm/marvelous65/` &nbsp;·&nbsp; **Layout:** 65% ANSI (5 rows × 8 cols, single encoder top-right) &nbsp;·&nbsp; **MCU:** nRF52840
-
-Hardware: 1 EC11 encoder on P0.09/P0.10, WS2812 RGB underglow
-(14 LEDs on SPI1 / P0.32), SSD1306 128×32 OLED on I2C0, battery
-sense on AIN2, EXT_POWER on P1.09 (50 ms init delay).
-
-ZMK Studio **not yet** supported — board has no `zmk,physical-layout`.
-
-Build: `./docker/build.sh --regular --board marvelous65` (or any
-non-studio variant).
-
-#### Keymap notes
-
-- 4 layers: `macos` (0), `windows` (1), `functions` (2), `settings` (3)
-- Top-right encoder: volume on layers 0/1, track skip on 2, scrub on 3
-
-### Marvelous65 Ergo
-
-**Path:** `boards/arm/marvelous65_ergo/` &nbsp;·&nbsp; **Layout:** 65% ergo with split B key across row 3 (left half) and row 4 (right half) &nbsp;·&nbsp; **MCU:** nRF52840
-
-Hardware: identical to the Rev2 (same Pro Micro pinout), but the
-**row 3** GPIO is wired to **P0.20** instead of P1.4 (PCB trace
-routing), and `EXT_POWER` uses a 300 ms init delay.
-
-ZMK Studio **not yet** supported.
-
-Build: `./docker/build.sh --regular --board marvelous65_ergo` (or
-any non-studio variant).
-
-#### Keymap notes
-
-- 4 layers: `macos` (0), `windows` (1), `functions` (2), `settings` (3)
-- Top-right encoder: same as Rev2
-
-### Marvelous65 Split
-
-**Path:** `boards/shields/marvelous65_split/` &nbsp;·&nbsp; **Layout:** true ZMK split — two halves pair over BLE, each with encoder + OLED + RGB &nbsp;·&nbsp; **Default MCU:** nRF52840 (`nrfmicro_13`)
-
-Each half runs the same firmware image; the `Kconfig.shield` picks
-the role (central / peripheral) based on `-DSHIELD=marvelous65_split_{left,right}`.
-
-Hardware (per half):
-- 1 EC11 encoder (only one enabled at a time — left/right)
-- SSD1306 128×32 OLED on I2C0
-- WS2812 RGB underglow (14 LEDs) on SPI1
-- 8×5 matrix; right half sets `col-offset = <8>` so its keys land
-  in cols 8–15 of a shared 16-col logical matrix
-
-**Default board is `nrfmicro_13`** — override with `--board <name>`
-for any other Pro Micro pin-compatible controller (nice!nano, etc.).
-The shield is designed against the Pro Micro pin aliases (D-row + A-row)
-so the GPIO assignments work on any board that exposes those pins.
-
-Build:
-```bash
-./docker/build.sh --regular --shield marvelous65_split_left
-./docker/build.sh --regular --shield marvelous65_split_right
-```
-
-Both halves must be flashed; the central role handles USB. After
-flashing, the halves pair over BLE on first power-up.
-
-#### Keymap notes
-
-- 4 layers: `macos` (0), `windows` (1), `functions` (2), `settings` (3)
-- 16-col × 5-row keymap shared by both halves; right half's
-  `col-offset = <8>` shifts its keys into the right half of the matrix
-- Both halves' encoders are bound to the same action (volume on
-  layers 0/1, track skip on 2, scrub on 3) — the unused encoder
-  is a no-op on each half
-
-See `AGENTS.md` for hardware specs, keymap conventions, and a full
-list of build / flash gotchas.
+SPDX-License-Identifier: MIT

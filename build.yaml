@@ -83,18 +83,18 @@ include:
     artifact-name: nrfmicro_13-marvelous65_split_right-zmk-reset
 
   # ---------- Sofle RGB v2.1 — nrfmicro_13 with external 32.768 kHz crystal ----------
-  # The upstream v0.3 Sofle shield supplies the matrix, one EC11 encoder,
-  # and the 128x32 OLED on each half. RGB is intentionally left disabled.
+  # The upstream v0.3 Sofle shield supplies the matrix and encoder.
+  # The nice_oled shield supplies custom vertical OLED widgets.
   - board: nrfmicro_13
-    shield: sofle_left
+    shield: sofle_left nice_oled
     cmake-args: -DCONFIG_ZMK_SPLIT_ROLE_CENTRAL=n
     artifact-name: nrfmicro_13-sofle_left-zmk
   - board: nrfmicro_13
-    shield: sofle_right
+    shield: sofle_right nice_oled
     cmake-args: -DCONFIG_ZMK_SPLIT_ROLE_CENTRAL=y
     artifact-name: nrfmicro_13-sofle_right-zmk
   - board: nrfmicro_13
-    shield: sofle_right
+    shield: sofle_right nice_oled
     snippet: studio-rpc-usb-uart
     cmake-args: -DCONFIG_ZMK_SPLIT_ROLE_CENTRAL=y -DCONFIG_ZMK_STUDIO=y
     artifact-name: nrfmicro_13-sofle_right-zmk-studio

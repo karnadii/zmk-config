@@ -92,35 +92,25 @@
         };
     };
 
-    macros {
-    };
-
     keymap {
         compatible = "zmk,keymap";
 
         default_layer {
             display-name = "default";
 
-            // -----------------------------------------------------------------
-            // | gresc| 1  | 2  |  3   |  4   |  5  |       |  6  |  7  |  8  |  9  |  0  |BSP/DEL|
-            // | TAB  | Q  | W  |  E   |  R   |  T  |       |  Y  |  U  |  I  |  O  |  P  |   \   |
-            // |CAPSWRD| A | S  |  D   |  F   |  G  |       |  H  |  J  |  K  |  L  |  ;  |   '   |
-            // | SHFT | Z  | X  |  C   |  V   |  B  | MUTE  |PLAY |  N  |  M  |  ,  |  .  |  /   |SHFT|
-            //             |GUI |  ALT |CTRL  |LWR/RET| RET |REPT|RSE/SPC|RCTRL|RALT|RGUI|
-            //
-            // gresc:      tap=ESC  | Shift/GUI=`  (built-in)
-            // bspc_del:   tap=BSP  | Shift/GUI=DEL
-            // lt 1 RET:   hold=LOWER | tap=Enter
-            // lt 2 SPACE: hold=RAISE | tap=Space  <-- only Space key
-            // key_repeat: repeats last sent key+mods
-            // JK combo -> ESC (see combos block)
+            // ------------------------------------------------------------------------------------------------------------
+            // |  gresc |  1   |  2   |  3    |  4    |  5    |                   |  6    |  7    |  8    |  9    |   0   |  DEL  |
+            // |  TAB   |  Q   |  W   |  E    |  R    |  T    |                   |  Y    |  U    |  I    |  O    |   P   |   \   |
+            // |CAPS_WRD|  A   |  S   |  D    |  F    |  G    |                   |  H    |  J    |  K    |  L    |   ;   |   '   |
+            // | SHIFT  |  Z   |  X   |  C    |  V    |  B    |  MUTE  |  | PLAY  |  N    |  M    |  ,    |  .    |   /   | SHIFT |
+            //                 | GUI  |  ALT  | CTRL  |LWR/SPC| REPEAT |  |  RET  |RSE/SPC| RCTRL | RALT  | RGUI  |
 
             bindings = <
 &gresc      &kp N1  &kp N2    &kp N3    &kp N4     &kp N5                                      &kp N6       &kp N7     &kp N8     &kp N9    &kp N0    &bspc_del
 &kp TAB     &kp Q   &kp W     &kp E     &kp R      &kp T                                       &kp Y        &kp U      &kp I      &kp O     &kp P     &kp BACKSLASH
 &caps_word  &kp A   &kp S     &kp D     &kp F      &kp G                                       &kp H        &kp J      &kp K      &kp L     &kp SEMI  &kp SQT
 &kp LSHFT   &kp Z   &kp X     &kp C     &kp V      &kp B      &kp C_MUTE     &kp K_PLAY_PAUSE  &kp N        &kp M      &kp COMMA  &kp DOT   &kp FSLH  &kp RSHFT
-                    &kp LGUI  &kp LALT  &kp LCTRL  &lt 1 RET  &key_repeat    &kp RET           &lt 2 SPACE  &kp RCTRL  &kp RALT   &kp RGUI
+                    &kp LGUI  &kp LALT  &kp LCTRL  &lt 1 SPACE &key_repeat   &kp RET           &lt 2 SPACE  &kp RCTRL  &kp RALT   &kp RGUI
             >;
 
             sensor-bindings =
@@ -131,14 +121,12 @@
         lower_layer {
             display-name = "lower";
 
-            // -----------------------------------------------------------------
-            // |`/fence| F1 | F2 | F3  | F4  | F5  |       | F6  | F7  | F8  | F9  | F10 | F11 |
-            // |       | 1  | 2  |  3  |  4  |  5  |       |  6  |  7  |  8  |  9  |  0  | F12 |
-            // |       | !  | @  |  #  |  $  |  %  |       |  ^  |  &  |  *  |  (  |  )  |  |  |
-            // |       | =  | -  |  +  |  {  |  }  |       |STUD |  [  |  ]  |  ;  |  :  |  \  |   |
-            //             |    |     |     |     |         |     |     |     |     |
-            //
-            // btick_code: tap=` | hold=``` fence macro
+            // ------------------------------------------------------------------------------------------------------------
+            // | `/```  |  F1  |  F2  |  F3   |  F4   |  F5   |                   |  F6   |  F7   |  F8   |  F9   |  F10  |  F11  |
+            // |        |  1   |  2   |  3    |  4    |  5    |                   |  6    |  7    |  8    |  9    |   0   |  F12  |
+            // |        |  !   |  @   |  #    |  $    |  %    |                   |  ^    |  &    |  *    |  (    |   )   |   |   |
+            // |        |  =   |  -   |  +    |  {    |  }    |        |  |       |  [    |  ]    |  ;    |  :    |   \   |       |
+            //                 |      |       |       |       |        |  | STUDIO|       |       |       |       |
 
             bindings = <
 &btick_code 0 GRAVE  &kp F1     &kp F2     &kp F3    &kp F4    &kp F5                               &kp F6     &kp F7    &kp F8     &kp F9     &kp F10   &kp F11
@@ -154,16 +142,12 @@
         raise_layer {
             display-name = "raise";
 
-            // -----------------------------------------------------------------
-            // |BT CLR| BT1 | BT2 | BT3  | BT4  | BT5 |       |     |PSCR | INS | PB  |     | DEL |
-            // |OUTTOG|     | MB4 | M-up | MB5  |SCRL+|       |     |PgUp |  up |PgDn |     |     |
-            // |SYSRST|     | M-lt| M-dn | M-rt |SCRL-|       |     | lt  | dn  |  rt | W-lt| W-rt|
-            // |BOOTLD|     |LClk |MClk  |RClk  |     |       |     |     |HOME |     | END | W-BS|   |
-            //             |     |      |      |     |EPTOG  |     |     |     |     |
-            //
-            // SCRL+/- = mouse scroll up/down
-            // W-lt/rt = Ctrl+Left/Right (word jump)
-            // W-BS    = Ctrl+Backspace  (delete word back)
+            // ------------------------------------------------------------------------------------------------------------
+            // | BTCLR  | BT1  | BT2  |  BT3  |  BT4  |  BT5  |                   |       | PSCR  |  INS  | P_BRK | W_DEL |  DEL  |
+            // | OUT_TOG|      | MB4  | M_UP  | MB5   |SCRL_UP|                   | PG_UP | W_LFT |   UP  | W_RGT | HOME  |       |
+            // |        |      |M_LEFT| M_DOWN|M_RIGHT|SCRL_DN|                   | PG_DN |  LEFT |  DOWN | RIGHT |  END  |       |
+            // |        |      | LCLK |  MCLK |  RCLK |       |        |  |       |       |       |       |       |       |       |
+            //                 |      |       |       |       |        |  |       |       |       |       |       |
 
             bindings = <
 &bt BT_CLR    &bt BT_SEL 0  &bt BT_SEL 1    &bt BT_SEL 2    &bt BT_SEL 3     &bt BT_SEL 4                      &trans     &kp PRINTSCREEN     &kp INS   &kp PAUSE_BREAK      &kp LC(BACKSPACE)  &kp DEL
@@ -178,6 +162,14 @@
 
         adjust_layer {
             display-name = "adjust";
+
+            // ------------------------------------------------------------------------------------------------------------
+            // | EP_TOG |      |      |       |       |       |                   |       |       |       |       |       |       |
+            // | RESET  |      |      |       |       |       |                   |       |       |       |       |       |       |
+            // | BOOTLDR|      |      |       |       |       |                   |       |       |       |       |       |       |
+            // | STUDIO |      |      |       |       |       |        |  |       |       |       |       |       |       |       |
+            //                 |      |       |       |       |        |  |       |       |       |       |       |       |
+
             bindings = <
 &ext_power EP_TOG  &trans  &trans  &trans  &trans  &trans                    &trans  &trans  &trans  &trans  &trans  &trans
 &sys_reset         &trans  &trans  &trans  &trans  &trans                    &trans  &trans  &trans  &trans  &trans  &trans

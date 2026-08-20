@@ -156,7 +156,9 @@ shield="${target_shield}"
 # When a shield is set, embed its name in the artifact so left/right
 # halves don't clobber each other (e.g. marvelous65_split_left-zmk.uf2).
 if [[ -n "${shield}" ]]; then
-    artifact_prefix="${target_board}-${shield}-zmk"
+    # Sanitize spaces/semicolons in shield name for the artifact filename
+    clean_shield="${shield//[ ;]/-}"
+    artifact_prefix="${target_board}-${clean_shield}-zmk"
 else
     artifact_prefix="${target_board}-zmk"
 fi
@@ -212,10 +214,10 @@ cmake_args=(
 # keyboard intentionally uses the right half as the central/master, so
 # override the role per half for local builds too.
 case "${shield}" in
-    sofle_right|*";sofle_right")
+    *sofle_right*)
         cmake_args+=("-DCONFIG_ZMK_SPLIT_ROLE_CENTRAL=y")
         ;;
-    sofle_left|*";sofle_left")
+    *sofle_left*)
         cmake_args+=("-DCONFIG_ZMK_SPLIT_ROLE_CENTRAL=n")
         ;;
 esac

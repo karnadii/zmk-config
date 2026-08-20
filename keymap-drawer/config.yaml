@@ -47,9 +47,16 @@ parse_config:
     "&mmv MOVE_DOWN":  "M↓"
     "&mmv MOVE_LEFT":  "M←"
     "&mmv MOVE_RIGHT": "M→"
+    "&msc SCRL_UP":    "Scroll ↑"
+    "&msc SCRL_DOWN":  "Scroll ↓"
     "&mkp LCLK":       "LCK"
     "&mkp MCLK":       "MID"
     "&mkp RCLK":       "ROK"
+    "&mkp MB4":        "$$mdi:arrow-left$$"
+    "&mkp MB5":        "$$mdi:arrow-right$$"
+    "&key_repeat":     "$$mdi:repeat$$"
+    "&caps_word":      "CAPS WORD"
+    "&btick_code 0 GRAVE": {tap: "`", hold: "```"}
     # Layer-lock tap-dance bindings. keymap-drawer v0.23 doesn't recognize
     # `compatible = "zmk,behavior-tap-dance"` so the bindings render as raw
     # text ("&set_lock", "&fun_lock") by default. The two entries below

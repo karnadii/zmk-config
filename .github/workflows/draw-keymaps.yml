@@ -13,6 +13,7 @@ on:
   push:
     paths:
       - "boards/**/*.keymap"
+      - "config/**/*.keymap"
       - "boards/**/*.dts"
       - "boards/**/*.dtsi"
       - "keymap-drawer/config.yaml"
@@ -24,7 +25,7 @@ jobs:
     permissions:
       contents: write
     with:
-      keymap_patterns: "boards/**/*.keymap"
+      keymap_patterns: "boards/**/*.keymap config/**/*.keymap"
       output_folder: "keymap-drawer"
       # Pin keymap-drawer v0.23.0 so CI is reproducible across pypi releases.
       install_version: "0.23.0"

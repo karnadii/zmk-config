@@ -12,8 +12,8 @@
 #
 # Variant naming: see README.md "Building the firmware" section.
 # Each board's <board>-zmk.uf2 is the regular (default) build.
-# <board>-zmk-studio.uf2 needs `zmk,physical-layout`; only the
-# Geulis has one for now.
+# <board>-zmk-studio.uf2 needs `zmk,physical-layout`; Geulis and the
+# upstream Sofle shield provide one.
 
 include:
   # ---------- Geulis (Alice, 7x10) ----------
@@ -81,3 +81,24 @@ include:
   - board: nrfmicro_13
     shield: settings_reset;marvelous65_split_right
     artifact-name: nrfmicro_13-marvelous65_split_right-zmk-reset
+
+  # ---------- Sofle RGB v2.1 — nrfmicro_13 with external 32.768 kHz crystal ----------
+  # The upstream v0.3 Sofle shield supplies the matrix, one EC11 encoder,
+  # and the 128x32 OLED on each half. RGB is intentionally left disabled.
+  - board: nrfmicro_13
+    shield: sofle_left
+    cmake-args: -DCONFIG_ZMK_SPLIT_ROLE_CENTRAL=n
+    artifact-name: nrfmicro_13-sofle_left-zmk
+  - board: nrfmicro_13
+    shield: sofle_right
+    cmake-args: -DCONFIG_ZMK_SPLIT_ROLE_CENTRAL=y
+    artifact-name: nrfmicro_13-sofle_right-zmk
+  - board: nrfmicro_13
+    shield: sofle_right
+    snippet: studio-rpc-usb-uart
+    cmake-args: -DCONFIG_ZMK_SPLIT_ROLE_CENTRAL=y -DCONFIG_ZMK_STUDIO=y
+    artifact-name: nrfmicro_13-sofle_right-zmk-studio
+  - board: nrfmicro_13
+    shield: settings_reset;sofle_left
+    cmake-args: -DCONFIG_ZMK_SPLIT_ROLE_CENTRAL=n
+    artifact-name: nrfmicro_13-sofle_left-zmk-reset

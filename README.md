@@ -13,6 +13,7 @@ shields is `nrfmicro_13`; override with `--board <name>`.
 | **Marvelous65 Rev2** (65% ANSI) | `boards/arm/marvelous65/` | monolithic nRF52840 board | `./docker/build.sh --regular --board marvelous65` |
 | **Marvelous65 Ergo** (65% ergo, split B) | `boards/arm/marvelous65_ergo/` | monolithic nRF52840 board | `./docker/build.sh --regular --board marvelous65_ergo` |
 | **Marvelous65 Split** | `boards/shields/marvelous65_split/` | shield on Pro Micro pin-compatible MCU | `./docker/build.sh --regular --shield marvelous65_split_left` and `--shield marvelous65_split_right` |
+| **Sofle RGB v2.1** | upstream `sofle_left` / `sofle_right` shields | `nrfmicro_13` with external 32.768 kHz crystal; OLED + encoder, no RGB; right half is central | build the right-central and left-peripheral variants below |
 
 Each board/shield has its own `## <Name>` section below with hardware
 notes, build commands, and any caveats.
@@ -98,7 +99,19 @@ and right halves don't clobber each other. Example: `nrfmicro_13-marvelous65_spl
 # Split keyboard: build both halves
 ./docker/build.sh --regular --shield marvelous65_split_left
 ./docker/build.sh --regular --shield marvelous65_split_right
+
+# Sofle RGB v2.1 — right half is central, left half is peripheral
+./docker/build.sh --regular --board nrfmicro_13 --shield sofle_right
+./docker/build.sh --regular --board nrfmicro_13 --shield sofle_left
+
+# Sofle ZMK Studio — right half only
+./docker/build.sh --studio --board nrfmicro_13 --shield sofle_right
 ```
+
+The upstream Sofle shield includes a physical layout, so the right/master
+Studio build is supported. The left half remains the regular BLE peripheral.
+With Studio locking enabled, press the first two keys of the right half's
+top row together to unlock Studio.
 
 If `--studio` fails with `static assertion failed` mentioning
 `zmk,physical-layout`, that board doesn't yet declare a physical

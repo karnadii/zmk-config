@@ -89,7 +89,8 @@ clear C static_assert, not a wrapper-side block).
 
 Split keyboards: use --board <name> --shield <half>. Default board is geulis;
 split shields default to --board nrfmicro_13 since they're designed against
-the Pro Micro pinout.
+the Pro Micro pinout. Upstream Sofle automatically builds the right half as
+central and the left half as peripheral.
 USAGE
             exit 0 ;;
         *)
@@ -206,6 +207,18 @@ cmake_args=(
     ${cmake_extra}
 )
 [[ -n "${shield}"  ]] && cmake_args+=("-DSHIELD=${shield}")
+
+# ZMK v0.3's upstream Sofle shield defaults sofle_left to central. This
+# keyboard intentionally uses the right half as the central/master, so
+# override the role per half for local builds too.
+case "${shield}" in
+    sofle_right|*";sofle_right")
+        cmake_args+=("-DCONFIG_ZMK_SPLIT_ROLE_CENTRAL=y")
+        ;;
+    sofle_left|*";sofle_left")
+        cmake_args+=("-DCONFIG_ZMK_SPLIT_ROLE_CENTRAL=n")
+        ;;
+esac
 
 west build \
     -s zmk/app \

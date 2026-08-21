@@ -45,18 +45,233 @@
             timeout-ms = <40>;
             layers = <0>;
         };
+
+        combo_fat_arrow {
+            bindings = <&fat_arrow>;
+            key-positions = <31 32>;
+            timeout-ms = <50>;
+            layers = <1>;
+        };
+
+        combo_thin_arrow {
+            bindings = <&thin_arrow>;
+            key-positions = <32 33>;
+            timeout-ms = <50>;
+            layers = <1>;
+        };
+
+        combo_equals {
+            bindings = <&equals>;
+            key-positions = <19 20>;
+            timeout-ms = <50>;
+            layers = <1>;
+        };
+
+        combo_not_equals {
+            bindings = <&not_equals>;
+            key-positions = <20 21>;
+            timeout-ms = <50>;
+            layers = <1>;
+        };
+
+        combo_logical_or {
+            bindings = <&logical_or>;
+            key-positions = <46 47>;
+            timeout-ms = <50>;
+            layers = <1>;
+        };
+
+        combo_logical_and {
+            bindings = <&logical_and>;
+            key-positions = <45 46>;
+            timeout-ms = <50>;
+            layers = <1>;
+        };
+
+        // Left-hand programming shortcuts: comments, null-safety, counters, and comparisons.
+        combo_block_comment_open {
+            bindings = <&block_comment_open>;
+            key-positions = <25 26>;
+            timeout-ms = <50>;
+            layers = <1>;
+        };
+
+        combo_block_comment_close {
+            bindings = <&block_comment_close>;
+            key-positions = <26 27>;
+            timeout-ms = <50>;
+            layers = <1>;
+        };
+
+        combo_optional_chain {
+            bindings = <&optional_chain>;
+            key-positions = <27 28>;
+            timeout-ms = <50>;
+            layers = <1>;
+        };
+
+        combo_increment {
+            bindings = <&increment>;
+            key-positions = <28 29>;
+            timeout-ms = <50>;
+            layers = <1>;
+        };
+
+        combo_decrement {
+            bindings = <&decrement>;
+            key-positions = <37 38>;
+            timeout-ms = <50>;
+            layers = <1>;
+        };
+
+        combo_less_equal {
+            bindings = <&less_equal>;
+            key-positions = <38 39>;
+            timeout-ms = <50>;
+            layers = <1>;
+        };
+
+        combo_greater_equal {
+            bindings = <&greater_equal>;
+            key-positions = <39 40>;
+            timeout-ms = <50>;
+            layers = <1>;
+        };
+
+        combo_null_coalesce {
+            bindings = <&null_coalesce>;
+            key-positions = <40 41>;
+            timeout-ms = <50>;
+            layers = <1>;
+        };
+
+        combo_null_coalesce_assign {
+            bindings = <&null_coalesce_assign>;
+            key-positions = <41 42>;
+            timeout-ms = <50>;
+            layers = <1>;
+        };
     };
 
     behaviors {
-        // bspc_del: tap=Backspace | Shift/GUI=Delete
-        // Ctrl+Alt excluded so Ctrl+Alt+Delete is unaffected.
-
-        bspc_del: bspc_del {
-            compatible = "zmk,behavior-mod-morph";
+        fat_arrow: fat_arrow {
+            compatible = "zmk,behavior-macro";
             #binding-cells = <0>;
-            bindings = <&kp BACKSPACE>, <&kp DEL>;
+            wait-ms = <10>;
+            tap-ms = <10>;
+            bindings = <&macro_tap>, <&kp EQUAL>, <&macro_tap>, <&kp LS(DOT)>;
+        };
 
-            mods = <(MOD_LSFT|MOD_LGUI|MOD_RSFT|MOD_RGUI)>;
+        thin_arrow: thin_arrow {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            wait-ms = <10>;
+            tap-ms = <10>;
+            bindings = <&macro_tap>, <&kp MINUS>, <&macro_tap>, <&kp LS(DOT)>;
+        };
+
+        equals: equals {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            wait-ms = <10>;
+            tap-ms = <10>;
+            bindings = <&macro_tap>, <&kp EQUAL>, <&macro_tap>, <&kp EQUAL>;
+        };
+
+        not_equals: not_equals {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            wait-ms = <10>;
+            tap-ms = <10>;
+            bindings = <&macro_tap>, <&kp EXCL>, <&macro_tap>, <&kp EQUAL>;
+        };
+
+        logical_or: logical_or {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            wait-ms = <10>;
+            tap-ms = <10>;
+            bindings = <&macro_tap>, <&kp PIPE>, <&macro_tap>, <&kp PIPE>;
+        };
+
+        logical_and: logical_and {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            wait-ms = <10>;
+            tap-ms = <10>;
+            bindings = <&macro_tap>, <&kp AMPS>, <&macro_tap>, <&kp AMPS>;
+        };
+
+        block_comment_open: block_comment_open {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            wait-ms = <10>;
+            tap-ms = <10>;
+            bindings = <&macro_tap>, <&kp FSLH>, <&macro_tap>, <&kp ASTRK>;
+        };
+
+        block_comment_close: block_comment_close {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            wait-ms = <10>;
+            tap-ms = <10>;
+            bindings = <&macro_tap>, <&kp ASTRK>, <&macro_tap>, <&kp FSLH>;
+        };
+
+        optional_chain: optional_chain {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            wait-ms = <10>;
+            tap-ms = <10>;
+            bindings = <&macro_tap>, <&kp LS(SLASH)>, <&macro_tap>, <&kp DOT>;
+        };
+
+        increment: increment {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            wait-ms = <10>;
+            tap-ms = <10>;
+            bindings = <&macro_tap>, <&kp PLUS>, <&macro_tap>, <&kp PLUS>;
+        };
+
+        decrement: decrement {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            wait-ms = <10>;
+            tap-ms = <10>;
+            bindings = <&macro_tap>, <&kp MINUS>, <&macro_tap>, <&kp MINUS>;
+        };
+
+        less_equal: less_equal {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            wait-ms = <10>;
+            tap-ms = <10>;
+            bindings = <&macro_tap>, <&kp LT>, <&macro_tap>, <&kp EQUAL>;
+        };
+
+        greater_equal: greater_equal {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            wait-ms = <10>;
+            tap-ms = <10>;
+            bindings = <&macro_tap>, <&kp GT>, <&macro_tap>, <&kp EQUAL>;
+        };
+
+        null_coalesce: null_coalesce {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            wait-ms = <10>;
+            tap-ms = <10>;
+            bindings = <&macro_tap>, <&kp LS(SLASH)>, <&macro_tap>, <&kp LS(SLASH)>;
+        };
+
+        null_coalesce_assign: null_coalesce_assign {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            wait-ms = <10>;
+            tap-ms = <10>;
+            bindings = <&macro_tap>, <&kp LS(SLASH)>, <&macro_tap>, <&kp LS(SLASH)>, <&macro_tap>, <&kp EQUAL>;
         };
 
         // code_fence: types ```<newline><newline>``` then Up arrow
@@ -112,18 +327,18 @@
             display-name = "default";
 
             // ------------------------------------------------------------------------------------------------------------
-            // |  gresc |  1   |  2   |  3    |  4    |  5    |                   |  6    |  7    |  8    |  9    |   0   |  DEL  |
+            // |  gresc |  1   |  2   |  3    |  4    |  5    |                   |  6    |  7    |  8    |  9    |   0   |  -/_  |
             // |  TAB   |  Q   |  W   |  E    |  R    |  T    |                   |  Y    |  U    |  I    |  O    |   P   |   \   |
             // |CAPS_WRD|  A   |  S   |  D    |  F    |  G    |                   |  H    |  J    |  K    |  L    |   ;   |   '   |
             // | SHIFT  |  Z   |  X   |  C    |  V    |  B    |  MUTE  |  | PLAY  |  N    |  M    |  ,    |  .    |   /   | SHIFT |
-            //                 | GUI  |  ALT  | CTRL  |LWR/SPC| REPEAT |  |  RET  |RSE/SPC| RCTRL | RALT  | RGUI  |
+            //                 | GUI  |  ALT  | CTRL  | LOWER |  BSPC  |  |  RET  |RSE/SPC| RCTRL | RALT  | RGUI  |
 
             bindings = <
-&gresc      &kp N1  &kp N2    &kp N3    &kp N4     &kp N5                                      &kp N6       &kp N7     &kp N8     &kp N9    &kp N0    &bspc_del
+&gresc      &kp N1  &kp N2    &kp N3    &kp N4     &kp N5                                      &kp N6       &kp N7     &kp N8     &kp N9    &kp N0    &kp MINUS
 &kp TAB     &kp Q   &kp W     &kp E     &kp R      &kp T                                       &kp Y        &kp U      &kp I      &kp O     &kp P     &kp BACKSLASH
 &caps_word  &kp A   &kp S     &kp D     &kp F      &kp G                                       &kp H        &kp J      &kp K      &kp L     &kp SEMI  &kp SQT
 &kp LSHFT   &kp Z   &kp X     &kp C     &kp V      &kp B      &kp C_MUTE     &kp C_PP          &kp N        &kp M      &kp COMMA  &kp DOT   &kp FSLH  &kp RSHFT
-                    &kp LGUI  &kp LALT  &kp LCTRL  &lt 1 SPACE &key_repeat   &kp RET           &lt 2 SPACE  &kp RCTRL  &kp RALT   &kp RGUI
+                    &kp LGUI  &kp LALT  &kp LCTRL  &mo 1        &kp BACKSPACE &kp RET           &lt 2 SPACE  &kp RCTRL  &kp RALT   &kp RGUI
             >;
 
             sensor-bindings =
@@ -136,16 +351,16 @@
 
             // ------------------------------------------------------------------------------------------------------------
             // | `/```  |  F1  |  F2  |  F3   |  F4   |  F5   |                   |  F6   |  F7   |  F8   |  F9   |  F10  |  F11  |
-            // |        |  1   |  2   |  3    |  4    |  5    |                   |  6    |  7    |  8    |  9    |   0   |  F12  |
-            // |        |  !   |  @   |  #    |  $    |  %    |                   |  ^    |  &    |  *    |  (    |   )   |   |   |
-            // |        |  =   |  -   |  +    |  {    |  }    |        |  |       |  [    |  ]    |  ;    |  :    |   \   |       |
+            // | F12    |  1   |  2   |  3    |  4    |  5    |                   |  6    |  7    |  8    |  9    |   0   |  =    |
+            // |        |  !   |  @   |  #    |  $    |  %    |                   |  ^    |  (    |  )    |  [    |   ]   |  {    |
+            // |        |  &   |  *   |  -    |  _    |  |    |        |  +       |  }    |  <    |  >    |  ;    |   :   |  \   |
             //                 |      |       |       |       |        |  |       |       |       |       |       |
 
             bindings = <
 &btick_code 0 GRAVE  &kp F1     &kp F2     &kp F3    &kp F4    &kp F5                               &kp F6     &kp F7    &kp F8     &kp F9     &kp F10   &kp F11
-&trans               &kp N1     &kp N2     &kp N3    &kp N4    &kp N5                               &kp N6     &kp N7    &kp N8     &kp N9     &kp N0    &kp F12
-&trans               &kp EXCL   &kp AT     &kp HASH  &kp DLLR  &kp PRCNT                            &kp CARET  &kp AMPS  &kp ASTRK  &kp LPAR   &kp RPAR  &kp PIPE
-&trans               &kp EQUAL  &kp MINUS  &kp PLUS  &kp LBRC  &kp RBRC   &trans    &trans          &kp LBKT   &kp RBKT  &kp SEMI   &kp COLON  &kp BSLH  &trans
+&kp F12              &kp N1     &kp N2     &kp N3    &kp N4    &kp N5                               &kp N6     &kp N7    &kp N8     &kp N9     &kp N0    &kp EQUAL
+&trans               &kp EXCL   &kp AT     &kp HASH  &kp DLLR  &kp PRCNT                            &kp CARET  &kp LPAR   &kp RPAR   &kp LBKT   &kp RBKT  &kp LBRC
+&trans               &kp AMPS   &kp ASTRK  &kp MINUS &kp UNDERSCORE &kp PIPE &kp PLUS              &kp RBRC   &kp LT     &kp GT     &kp SEMI   &kp COLON &kp BSLH &trans
                                 &trans     &trans    &trans    &trans     &trans    &trans          &trans     &trans    &trans     &trans
             >;
 

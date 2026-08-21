@@ -102,3 +102,7 @@ include:
     shield: settings_reset;sofle_left
     cmake-args: -DCONFIG_ZMK_SPLIT_ROLE_CENTRAL=n
     artifact-name: nrfmicro_13-sofle_left-zmk-reset
+  - board: nrfmicro_13
+    shield: settings_reset;sofle_right
+    cmake-args: -DCONFIG_ZMK_SPLIT_ROLE_CENTRAL=y
+    artifact-name: nrfmicro_13-sofle_right-zmk-reset

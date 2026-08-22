@@ -30,15 +30,13 @@ jobs:
     with:
       # The reusable workflow expands this in Bash without globstar enabled.
       # Use patterns that match the repository's actual two-level board paths.
-      keymap_patterns: "boards/*/*/*.keymap config/*.keymap"
+      # The split shield has no zmk,physical-layout definition yet, so leave
+      # it out until its DTS layout is made drawable.
+      keymap_patterns: "boards/arm/*/*.keymap config/*.keymap"
       output_folder: "keymap-drawer"
       # Pin keymap-drawer v0.23.0 so CI is reproducible across pypi releases.
       install_version: "0.23.0"
       config_path: "keymap-drawer/config.yaml"
-      # The Ergo keymap retains a reserved layer reference (&mo 4); provide
-      # a legend for that index so parsing remains non-destructive to firmware.
-      parse_args: >-
-        marvelous65_ergo:'--layer-names MACOS WINDOWS FUNCTIONS SETTINGS RESERVED'
       # Fail the workflow on any per-keyboard parse/draw error so a broken
       # commit can't silently drop a diagram from `keymap-drawer/`.
       fail_on_error: true

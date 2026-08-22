@@ -37,11 +37,11 @@
     combos {
         compatible = "zmk,combos";
 
-        // J (31) + K (32) -> ESC  (base layer only, 40 ms timeout)
+        // H (30) + J (31) -> ESC  (base layer only, 40 ms timeout)
 
         combo_jk_esc {
             bindings = <&kp ESC>;
-            key-positions = <31 32>;
+            key-positions = <30 31>;
             timeout-ms = <40>;
             layers = <0>;
         };

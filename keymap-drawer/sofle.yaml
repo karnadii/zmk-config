@@ -246,9 +246,6 @@ layers:
   - {t: ▽, type: trans}
 combos:
 - p: [31, 32]
-  k: $$mdi:keyboard-esc$$
-  l: [default]
-- p: [31, 32]
   k: '&fat_arrow'
   l: [lower]
 - p: [32, 33]

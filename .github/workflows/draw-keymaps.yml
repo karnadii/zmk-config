@@ -14,6 +14,9 @@ on:
     paths:
       - "boards/**/*.keymap"
       - "config/**/*.keymap"
+      # Keep the root-level Sofle keymap explicit; this avoids glob-parser
+      # differences treating config/**/*.keymap as requiring a subdirectory.
+      - "config/sofle.keymap"
       - "boards/**/*.dts"
       - "boards/**/*.dtsi"
       - "keymap-drawer/config.yaml"

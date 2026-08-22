@@ -12,7 +12,7 @@ layers:
   - '8'
   - '9'
   - '0'
-  - {t: '$$mdi:keyboard-backspace$$', s: '$$mdi:backspace-reverse-outline$$'}
+  - '-'
   - $$mdi:keyboard-tab$$
   - Q
   - W
@@ -54,8 +54,8 @@ layers:
   - $$mdi:apple-keyboard-command$$
   - $$mdi:apple-keyboard-option$$
   - $$mdi:apple-keyboard-control$$
-  - {t: '$$mdi:keyboard-space$$', h: lower}
-  - $$mdi:repeat$$
+  - lower
+  - $$mdi:keyboard-backspace$$
   - $$mdi:keyboard-return$$
   - {t: '$$mdi:keyboard-space$$', h: raise}
   - $$mdi:apple-keyboard-control$$
@@ -74,7 +74,7 @@ layers:
   - F9
   - F10
   - F11
-  - {t: ▽, type: trans}
+  - F12
   - '1'
   - '2'
   - '3'
@@ -85,7 +85,7 @@ layers:
   - '8'
   - '9'
   - '0'
-  - F12
+  - '='
   - {t: ▽, type: trans}
   - '!'
   - '@'
@@ -93,21 +93,21 @@ layers:
   - $
   - '%'
   - ^
-  - '&'
-  - '*'
   - (
   - )
-  - '|'
-  - {t: ▽, type: trans}
-  - '='
-  - '-'
-  - +
-  - '{'
-  - '}'
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
   - '['
   - ']'
+  - '{'
+  - {t: ▽, type: trans}
+  - '&'
+  - '*'
+  - '-'
+  - _
+  - '|'
+  - +
+  - '}'
+  - <
+  - '>'
   - ;
   - ':'
   - \
@@ -248,3 +248,48 @@ combos:
 - p: [31, 32]
   k: $$mdi:keyboard-esc$$
   l: [default]
+- p: [31, 32]
+  k: '&fat_arrow'
+  l: [lower]
+- p: [32, 33]
+  k: '&thin_arrow'
+  l: [lower]
+- p: [19, 20]
+  k: '&equals'
+  l: [lower]
+- p: [20, 21]
+  k: '&not_equals'
+  l: [lower]
+- p: [46, 47]
+  k: '&logical_or'
+  l: [lower]
+- p: [45, 46]
+  k: '&logical_and'
+  l: [lower]
+- p: [25, 26]
+  k: '&block_comment_open'
+  l: [lower]
+- p: [26, 27]
+  k: '&block_comment_close'
+  l: [lower]
+- p: [27, 28]
+  k: '&optional_chain'
+  l: [lower]
+- p: [28, 29]
+  k: '&increment'
+  l: [lower]
+- p: [37, 38]
+  k: '&decrement'
+  l: [lower]
+- p: [38, 39]
+  k: '&less_equal'
+  l: [lower]
+- p: [39, 40]
+  k: '&greater_equal'
+  l: [lower]
+- p: [40, 41]
+  k: '&null_coalesce'
+  l: [lower]
+- p: [41, 42]
+  k: '&null_coalesce_assign'
+  l: [lower]

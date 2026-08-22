@@ -365,7 +365,9 @@ path.combo { stroke: #7f7f7f; }
 </g>
 <g transform="translate(117, 146)" class="key keypos-32">
 <rect rx="6" ry="6" x="-47" y="-26" width="94" height="52" class="key"/>
-<text x="0" y="0" class="key tap"><tspan style="font-size: 70%">&amp;caps_word</tspan></text>
+<text x="0" y="0" class="key tap">
+<tspan x="0" dy="-0.3em">CAPS</tspan><tspan x="0" dy="1.2em">WORD</tspan>
+</text>
 <use href="#mdi:keyboard-caps" xlink:href="#mdi:keyboard-caps" x="-5" y="-24" height="10" width="10.0" class="key shifted glyph mdi:keyboard-caps"/>
 </g>
 <g transform="translate(194, 146)" class="key keypos-33">

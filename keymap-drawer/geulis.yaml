@@ -33,7 +33,7 @@ layers:
   - ']'
   - \
   - PAGE DOWN
-  - {t: '&caps_word', s: '$$mdi:keyboard-caps$$'}
+  - {t: CAPS WORD, s: '$$mdi:keyboard-caps$$'}
   - A
   - S
   - D

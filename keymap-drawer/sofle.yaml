@@ -54,7 +54,7 @@ layers:
   - $$mdi:apple-keyboard-command$$
   - $$mdi:apple-keyboard-option$$
   - $$mdi:apple-keyboard-control$$
-  - lower
+  - {t: '$$mdi:keyboard-space$$', h: lower}
   - $$mdi:keyboard-backspace$$
   - $$mdi:keyboard-return$$
   - {t: '$$mdi:keyboard-space$$', h: raise}
@@ -86,26 +86,26 @@ layers:
   - '9'
   - '0'
   - '='
-  - {t: ▽, type: trans}
   - '!'
   - '@'
   - '#'
   - $
   - '%'
-  - ^
+  - +
   - (
   - )
   - '['
   - ']'
   - '{'
+  - '}'
   - {t: ▽, type: trans}
   - '&'
   - '*'
   - '-'
   - _
   - '|'
-  - +
-  - '}'
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
   - <
   - '>'
   - ;
@@ -116,7 +116,7 @@ layers:
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {type: held}
-  - {t: ▽, type: trans}
+  - $$mdi:backspace-reverse-outline$$
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
@@ -133,10 +133,10 @@ layers:
   - PRINTSCREEN
   - INS
   - PAUSE BREAK
-  - Ctl+ $$mdi:keyboard-backspace$$
-  - $$mdi:backspace-reverse-outline$$
-  - OUT TOG
   - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - OUT TOG
+  - '&msc SCRL_LEFT'
   - $$mdi:arrow-left$$
   - M↑
   - $$mdi:arrow-right$$
@@ -148,7 +148,7 @@ layers:
   - HOME
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
+  - '&msc SCRL_RIGHT'
   - M←
   - M↓
   - M→
@@ -167,17 +167,17 @@ layers:
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
+  - Ctl+Sft+ $$mdi:keyboard-tab$$
+  - Ctl+ $$mdi:keyboard-tab$$
+  - Ctl+ W
+  - Sft+Alt+ $$mdi:keyboard-tab$$
+  - Alt+ $$mdi:keyboard-tab$$
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
+  - $$mdi:backspace-reverse-outline$$
   - {t: ▽, type: trans}
   - {type: held}
   - {t: ▽, type: trans}
@@ -195,7 +195,7 @@ layers:
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
+  - $$mdi:power-plug-outline$$
   - $$mdi:restart-alert$$
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
@@ -207,7 +207,7 @@ layers:
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
+  - $$mdi:restart-alert$$
   - $$mdi:usb-flash-drive-outline$$
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
@@ -219,7 +219,7 @@ layers:
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
+  - $$mdi:usb-flash-drive-outline$$
   - $$mdi:lock-open-variant$$
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
@@ -233,7 +233,7 @@ layers:
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
+  - $$mdi:lock-open-variant$$
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
@@ -287,6 +287,6 @@ combos:
 - p: [40, 41]
   k: '&null_coalesce'
   l: [lower]
-- p: [41, 42]
+- p: [47, 48]
   k: '&null_coalesce_assign'
   l: [lower]

@@ -35,6 +35,10 @@ jobs:
       # Pin keymap-drawer v0.23.0 so CI is reproducible across pypi releases.
       install_version: "0.23.0"
       config_path: "keymap-drawer/config.yaml"
+      # The Ergo keymap retains a reserved layer reference (&mo 4); provide
+      # a legend for that index so parsing remains non-destructive to firmware.
+      parse_args: >-
+        marvelous65_ergo:'--layer-names MACOS WINDOWS FUNCTIONS SETTINGS RESERVED'
       # Fail the workflow on any per-keyboard parse/draw error so a broken
       # commit can't silently drop a diagram from `keymap-drawer/`.
       fail_on_error: true
@@ -51,9 +55,9 @@ jobs:
       # Marvelous65 Split is the only board without an Info.json — its physical
       # layout lives in `boards/shields/marvelous65_split/marvelous65_split.dtsi`.
       draw_args: >-
-        geulis:-j boards/arm/geulis/geulis.json
-        marvelous65:-j boards/arm/marvelous65/marvelous65-ansi.json
-        marvelous65_ergo:-j boards/arm/marvelous65_ergo/marvelous65_ergo.json
-        marvelous65_split:-d boards/shields/marvelous65_split/marvelous65_split.dtsi
+        geulis:'-j boards/arm/geulis/geulis.json'
+        marvelous65:'-j boards/arm/marvelous65/marvelous65-ansi.json'
+        marvelous65_ergo:'-j boards/arm/marvelous65_ergo/marvelous65_ergo.json'
+        marvelous65_split:'-d boards/shields/marvelous65_split/marvelous65_split.dtsi'
       destination: both
       artifact_name: drawings

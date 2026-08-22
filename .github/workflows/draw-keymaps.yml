@@ -28,7 +28,9 @@ jobs:
     permissions:
       contents: write
     with:
-      keymap_patterns: "boards/**/*.keymap config/**/*.keymap"
+      # The reusable workflow expands this in Bash without globstar enabled.
+      # Use patterns that match the repository's actual two-level board paths.
+      keymap_patterns: "boards/*/*/*.keymap config/*.keymap"
       output_folder: "keymap-drawer"
       # Pin keymap-drawer v0.23.0 so CI is reproducible across pypi releases.
       install_version: "0.23.0"
